@@ -1,0 +1,9 @@
+runtime: python39
+
+handlers:
+
+- url: /.*
+  script: auto
+
+entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT main:app
+
