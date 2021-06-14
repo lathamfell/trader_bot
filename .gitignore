@@ -1,0 +1,4 @@
+*dist-info/
+.idea/
+__pycache__/
+venv/

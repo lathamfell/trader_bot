@@ -37,3 +37,6 @@ Development:
 DB Update:
 https://tinyurl.com/23h3x4rm/update
 {"user": "latham", "strat": "eth2", "MTF": "short" }
+
+Optionally, add expiration:
+{"user": "latham", "strat": "eth2", "MTF": "short", "expiration": 1800 }
