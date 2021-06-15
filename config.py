@@ -6,18 +6,16 @@ USER_ATTR = {
         'email_enabled': False,
         'strats': {
             'btc': {
-                'long_bot': "4007368",
-                'short_bot': "4007430",
-                'logic': 'rho',
+                'logic': '',
                 'coin': 'btc',
-                'account_id': '29896590'  # Binance COIN-M
+                'account_id': 29896590,  # Binance COIN-M
+                'pair': 'BTC_BTCUSD_PERP'
             },
             'eth': {
-                'long_bot': "4011262",
-                'short_bot': "4011268",
-                'logic': 'rho',
+                'logic': '',
                 'coin': 'eth',
-                'account_id': '29896590'  # Binance COIN-M
+                'account_id': 29896590,  # Binance COIN-M
+                'pair': 'ETH_ETHUSD_PERP'
             }
         }
     },
@@ -27,80 +25,24 @@ USER_ATTR = {
         'email': 'lathamfell@gmail.com',
         'email_enabled': False,
         'strats': {
-            #'btc1': {
-            #    'long_bot': 4179669,
-            #    'short_bot': 4379268,
-            #    'logic': 'pi',
-            #    'coin': 'btc',
-            #},
-            #'btc2': {
-            #    'long_bot': 4501882,
-            #    'short_bot': 4501885,
-            #    'logic': 'pi',
-            #    'coin': 'btc'
-            #},
-            #'btc3': {
-            #    'long_bot': 4542082,
-            #    'short_bot': 4542088,
-            #    'logic': 'pi',
-            #    'coin': 'btc'
-            #},
-            #'btc4': {
-            #    'long_bot': 4555949,
-            #    'short_bot': 4555970,
-            #    'logic': 'gamma',
-            #    'coin': 'btc'
-            #},
-            #'eth1': {  # currently run without AlphaBot
-            #    'long_bot': '',
-            #    'short_bot': '',
-            #    'logic': '',
-            #    'coin': 'eth'
-            #},
-            #'eth2': {  # currently run without AlphaBot
-            #    'long_bot': '',
-            #    'short_bot': '',
-            #    'logic': '',
-            #    'coin': 'eth'
-            #},
             'eth3': {
-                'long_bot': "4762987",
-                'short_bot': "4762989",
                 'logic': 'epsilon',
                 'coin': 'eth',
-                'account_id': 30391847,  # 3Commas account id for COIN-M tk (trendking2021)
-                'pair': 'ETH_ETHUSD_PERP',
-                'tp': 0.2,
-                'tp_trail': 0.02,
-                'sl': 0.2
+                'account_id': 30391847,  # COIN-M tk (trendking2021)
+                'pair': 'ETH_ETHUSD_PERP'
             },
             'eth4': {
-                'long_bot': "4555975",
-                'short_bot': "4555978",
                 'logic': 'sigma',
                 'coin': 'eth',
-                'account_id': 30398341,  # 3Commas account id for Binance lf Futures COIN-M (lathamfell)
+                'account_id': 30398341,  # Binance lf Futures COIN-M (lathamfell)
+                'pair': 'ETH_ETHUSD_PERP'
             },
             'eth5': {
-                'long_bot': "4749169",
-                'short_bot': "4753922",
                 'logic': 'sigma',
                 'coin': 'eth',
-                'account_id': 30491505  # 3Commas account id for Binance Eth8 Futures COIN-M (eth8eth8eth8)
+                'account_id': 30491505,  # Binance Eth8 Futures COIN-M (eth8eth8eth8)
+                'pair': 'ETH_ETHUSD_PERP'
             }
-        }
-    },
-    'test': {
-        'c3_api_key': "418a3c2e87f447219ca6ed9ebf35b4706e1c7610fbd24850b312ca504cf8bfa6",
-        'c3_secret': "602bcc216123d14028e8eaff528636aab3e0622a3985d694a1e8cf47b389e7bc89bc81254f5f541ef02ad4661162e339d264091d22a7f30281268081bfb61b78acdc9be6b56a1d5c7c8e6a8e628af4f7ced2f4d9b3b33d72ca46523cb4040c432d25a783",
-        'email': 'lathamfell+test@gmail.com',
-        'email_enabled': True,
-        'strats': {
-            #'btc': {
-            #    'long_bot': 4179712,
-            #    'short_bot': 4352212,
-            #    'logic': 'delta'
-            #}
         }
     }
 }

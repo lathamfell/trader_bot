@@ -7,7 +7,7 @@ from py3cw.request import Py3CW
 
 from config import USER_ATTR
 
-DEBUG = False  # turn all debug messages
+DEBUG = True  # turn all debug messages
 DEBUG2 = True  # just specific ones related to what I'm working on
 
 app = Flask(__name__)
@@ -23,27 +23,20 @@ def status():
     # user specific updates
     for user in USER_ATTR:
         for strat in USER_ATTR[user]['strats']:
-            long_bot_id = USER_ATTR[user]['strats'][strat]['long_bot']
-            short_bot_id = USER_ATTR[user]['strats'][strat]['short_bot']
             logic = USER_ATTR[user]['strats'][strat]['logic']
-            api_key = USER_ATTR[user]['c3_api_key']
-            secret = USER_ATTR[user]['c3_secret']
             state = coll.find_one({'_id': user}).get(strat)
-            py3c = Py3CW(key=api_key, secret=secret)
 
-            deal_status = 'idle'
-            long_in_deal = bot_in_deal(py3c, long_bot_id)
-            short_in_deal = bot_in_deal(py3c, short_bot_id)
-            if long_in_deal:
-                deal_status = 'long'
-            if short_in_deal:
-                deal_status = 'short'
+            trade_status = 'idle'
+            if state['status']['in_long']:
+                trade_status = 'long'
+            if state['status']['in_short']:
+                trade_status = 'short'
 
             state_str = ''
             if state:
                 state_str = f"State: {state}.  "
 
-            print(f"{user} {strat} is {deal_status}.  {state_str}Logic: {logic}")
+            print(f"{user} {strat} is {trade_status}.  {state_str}Logic: {logic}")
     # indicator updates
     indicatorz = coll.find_one({'_id': 'indicators'})
     del indicatorz['_id']
@@ -64,47 +57,76 @@ def status():
     return "status ack"
 
 
-@app.route("/update", methods=["POST"])
-def update():
+@app.route("/cond_update", methods=["POST"])
+def strat_cond_update():
     client = pymongo.MongoClient(
         "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
     db = client.indicators_db
     coll = db.indicators_coll
+
     _update = request.json
-    print(f"Received direct update request: {in_order(_update)}")
+    print(f"Received direct condition update request: {in_order(_update)}")
     user = _update['user']
     strat = _update.get('strat')
-    conditions = [
-        'UHTF', 'HTF', 'MTF', 'LTF', 'ULTF', 'UULTF', 'MA', 'MAL', 'MAS', 'HTFMAL', 'MTFMAL', 'LTFMAL',
-        'HTFMAS', 'MTFMAS', 'LTFMAS', 'condition_one', 'condition_two', 'condition_three'
-    ]
+    conditions = _update["conditions"]
     for condition in conditions:
-        if condition in _update:
-            value = _update[condition]
-            exp_length = _update.get("expiration")
-            if not exp_length:
-                exp_time = dt.datetime.now() + dt.timedelta(weeks=52)
-            else:
-                exp_time = dt.datetime.now() + dt.timedelta(seconds=exp_length)
-            expiration = exp_time
-            if isinstance(value, str):
-                # translate bool strs to bool type
-                if value == 'true':
-                    value = True
-                elif value == 'false':
-                    value = False
-            # set db value
-            result = coll.update_one({'_id': user}, {"$set": {
-                f"{strat}.{condition}.value": value,
-                f"{strat}.{condition}.expiration": expiration
-            }}, upsert=True)
-            if result.raw_result['nModified'] > 0:
-                print(f"Direct updated {user} {strat} {condition} to {value}")
-            else:
-                print(f"{user} {strat} {condition} value {value} same as existing, nothing to update")
-    new_state = coll.find_one({'_id': user})[strat]
-    print(f"{user} {strat} state: {new_state}")
+        value = _update[condition]
+        expiration = dt.datetime.now() + dt.timedelta(weeks=52)
+        value = screen_for_str_bools(value)
+
+        result = coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.conditions.{condition}.value": value,
+            f"{strat}.conditions.{condition}.expiration": expiration
+        }}, upsert=True)
+
+        if result.raw_result['nModified'] > 0:
+            print(f"Direct updated {user} {strat} {condition} to {value}")
+        else:
+            print(f"{user} {strat} {condition} value {value} same as existing, nothing to update")
     return "update complete"
+
+
+@app.route("/conf_update", methods=["POST"])
+def strat_conf_update():
+    client = pymongo.MongoClient(
+        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority", tls=True, tlsAllowInvalidCertificates=True)
+    db = client.indicators_db
+    coll = db.indicators_coll
+
+    _update = request.json
+    print(f"Received direct config update request: {in_order(_update)}")
+    user = _update['user']
+    strat = _update.get('strat')
+    config = _update["config"]
+
+    tp_pct = config.get("tp_pct")
+    tp_trail = config.get("tp_trail")
+    sl_pct = config.get("sl_pct")
+    leverage = config.get("leverage")
+    units = config.get("units")
+
+    if tp_pct:
+        coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.config.tp_pct": tp_pct
+        }}, upsert=True)
+    if tp_trail:
+        coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.config.tp_trail": tp_trail
+        }}, upsert=True)
+    if sl_pct:
+        coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.config.sl_pct": sl_pct
+        }}, upsert=True)
+    if leverage:
+        coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.config.leverage": leverage
+        }}, upsert=True)
+    if units:
+        coll.update_one({'_id': user}, {"$set": {
+            f"{strat}.config.units": units
+        }}, upsert=True)
+
+    print(f"Complete direct config update request for {user} {strat}")
 
 
 @app.route("/indicators", methods=["POST"])
@@ -120,7 +142,7 @@ def indicators():
     elif indicator == 'KST':
         handle_kst_indicator(_update, indicator)
     else:
-        print(f"Unknown indicator {indicator} received")
+        raise Exception(f"Unknown indicator {indicator} received")
 
     return "indicator updated"
 
@@ -163,7 +185,7 @@ def handle_kst_indicator(_update, indicator):
         f"{indicator}.{coin}.{interval}.change_history": change_history,
         f"{indicator}.{coin}.{interval}.recent_value_history": recent_value_history
     }}, upsert=True)
-    if DEBUG or DEBUG2:
+    if DEBUG:
         print(f"DEBUG Indicator {indicator} change from {oldest_value} to {cur_value} over {number_of_minutes_to_count_back} minutes is {change}")
 
 
@@ -265,22 +287,17 @@ class AlertHandler:
             exp_time = dt.datetime.now() + dt.timedelta(seconds=exp_length)
         self.expiration = exp_time
         self.run_logic = self.alert.get('run_logic')
-        if isinstance(self.value, str):
-            # translate bool strs to bool type
-            if self.value == 'true':
-                self.value = True
-            elif self.value == 'false':
-                self.value = False
+        self.value = screen_for_str_bools(self.value)
 
-        # get user, coin and bot details from config
+        # get details from config
         self.api_key = USER_ATTR[self.user]['c3_api_key']
         self.secret = USER_ATTR[self.user]['c3_secret']
         self.email = USER_ATTR[self.user]['email']
         self.email_enabled = USER_ATTR[self.user]['email_enabled']
-        self.long_bot = USER_ATTR[self.user]['strats'][self.strat]['long_bot']
-        self.short_bot = USER_ATTR[self.user]['strats'][self.strat]['short_bot']
         self.logic = USER_ATTR[self.user]['strats'][self.strat]['logic']
         self.coin = USER_ATTR[self.user]['strats'][self.strat]['coin']
+        self.pair = USER_ATTR[self.user]['strats'][self.strat]['pair']
+        self.account_id = USER_ATTR[self.user]['strats'][self.strat]['account_id']
         self.py3c = Py3CW(key=self.api_key, secret=self.secret)
 
         if self.run_logic:
@@ -368,102 +385,9 @@ class AlertHandler:
             self.run_logic_sigma(alert)
             return
         elif self.logic == '':
-            print(f"No logic configured for {self.user} {self.strat}, skipping bot decisions.")
+            print(f"No logic configured for {self.user} {self.strat}, skipping trade decision.")
             return
         raise Exception(f"Something unexpected went wrong trying to route logic for {self.user} {self.strat}")
-
-    def run_logic_alpha(self, alert):
-        self.state = self.coll.find_one({'_id': 'indicators'})['SuperTrend'][self.coin]
-        try:
-            UULTF = self.state['1m']
-            MTF = self.state['15m']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if UULTF == 'buy' and MTF == 'buy':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long.  Reason: UULTF buy and MTF buy")
-                open_bot_deal(self.py3c, self.long_bot)
-                return
-        else:
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-                return
-        if DEBUG:
-            print(f"Stars misaligned for {self.user} {self.strat} long, or already in deal, nothing to do")
-
-        if UULTF == 'sell' and MTF == 'sell':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short.  Reason: UULTF sell and MTF sell")
-                open_bot_deal(self.py3c, self.short_bot)
-                return
-        else:
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-                return
-        if DEBUG:
-            print(f"Stars misaligned for {self.user} {self.strat} short, or already in deal, nothing to do")
-
-    def run_logic_beta(self, alert):
-        self.state = self.coll.find_one({'_id': 'indicators'})['SuperTrend'][self.coin]
-        try:
-            MTF = self.state['15m']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        indicatorz = self.coll.find_one({'_id': 'indicators'})
-        MA_pct_per_2_bars = indicatorz['MA'][self.coin]['15m']['MA_pct_per_2_bars']
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        LONG_OPEN = self.alert['long_open']
-        LONG_CLOSE = self.alert['long_close']
-        SHORT_OPEN = self.alert['short_open']
-        SHORT_CLOSE = self.alert['short_close']
-
-        if long_in_deal:
-            if MA_pct_per_2_bars <= LONG_CLOSE:
-                print(f"Closing {self.user} {self.strat} long.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} <= {LONG_CLOSE}")
-                close_bot_deal(self.py3c, self.long_bot)
-            elif MTF != 'buy':
-                print(f"Closing {self.user} {self.strat} long.  Reason: MTF sell")
-                close_bot_deal(self.py3c, self.long_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in long, leaving open because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not <= {LONG_CLOSE}, and MTF buy")
-        elif MTF == 'buy':
-            if MA_pct_per_2_bars >= LONG_OPEN:
-                print(f"Opening {self.user} {self.strat} long.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} >= {LONG_OPEN} and MTF buy")
-                open_bot_deal(self.py3c, self.long_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} not opening long because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not >= {LONG_OPEN}")
-        elif DEBUG:
-            print(f"DEBUG {self.user} {self.strat} not opening long because MTF sell")
-
-        if short_in_deal:
-            if MA_pct_per_2_bars >= SHORT_CLOSE:
-                print(f"Closing {self.user} {self.strat} short.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} >= {SHORT_CLOSE}")
-                close_bot_deal(self.py3c, self.short_bot)
-            elif MTF != 'sell':
-                print(f"Closing {self.user} {self.strat} short.  Reason: MTF buy")
-                close_bot_deal(self.py3c, self.short_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in short, leaving open because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not >= {SHORT_CLOSE}, and MTF sell")
-        elif MTF == 'sell':
-            if MA_pct_per_2_bars <= SHORT_OPEN:
-                print(f"Opening {self.user} {self.strat} short.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} <= {SHORT_OPEN} and MTF sell")
-                open_bot_deal(self.py3c, self.short_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} not opening short because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not <= {SHORT_OPEN}")
-        elif DEBUG:
-            print(f"DEBUG {self.user} {self.strat} not opening short because MTF buy")
 
     def run_logic_gamma(self, alert):
         self.state = self.coll.find_one({'_id': 'indicators'})['SuperTrend'][self.coin]
@@ -478,73 +402,100 @@ class AlertHandler:
             print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
             return "Incomplete dataset, skipping decision"
 
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
+        in_long = self.state['status'].get('in_long')
+        in_short = self.state['status'].get('in_short')
 
         if UULTF == 'buy' and ULTF == 'buy' and LTF == 'buy' and MTF == 'buy' and HTF == 'buy' and UHTF == 'buy':
-            if not long_in_deal:
+            if not in_long:
                 print(f"Opening {self.user} {self.strat} long.  Reason: all 6 TFs buy")
-                open_bot_deal(self.py3c, self.long_bot)
+                trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='buy')
+                self.coll.update_one({'_id': self.user}, {"$set": {
+                    f"{self.strat}.status.trade_id": trade_id,
+                    f"{self.strat}.status.in_long": True
+                }})
+                return
+        elif in_long:
+            print(f"Closing {self.user} {self.strat} long")
+            trade_id = self.state['status']['trade_id']
+            close_trade(self.py3c, trade_id)
+            return
+        if DEBUG:
+            print(f"Stars misaligned for {self.user} {self.strat} long, or already in deal, nothing to do")
+
+        if UULTF == 'sell' and ULTF == 'sell' and LTF == 'sell' and MTF == 'sell' and HTF == 'sell' and UHTF == 'sell':
+            if not in_short:
+                print(f"Opening {self.user} {self.strat} short.  Reason: all 6 TFs sell")
+                trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='sell')
+                self.coll.update_one({'_id': self.user}, {"$set": {
+                    f"{self.strat}.status.trade_id": trade_id,
+                    f"{self.strat}.status.in_long": True
+                }}, upsert=True)
                 return
         else:
-            if long_in_deal:
+            if in_short:
+                print(f"Closing {self.user} {self.strat} short")
+                trade_id = self.state['status']['trade_id']
+                close_trade(self.py3c, trade_id)
+                return
+        if DEBUG:
+            print(f"Stars misaligned for {self.user} {self.strat} short, or already in deal, nothing to do")
+
+    def run_logic_sigma(self, alert):
+        try:
+            UULTF = self.state['UULTF']['value']
+            ULTF = self.state['ULTF']['value']
+            LTF = self.state['LTF']['value']
+            MTF = self.state['MTF']['value']
+            HTF = self.state['HTF']['value']
+            UHTF = self.state['UHTF']['value']
+        except KeyError:
+            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
+            return "Incomplete dataset, skipping decision"
+
+        in_long = self.state['status'].get('in_long')
+        in_short = self.state['status'].get('in_short')
+
+        if UULTF == 'buy' and ULTF == 'buy' and LTF == 'buy' and MTF == 'buy' and HTF == 'buy' and UHTF == 'buy':
+            if not in_long:
+                print(f"Opening {self.user} {self.strat} long.  Reason: all 6 TFs buy")
+                trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='buy')
+                self.coll.update_one({'_id': self.user}, {"$set": {
+                    f"{self.strat}.status.trade_id": trade_id,
+                    f"{self.strat}.status.in_long": True
+                }}, upsert=True)
+                return
+        else:
+            if in_long:
                 print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
+                trade_id = self.state['status']['trade_id']
+                close_trade(self.py3c, trade_id)
                 return
         if DEBUG:
             print(f"Stars misaligned for {self.user} {self.strat} long, or already in deal, nothing to do")
 
         if UULTF == 'sell' and ULTF == 'sell' and LTF == 'sell' and MTF == 'sell' and HTF == 'sell' and UHTF == 'sell':
-            if not short_in_deal:
+            if not in_short:
                 print(f"Opening {self.user} {self.strat} short.  Reason: all 6 TFs sell")
-                open_bot_deal(self.py3c, self.short_bot)
+                trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='sell')
+                self.coll.update_one({'_id': self.user}, {"$set": {
+                    f"{self.strat}.status.trade_id": trade_id,
+                    f"{self.strat}.status.in_long": True
+                }}, upsert=True)
                 return
         else:
-            if short_in_deal:
+            if in_short:
                 print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
+                trade_id = self.state['status']['trade_id']
+                close_trade(self.py3c, trade_id)
                 return
         if DEBUG:
             print(f"Stars misaligned for {self.user} {self.strat} short, or already in deal, nothing to do")
 
-    def run_logic_delta(self, alert):
-        try:
-            KST = self.state["KST"]["value"]
-            last_trend_entered = self.state.get("last_trend_entered")
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if long_in_deal or short_in_deal:
-            if DEBUG:
-                print(f"DEBUG {self.user} {self.strat} already in deal, nothing to do")
-                return
-        if (KST == 'long' and last_trend_entered == 'long') or (KST == 'short' and last_trend_entered == 'short'):
-            if DEBUG:
-                print(f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do")
-                return
-        if KST == 'long':
-            print(f"Opening {self.user} {self.strat} long")
-            open_bot_deal(self.py3c, self.long_bot)
-            last_trend_entered = 'long'
-        elif KST == 'short':
-            print(f"Opening {self.user} {self.strat} short")
-            open_bot_deal(self.py3c, self.short_bot)
-            last_trend_entered = 'short'
-
-        self.coll.update_one({'_id': self.user}, {"$set": {
-            f"{self.strat}.last_trend_entered": last_trend_entered
-        }}, upsert=True)
-
     def run_logic_epsilon(self, alert):
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
+        strat_in_deal = self.state['status'].get('in_long') or self.state['status'].get('in_short')
 
-        if long_in_deal or short_in_deal:
-            if DEBUG or DEBUG2:
+        if strat_in_deal:
+            if DEBUG:
                 print(f"DEBUG {self.user} {self.strat} already in deal, nothing to do")
                 return
 
@@ -560,362 +511,33 @@ class AlertHandler:
         enter_long = change > deal_threshold
         enter_short = change < (-1 * deal_threshold)
         if (enter_long and last_trend_entered == 'long') or (enter_short and last_trend_entered == 'short'):
-            if DEBUG or DEBUG2:
+            if DEBUG:
                 print(f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do")
                 return
         elif enter_long:
             print(f"Opening {self.user} {self.strat} long")
-            open_bot_deal(self.py3c, self.long_bot)
-            last_trend_entered = 'long'
+            trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='buy')
+            self.coll.update_one({'_id': self.user}, {"$set": {
+                f"{self.strat}.status.trade_id": trade_id,
+                f"{self.strat}.status.in_long": True,
+                f"{self.strat}.status.last_trend_entered": "long"
+            }}, upsert=True)
         elif enter_short:
             print(f"Opening {self.user} {self.strat} short")
-            open_bot_deal(self.py3c, self.short_bot)
-            last_trend_entered = 'short'
+            trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='sell')
+            self.coll.update_one({'_id': self.user}, {"$set": {
+                f"{self.strat}.status.trade_id": trade_id,
+                f"{self.strat}.status.in_short": True,
+                f"{self.strat}.status.last_trend_entered": 'short'
+            }}, upsert=True)
         else:
             print(f"{self.user} {self.strat}: change {change} is within deal threshold of {deal_threshold}, nothing to do")
             return
 
-        self.coll.update_one({'_id': self.user}, {"$set": {
-            f"{self.strat}.last_trend_entered": last_trend_entered
-        }}, upsert=True)
-
-    def run_logic_zeta(self, alert):
-        try:
-            LTF = self.state['LTF']
-            MTF = self.state['MTF']
-            HTF = self.state['HTF']
-            UHTF = self.state['UHTF']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if LTF == 'long' and MTF == 'long' and HTF == 'long' and UHTF == 'long':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-
-        if LTF == 'short' and MTF == 'short' and HTF == 'short' and UHTF == 'short':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_eta(self, alert):
-        try:
-            UULTF = self.state['UULTF']
-            ULTF = self.state['ULTF']
-            LTF = self.state['LTF']
-            MTF = self.state['MTF']
-            HTF = self.state['HTF']
-            UHTF = self.state['UHTF']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if UULTF == 'long' and ULTF == 'long' and LTF == 'long' and MTF == 'long' and HTF == 'long' and UHTF == 'long':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-
-        if UULTF == 'short' and ULTF == 'short' and LTF == 'short' and MTF == 'short' and HTF == 'short' and UHTF == 'short':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_theta(self, alert):
-        self.state = self.coll.find_one({'_id': 'indicators'})['SuperTrend'][self.coin]['15m']
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-
-        if self.condition == "long" and self.state == "buy" and not long_in_deal:
-            print(f"Opening {self.user} {self.strat} long")
-            open_bot_deal(self.py3c, self.long_bot)
-
-    def run_logic_iota(self, alert):
-        try:
-            HTF = self.state['HTF']
-            LTF = self.state['LTF']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if HTF == 'long' and LTF == 'long':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-        elif self.condition == 'LTF' and self.value == 'short':
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-
-        if HTF == 'short' and LTF == 'short':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.short_bot)
-        elif self.condition == 'LTF' and self.value == 'long':
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_kappa(self, alert):
-        try:
-            MA = self.state['MA']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if MA == 'long':
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-        if MA == 'short':
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_lambda(self, alert):
-        try:
-            MAL = self.state['MAL']
-            MAS = self.state['MAS']
-            HTF = self.state['HTF']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if HTF == 'long':
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-            if MAL and not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-            elif not MAL and long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-
-        if HTF == 'short':
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-            if MAS and not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-            elif not MAS and short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_mu(self, alert):
-        try:
-            LTF = self.state['LTF']
-            MTF = self.state['MTF']
-            HTF = self.state['HTF']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if LTF == 'long' and MTF == 'long' and HTF == 'long':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-        else:
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-
-        if LTF == 'short' and MTF == 'short' and HTF == 'short':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-        else:
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_nu(self, alert):
-        try:
-            MAL = self.state['MAL']
-            MAS = self.state['MAS']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if MAL and not MAS:
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-        else:
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-
-        if MAS and not MAL:
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-        else:
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_xi(self, alert):
-        try:
-            HTF = self.state['HTF']
-            MA = self.state['MA']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if MA == 'long':
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-            if not long_in_deal and HTF == 'long':
-                print(f"Opening {self.user} {self.strat} long")
-                open_bot_deal(self.py3c, self.long_bot)
-        if MA == 'short':
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-            if not short_in_deal and HTF == 'short':
-                print(f"Opening {self.user} {self.strat} short")
-                open_bot_deal(self.py3c, self.short_bot)
-
-    def run_logic_omicron(self, alert):
-        indicatorz = self.coll.find_one({'_id': 'indicators'})
-        MA_pct_per_2_bars_LTF = indicatorz['MA'][self.coin]['13m']['MA_pct_per_2_bars']
-        MA_pct_per_2_bars_MTF = indicatorz['MA'][self.coin]['15m']['MA_pct_per_2_bars']
-        MA_pct_per_2_bars_HTF = indicatorz['MA'][self.coin]['17m']['MA_pct_per_2_bars']
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        LONG_OPEN = self.alert['long_open']
-        LONG_CLOSE = self.alert['long_close']
-        SHORT_OPEN = self.alert['short_open']
-        SHORT_CLOSE = self.alert['short_close']
-        if DEBUG:
-            print(f"Running {self.user} {self.strat}, pcts are 13m: {MA_pct_per_2_bars_LTF}, 15m: {MA_pct_per_2_bars_MTF}, 17m: {MA_pct_per_2_bars_HTF}")
-
-        if long_in_deal:
-            if MA_pct_per_2_bars_HTF <= LONG_CLOSE or MA_pct_per_2_bars_MTF <= LONG_CLOSE or MA_pct_per_2_bars_LTF <= LONG_CLOSE:
-                print(f"Closing {self.user} {self.strat} long.  Reason: HTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_HTF)} or MTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_MTF)} or LTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_LTF)} <= {LONG_CLOSE}")
-                close_bot_deal(self.py3c, self.long_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in long, leaving open because no MA pcts are <= {LONG_CLOSE}")
-        else:
-            if MA_pct_per_2_bars_HTF >= LONG_OPEN and MA_pct_per_2_bars_MTF >= LONG_OPEN and MA_pct_per_2_bars_LTF >= LONG_OPEN:
-                print(f"Opening {self.user} {self.strat} long. Reason: HTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_HTF)} and MTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_MTF)} and LTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_LTF)} >= {LONG_OPEN}")
-                open_bot_deal(self.py3c, self.long_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} not in long, not opening because a MA pct not >= {LONG_OPEN}")
-
-        if short_in_deal:
-            if MA_pct_per_2_bars_HTF >= SHORT_CLOSE or MA_pct_per_2_bars_MTF >= SHORT_CLOSE or MA_pct_per_2_bars_LTF >= SHORT_CLOSE:
-                print(f"Closing {self.user} {self.strat} short.  Reason: HTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_HTF)} or MTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_MTF)} or LTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_LTF)} >= {SHORT_CLOSE}")
-                close_bot_deal(self.py3c, self.short_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in short, leaving open because no MA pcts are >= {SHORT_CLOSE}")
-        else:
-            if MA_pct_per_2_bars_HTF <= SHORT_OPEN and MA_pct_per_2_bars_MTF <= SHORT_OPEN and MA_pct_per_2_bars_LTF <= SHORT_OPEN:
-                print(f"Opening {self.user} {self.strat} short.  Reason: HTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_HTF)} and MTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_MTF)} and LTF MA pct {'{:.2f}'.format(MA_pct_per_2_bars_LTF)} <= {SHORT_OPEN}")
-                open_bot_deal(self.py3c, self.short_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} not in short, not opening because one MA pct not <= {SHORT_OPEN}")
-
-    def run_logic_pi(self, alert):
-        indicatorz = self.coll.find_one({'_id': 'indicators'})
-        MA_pct_per_2_bars = indicatorz['MA'][self.coin]['15m']['MA_pct_per_2_bars']
-
-        last_trend_entered = None
-        strat_stats = self.coll.find_one({'_id': self.user}).get(self.strat)
-        if strat_stats:
-            last_trend_entered = strat_stats.get('last_trend_entered')
-        # see if we can clear the trend
-        if last_trend_entered == 'long' and MA_pct_per_2_bars <= 0:
-            print(f"{self.user} {self.strat} clearing long flag from last_trend_entered")
-            last_trend_entered = None
-        elif last_trend_entered == 'short' and MA_pct_per_2_bars >= 0:
-            print(f"{self.user} {self.strat} clearing short flag from last_trend_entered")
-            last_trend_entered = None
-
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        LONG_OPEN = self.alert['long_open']
-        LONG_CLOSE = self.alert['long_close']
-        SHORT_OPEN = self.alert['short_open']
-        SHORT_CLOSE = self.alert['short_close']
-
-        if long_in_deal:
-            if MA_pct_per_2_bars <= LONG_CLOSE:
-                print(f"Closing {self.user} {self.strat} long.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} <= {LONG_CLOSE}")
-                close_bot_deal(self.py3c, self.long_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in long, leaving open because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not <= {LONG_CLOSE}")
-        elif last_trend_entered == 'long':
-            if DEBUG:
-                print(f"DEBUG {self.user} {self.strat} long staying out until trend exhaustion")
-        elif MA_pct_per_2_bars >= LONG_OPEN:
-            print(f"Opening {self.user} {self.strat} long.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} >= {LONG_OPEN}")
-            open_bot_deal(self.py3c, self.long_bot)
-            last_trend_entered = 'long'
-        elif DEBUG:
-            print(f"DEBUG {self.user} {self.strat} not opening long because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not >= {LONG_OPEN}")
-
-        if short_in_deal:
-            if MA_pct_per_2_bars >= SHORT_CLOSE:
-                print(f"Closing {self.user} {self.strat} short.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} >= {SHORT_CLOSE}")
-                close_bot_deal(self.py3c, self.short_bot)
-            elif DEBUG:
-                print(f"DEBUG {self.user} {self.strat} in short, leaving open because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not >= {SHORT_CLOSE}")
-        elif last_trend_entered == 'short':
-            if DEBUG:
-                print(f"DEBUG {self.user} {self.strat} short staying out until trend exhaustion")
-        elif MA_pct_per_2_bars <= SHORT_OPEN:
-            print(f"Opening {self.user} {self.strat} short.  Reason: MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} <= {SHORT_OPEN}")
-            open_bot_deal(self.py3c, self.short_bot)
-            last_trend_entered = 'short'
-        elif DEBUG:
-            print(f"DEBUG {self.user} {self.strat} not opening short because MA pct {'{:.2f}'.format(MA_pct_per_2_bars)} not <= {SHORT_OPEN}")
-
-        self.coll.update_one({'_id': self.user}, {"$set": {
-            f"{self.strat}.last_trend_entered": last_trend_entered
-        }}, upsert=True)
-
     def run_logic_rho(self, alert):
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
+        strat_in_deal = self.state['status'].get('in_long') or self.state['status'].get('in_short')
 
-        if long_in_deal or short_in_deal:
+        if strat_in_deal:
             if DEBUG:
                 print(f"DEBUG {self.user} {self.strat} skipping all logic because already in a deal")
             return
@@ -954,7 +576,11 @@ class AlertHandler:
 
         if COND_1_VALUE == 'long' and COND_2_VALUE == 'long' and COND_3_VALUE == 'long' and COND_4_VALUE == 'long':
             print(f"Opening {self.user} {self.strat} long and clearing conditions")
-            open_bot_deal(self.py3c, self.long_bot)
+            trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='buy')
+            self.coll.update_one({'_id': self.user}, {"$set": {
+                f"{self.strat}.status.trade_id": trade_id,
+                f"{self.strat}.status.in_long": True
+            }}, upsert=True)
             # clear expirations
             self.coll.update_one({'_id': self.user}, {"$unset": {
                 f"{self.strat}.condition_one.expiration": '',
@@ -968,7 +594,11 @@ class AlertHandler:
             }})
         elif COND_1_VALUE == 'short' and COND_2_VALUE == 'short' and COND_3_VALUE == 'short' and COND_4_VALUE == 'short':
             print(f"Opening {self.user} {self.strat} short and clearing conditions")
-            open_bot_deal(self.py3c, self.short_bot)
+            trade_id = open_trade(self.py3c, account_id=self.account_id, pair=self.pair, _type='sell')
+            self.coll.update_one({'_id': self.user}, {"$set": {
+                f"{self.strat}.status.trade_id": trade_id,
+                f"{self.strat}.status.in_short": True
+            }}, upsert=True)
             # clear expirations
             self.coll.update_one({'_id': self.user}, {"$unset": {
                 f"{self.strat}.condition_one.expiration": '',
@@ -983,94 +613,13 @@ class AlertHandler:
         elif DEBUG:
             print(f"DEBUG {self.user} {self.strat} not opening a deal because signals don't line up")
 
-    def run_logic_sigma(self, alert):
-        try:
-            UULTF = self.state['UULTF']['value']
-            ULTF = self.state['ULTF']['value']
-            LTF = self.state['LTF']['value']
-            MTF = self.state['MTF']['value']
-            HTF = self.state['HTF']['value']
-            UHTF = self.state['UHTF']['value']
-        except KeyError:
-            print(f"Incomplete dataset for user {self.user} {self.strat}, skipping decision")
-            return "Incomplete dataset, skipping decision"
 
-        long_in_deal = bot_in_deal(self.py3c, self.long_bot)
-        short_in_deal = bot_in_deal(self.py3c, self.short_bot)
-
-        if UULTF == 'buy' and ULTF == 'buy' and LTF == 'buy' and MTF == 'buy' and HTF == 'buy' and UHTF == 'buy':
-            if not long_in_deal:
-                print(f"Opening {self.user} {self.strat} long.  Reason: all 6 TFs buy")
-                open_bot_deal(self.py3c, self.long_bot)
-                return
-        else:
-            if long_in_deal:
-                print(f"Closing {self.user} {self.strat} long")
-                close_bot_deal(self.py3c, self.long_bot)
-                return
-        if DEBUG:
-            print(f"Stars misaligned for {self.user} {self.strat} long, or already in deal, nothing to do")
-
-        if UULTF == 'sell' and ULTF == 'sell' and LTF == 'sell' and MTF == 'sell' and HTF == 'sell' and UHTF == 'sell':
-            if not short_in_deal:
-                print(f"Opening {self.user} {self.strat} short.  Reason: all 6 TFs sell")
-                open_bot_deal(self.py3c, self.short_bot)
-                return
-        else:
-            if short_in_deal:
-                print(f"Closing {self.user} {self.strat} short")
-                close_bot_deal(self.py3c, self.short_bot)
-                return
-        if DEBUG:
-            print(f"Stars misaligned for {self.user} {self.strat} short, or already in deal, nothing to do")
 
 
 @app.route("/", methods=["GET", "POST"])
 def main():
     AlertHandler(req=request)
     return "ok"
-
-
-def turn_on_bot(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="enable", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error turning on bot {bot_id}, {error['msg']}")
-    return data
-
-
-def turn_off_bot(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="disable", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error turning off bot {bot_id}, {error['msg']}")
-    return data
-
-
-def cancel_bot_deal(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="cancel_all_deals", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error cancelling deal for bot {bot_id}, {error['msg']}")
-    return data
-
-
-def bot_in_deal(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="show", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error checking status for bot {bot_id}, {error['msg']}")
-    return data['active_deals_count'] > 0
-
-
-def open_bot_deal(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="start_new_deal", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error opening new deal for bot {bot_id}, {error['msg']}")
-    return data
-
-
-def close_bot_deal(py3c, bot_id):
-    error, data = py3c.request(entity="bots", action="panic_sell_all_deals", action_id=bot_id)
-    if error.get("error"):
-        raise Exception(f"Error closing deal for bot {bot_id}, {error['msg']}")
-    return data
 
 
 def close_trade(py3c, trade_id):
@@ -1080,106 +629,94 @@ def close_trade(py3c, trade_id):
     return data
 
 
-def open_trade(py3c, account_id, pair, _type, tp, tp_trail, sl):
-    trade = get_trade(account_id, pair, _type, tp, tp_trail, sl)
-    error, data = py3c.request(entity="smart_trades_v2", action="new", payload=trade)
-    if error.get("error"):
-        raise Exception(f"Error opening trade of type {_type} for account {account_id}, {error['msg']}")
-    return data
+def open_trade(py3c, account_id, pair, _type, leverage=1, units=1, tp_pct=0.2, tp_trail=None, sl_pct=0.2):
+    base_trade = get_base_trade(account_id, pair, leverage, units)
+    base_trade_error, base_trade_data = py3c.request(entity="smart_trades_v2", action="new", payload=base_trade)
+    if base_trade_error.get("error"):
+        raise Exception(f"Error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}")
+
+    trade_id = str(base_trade_data['id'])
+    trade_entry = round(float(base_trade_data['position']['price']['value']), 2)
+    tp_price = round(trade_entry * (1 + tp_pct/100))
+    sl_price = round(trade_entry * (1 - sl_pct/100))
+
+    update_trade = get_update_trade(
+        trade_id=trade_id, _type=_type, units=units, tp_price=tp_price, tp_trail=tp_trail, sl_price=sl_price, sl_pct=sl_pct)
+    update_trade_error, update_trade_data = py3c.request(entity="smart_trades_v2", action="new", payload=update_trade)
+    if update_trade_error.get("error"):
+        raise Exception(f"Error updating trade, {update_trade_error['msg']}")
+    return trade_id
 
 
-def get_base_trade(account_id, pair, _type, tp, tp_trail, sl):
+def get_base_trade(account_id, pair, _type, leverage, units):
     return {
-        "account_id": int(account_id),
+        "account_id": account_id,
         "pair": pair,
         "leverage": {
-            "enabled": "true",
+            "enabled": True,
             "type": "isolated",
-            "value": str(1)
+            "value": leverage
         },
         "position": {
             "type": _type,  # 'buy' / 'sell'
             "units": {
-                "value": "1"
+                "value": units
             },
             "order_type": "market"
         },
         "take_profit": {
-            "enabled": "true",
-            "steps": [
-                {
-                    "order_type": "market",
-                    "price": {
-                        "type": "last",
-                        "percent": str(tp)
-                    },
-                    "volume": "100",
-                    "trailing": {
-                        "enabled": "true",
-                        "percent": str(tp_trail)
-                    }
-                }
-            ]
+            "enabled": False
         },
         "stop_loss": {
-            "enabled": "true",
-            "order_type": "market",
-            "conditional": {
-                "price": {
-                    "type": "last",
-                    "percent": str(sl)
-                },
-                "trailing": {
-                    "enabled": "true",
-                    "percent": str(sl)
-                }
-            }
+            "enabled": False
         }
     }
 
 
-def get_simple_trade():
-    return {
-        "account_id": 30391847,
-        "pair": "ETH_ETHUSD_PERP",
+def get_update_trade(trade_id, _type, units, tp_price, sl_price, sl_pct, tp_trail=None):
+    update_trade = {
+        "id": trade_id,
         "position": {
-            "type": "buy",
+            "type": _type,
             "units": {
-                "value": "1.0"
+                "value": units
             },
             "order_type": "market"
         },
-        "leverage": {
-            "enabled": "true",
-            "type": "isolated",
-            "value": "1"
-        },
         "take_profit": {
-            "enabled": "false",
+            "enabled": True,
             "steps": [
                 {
                     "order_type": "market",
                     "price": {
-                        "value": 3000,
+                        "value": tp_price,
                         "type": "last"
-                    }
+                    },
+                    "volume": 100
                 }
             ]
         },
         "stop_loss": {
-            "enabled": "true",
+            "enabled": True,
             "order_type": "market",
             "conditional": {
                 "price": {
+                    "value": sl_price,
                     "type": "last"
                 },
                 "trailing": {
-                    "enabled": "true",
-                    "percent": "0.2"
+                    "enabled": True,
+                    "percent": sl_pct
                 }
             }
         }
     }
+    if tp_trail:
+        update_trade['take_profit']['steps'][0]['trailing'] = {
+            "enabled": True,
+            "percent": tp_trail
+        }
+    return update_trade
 
 
 def send_email(to, subject, body=None):
@@ -1188,6 +725,15 @@ def send_email(to, subject, body=None):
 
 def in_order(dict):
     return json.dumps(dict, sort_keys=True)
+
+
+def screen_for_str_bools(value):
+    if isinstance(value, str):
+        if value == 'true':
+            return True
+        if value == 'false':
+            return False
+    return value
 
 
 if __name__ == '__main__':
