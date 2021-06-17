@@ -6,10 +6,10 @@ from py3cw.request import Py3CW
 
 def main():
     # change this to whatever you need
-    user = 'malcolm'
+    user = "malcolm"
 
-    api_key = USER_ATTR[user]['c3_api_key']
-    secret = USER_ATTR[user]['c3_secret']
+    api_key = USER_ATTR[user]["c3_api_key"]
+    secret = USER_ATTR[user]["c3_secret"]
     py3c = Py3CW(key=api_key, secret=secret)
 
     error, data = py3c.request(entity="accounts", action="")
@@ -18,5 +18,5 @@ def main():
         print(f"Account {acct['name']}: {acct['id']}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

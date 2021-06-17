@@ -34,9 +34,8 @@ perspective is whether the signal is "buy" or "sell" and what the timeframe is.
 Development:
 * Activate venv: `.\venv\Scripts\activate.bat`
 
-DB Update:
-https://tinyurl.com/23h3x4rm/update
-{"user": "latham", "strat": "eth2", "MTF": "short" }
+Direct condition update:
+{ "route": "condition_update", "user": "latham", "strat": "eth5", "conditions": {"UULTF": "buy", "UHTF": "buy" } }
 
-Optionally, add expiration:
-{"user": "latham", "strat": "eth2", "MTF": "short", "expiration": 1800 }
+Config update:
+{"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 0.4, "tp_trail": null, "sl_pct": 0.4, "leverage": 2, "units": 2 }}

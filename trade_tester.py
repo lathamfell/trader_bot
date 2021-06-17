@@ -1,106 +1,61 @@
-import json
 from py3cw.request import Py3CW
+from time import sleep
 
 from config import USER_ATTR
+from helpers import open_trade, close_trade, get_base_trade, trade_status
+
+USER = "latham"
+
+FUNCTION = 1
 
 
 def main():
-    # change this to whatever you need
-    user = 'latham'
+    if FUNCTION == 1:
+        main1()
 
-    api_key = USER_ATTR[user]['c3_api_key']
-    secret = USER_ATTR[user]['c3_secret']
+
+def main1():
+    api_key = USER_ATTR[USER]["c3_api_key"]
+    secret = USER_ATTR[USER]["c3_secret"]
     py3c = Py3CW(key=api_key, secret=secret)
+    account_id = 30391847
+    pair = "ETH_ETHUSD_PERP"
+    leverage = 1
+    _type = "buy"
+    units = 1
+    tp_pct = 0.2
+    tp_trail = None
+    sl_pct = 0.2
 
-    base_trade = get_base_trade()
-    base_trade_error, base_trade_data = py3c.request(entity="smart_trades_v2", action="new", payload=base_trade)
-    if base_trade_error.get("error"):
-        raise Exception(f"Error opening base trade, {base_trade_error['msg']}")
-    trade_id = str(base_trade_data['id'])
-    price = round(float(base_trade_data['position']['price']['value']), 2)
-    print(f"purchase price was {price}")
-    tp = 0.2
-    tp_trailing = 0.02
-    sl = 0.2
-    tp_price = round(price * (1 + tp/100), 2)
-    sl_price = round(price * (1 - sl/100), 2)
-    print(f"calculated tp of {tp_price}, sl of {sl_price}")
-    trade_update = get_trade_update(trade_id=trade_id, tp=tp_price, sl_price=sl_price, sl_pct=sl, tp_trailing=tp_trailing)
-    update_trade_error, update_trade_data = py3c.request(
-        entity="smart_trades_v2", action="update", action_id=trade_id, payload=trade_update)
-    if update_trade_error.get("error"):
-        raise Exception(f"Error opening tp trade, {update_trade_error['msg']}")
-    print(update_trade_data)
-
-
-def get_base_trade():
-    return {
-        "account_id": 30391847,
-        "pair": "ETH_ETHUSD_PERP",
-        "position": {
-            "type": "buy",
-            "units": {
-                "value": "1.0"
-            },
-            "order_type": "market"
-        },
-        "leverage": {
-            "enabled": True,
-            "type": "isolated",
-            "value": "1"
-        },
-        "take_profit": {
-            "enabled": False
-        },
-        "stop_loss": {
-            "enabled": False
-        }
-    }
+    """
+    trade_id = open_trade(
+        py3c=py3c,
+        account_id=account_id,
+        pair=pair,
+        _type=_type,
+        leverage=leverage,
+        units=units,
+        tp_pct=tp_pct,
+        tp_trail=tp_trail,
+        sl_pct=sl_pct,
+    )
+    """
+    trade_id = "7508801"
+    _trade_status = trade_status(py3c, trade_id)
 
 
-def get_trade_update(trade_id, tp, sl_price, sl_pct, tp_trailing):
-    return {
-        "id": trade_id,
-        "position": {
-            "type": "buy",
-            "units": {
-                "value": "3.0"
-            },
-            "order_type": "market"
-        },
-        "take_profit": {
-            "enabled": True,
-            "steps": [
-                {
-                    "order_type": "market",
-                    "price": {
-                        "value": tp,
-                        "type": "last"
-                    },
-                    "volume": 100,
-                    "trailing": {
-                        "enabled": True,
-                        "percent": tp_trailing
-                    }
-                }
-            ]
-        },
-        "stop_loss": {
-            "enabled": True,
-            "order_type": "market",
-            "conditional": {
-                "price": {
-                    "value": sl_price,
-                    "type": "last"
-                },
-                "trailing": {
-                    "enabled": True,
-                    "percent": sl_pct
-                }
-            }
-        }
-    }
+    #base_trade = get_base_trade(account_id, pair, _type, leverage, units)
+    #error, data = py3c.request(entity="smart_trades_v2", action="new", payload=base_trade)
+    #trade_id = str(data['id'])
+    sleep(1)
+    #trade_id = "7490766"
+    #trade_info = py3c.request(entity="smart_trades_v2", action="get_by_id", action_id=trade_id)
+
+    data = close_trade(py3c=py3c, trade_id=trade_id)
+    print(data)
 
 
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     main()
