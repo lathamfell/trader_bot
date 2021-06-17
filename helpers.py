@@ -31,6 +31,14 @@ def get_current_trade_direction(_trade_status):
         return None
 
 
+def is_trade_closed(_trade_status):
+    try:
+        _trade_status["data"]["closed_at"]
+    except KeyError:
+        return False
+    return True
+
+
 def current_trade_profit_pct(_trade_status):
     profit_pct = _trade_status["data"]["profit"]["percent"]
     return profit_pct
@@ -76,11 +84,10 @@ def open_trade(
     trade_entry = round(float(base_trade_data["position"]["price"]["value"]), 2)
     if DEBUG:
         print(f"DEBUG Entered trade at {trade_entry}")
-    tp_price = sl_price = trade_entry
     if _type == 'buy':
         tp_price = round(trade_entry * (1 + tp_pct / 100))
         sl_price = round(trade_entry * (1 - sl_pct / 100))
-    elif _type == 'sell':
+    else:  # sell
         tp_price = round(trade_entry * (1 - tp_pct / 100))
         sl_price = round(trade_entry * (1 + sl_pct / 100))
     update_trade = get_update_trade(
@@ -93,12 +100,12 @@ def open_trade(
         sl_pct=sl_pct,
     )
     if DEBUG:
-        print(f"DEBUG Sending update trade: {update_trade}")
+        print(f"DEBUG Sending update trade while opening trade: {update_trade}")
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2", action="update", action_id=trade_id, payload=update_trade
     )
     if update_trade_error.get("error"):
-        print(f"\n !!!! ERROR !!!! Error updating trade, {update_trade_error['msg']}\n")
+        print(f"\n !!!! ERROR !!!! Error updating trade while opening, {update_trade_error['msg']}\n")
         print(f"Closing trade {trade_id} since we couldn't apply TP/SL")
         sleep(1)
         close_trade(py3c, trade_id)

@@ -28,24 +28,24 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "eth3": {
-                "logic": "epsilon",
-                "coin": "eth",
-                "account_id": 30391847,  # COIN-M tk (trendking2021)
-                "pair": "ETH_ETHUSD_PERP",
-            },
-            "eth4": {
-                "logic": "sigma",
-                "coin": "eth",
-                "account_id": 30398341,  # Binance lf Futures COIN-M (lathamfell)
-                "pair": "ETH_ETHUSD_PERP",
-            },
-            "eth5": {
-                "logic": "sigma",
-                "coin": "eth",
-                "account_id": 30491505,  # Binance Eth8 Futures COIN-M (eth8eth8eth8)
-                "pair": "ETH_ETHUSD_PERP",
-            },
+            #"eth3": {
+            #    "logic": "epsilon",
+            #    "coin": "eth",
+            #    "account_id": 30391847,  # COIN-M tk (trendking2021)
+            #    "pair": "ETH_ETHUSD_PERP",
+            #},
+            #"eth4": {
+            #    "logic": "sigma",
+            #    "coin": "eth",
+            #    "account_id": 30398341,  # Binance lf Futures COIN-M (lathamfell)
+            #    "pair": "ETH_ETHUSD_PERP",
+            #},
+            #"eth5": {
+            #    "logic": "sigma",
+            #    "coin": "eth",
+            #    "account_id": 30491505,  # Binance Eth8 Futures COIN-M (eth8eth8eth8)
+            #    "pair": "ETH_ETHUSD_PERP",
+            #},
         },
     },
 }

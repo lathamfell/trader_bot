@@ -5,6 +5,7 @@ from py3cw.request import Py3CW
 import traceback
 from dateutil import parser
 import pytz
+from time import sleep
 
 from helpers import (
     in_order,
@@ -16,7 +17,9 @@ from helpers import (
     handle_kst_indicator,
     send_email,
     trade_status,
-    get_current_trade_direction
+    get_current_trade_direction,
+    get_update_trade,
+    is_trade_closed
 )
 from config import USER_ATTR, DEBUG, DEBUG2, DEFAULT_STRAT_CONFIG
 
@@ -70,26 +73,103 @@ def breakeven_check():
         secret = USER_ATTR[user]["c3_secret"]
         py3c = Py3CW(key=api_key, secret=secret)
         strat_states = coll.find_one({"_id": user})
-        for strat in USER_ATTR[user]['strats']:
+        for strat in USER_ATTR[user]["strats"]:
+            if strat_states[strat]["status"].get("breakeven_set"):
+                if DEBUG:
+                    print(
+                        f"DEBUG skipping breakeven check because {user} {strat} was already set to breakeven"
+                    )
+                continue
             trade_id = strat_states[strat]["status"].get("trade_id")
-            if trade_id and strat_states[strat]["config"].get("set_breakeven"):
+            try:
+                set_breakeven = strat_states[strat]["config"]["set_breakeven"]
+                breakeven_trigger_pct = strat_states[strat]["config"][
+                    "breakeven_trigger_pct"
+                ]
+                breakeven_sl_pct = strat_states[strat]["config"]["breakeven_sl_pct"]
+            except KeyError:
+                if DEBUG:
+                    print(
+                        f"DEBUG skipping breakeven check because {user} {strat} is missing a breakeven config item. Strat state is {strat_states[strat]}"
+                    )
+                continue
+            if not set_breakeven:
+                if DEBUG:
+                    print(f"DEBUG {user} {strat} has breakeven disabled, skipping")
+                    continue
+            if trade_id:
                 _trade_status = trade_status(py3c, trade_id)
                 trade_direction = get_current_trade_direction(_trade_status)
                 if not trade_direction:
                     if DEBUG:
-                        print(f"DEBUG trade {trade_id} not open, skipping breakeven check")
+                        print(
+                            f"DEBUG trade {user} {strat} {trade_id} not open, skipping breakeven check"
+                        )
                         continue
-                profit_pct = _trade_status["data"]["profit"]["percent"]
-                if profit_pct < 0.15:
+                if DEBUG:
+                    print(f"Checking for profit pct in trade status: {_trade_status}")
+                profit_pct = float(_trade_status["profit"]["percent"])
+                if profit_pct < breakeven_trigger_pct:
                     if DEBUG:
-                        print(f"DEBUG trade {trade_id} not enough in profit, skipping breakeven check")
+                        print(
+                            f"DEBUG trade {user} {strat} {trade_id} not enough in profit, skipping breakeven check"
+                        )
                         continue
                 # all right, set it to breakeven!
                 # most things are the same
-                units = strat_states[strat]
-                _type = strat_states[strat]["config"][""]
-                update_trade = get_update_trade(trade_id, _type, units, tp_price, sl_price, sl_pct, tp_trail)
+                _type = _trade_status["position"]["type"]
+                units = _trade_status["position"]["units"]["value"]
+                tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
+                tp_trail = _trade_status["take_profit"]["steps"][0]["trailing"][
+                    "percent"
+                ]
+                sl_pct = strat_states[strat]["config"][
+                    "sl_pct"
+                ]  # not sure how to get this out of trade status
+                # recalculate sl price
+                trade_entry = round(float(_trade_status["position"]["price"]["value"]))
+                if _type == "buy":
+                    sl_price = round(trade_entry * (1 - breakeven_sl_pct / 100))
+                else:  # sell
+                    sl_price = round(trade_entry * (1 + breakeven_sl_pct / 100))
 
+                update_trade = get_update_trade(
+                    trade_id=trade_id,
+                    _type=_type,
+                    units=units,
+                    tp_price=tp_price,
+                    tp_trail=tp_trail,
+                    sl_price=sl_price,
+                    sl_pct=sl_pct,
+                )
+                if DEBUG:
+                    print(
+                        f"DEBUG Sending update trade while setting trade to breakeven: {update_trade}"
+                    )
+                update_trade_error, update_trade_data = py3c.request(
+                    entity="smart_trades_v2",
+                    action="update",
+                    action_id=trade_id,
+                    payload=update_trade,
+                )
+                if update_trade_error.get("error"):
+                    print(
+                        f"\n !!!! ERROR !!!! Error updating trade to breakeven, {update_trade_error['msg']}\n"
+                    )
+                    print(f"Closing trade {trade_id} since we couldn't apply breakeven")
+                    sleep(1)
+                    close_trade(py3c, trade_id)
+                    raise Exception
+                # update strat status so we don't set it to breakeven again
+                coll.update_one(
+                    {"_id": user},
+                    {"$unset": {f"{strat}.status.breakeven_set": True}},
+                    upsert=True,
+                )
+                if DEBUG:
+                    print(
+                        f"DEBUG trade {user} {strat} {trade_id} successfully updated to breakeven, response: {update_trade_data}"
+                    )
 
     return "breakeven check complete"
 
@@ -234,8 +314,10 @@ def config_update():
     one_entry_per_trend = screen_for_str_bools(config.get("one_entry_per_trend"))
     cooldown = config.get("cooldown")
     set_breakeven = config.get("set_breakeven")
+    breakeven_trigger_pct = config.get("breakeven_trigger_pct")
+    breakeven_sl_pct = config.get("breakeven_sl_pct")
 
-    if tp_pct:
+    if tp_pct or tp_pct == 0:
         coll.update_one(
             {"_id": user}, {"$set": {f"{strat}.config.tp_pct": tp_pct}}, upsert=True
         )
@@ -245,7 +327,7 @@ def config_update():
         coll.update_one(
             {"_id": user}, {"$set": {f"{strat}.config.tp_trail": tp_trail}}, upsert=True
         )
-    if sl_pct:
+    if sl_pct or sl_pct == 0:
         coll.update_one(
             {"_id": user}, {"$set": {f"{strat}.config.sl_pct": sl_pct}}, upsert=True
         )
@@ -263,13 +345,27 @@ def config_update():
             {"$set": {f"{strat}.config.one_entry_per_trend": one_entry_per_trend}},
             upsert=True,
         )
-    if cooldown:
+    if cooldown or cooldown == 0:
         coll.update_one(
             {"_id": user}, {"$set": {f"{strat}.config.cooldown": cooldown}}, upsert=True
         )
     if set_breakeven:
         coll.update_one(
-            {"_id": user}, {"$set": {f"{strat}.config.set_breakeven": set_breakeven}}, upsert=True
+            {"_id": user},
+            {"$set": {f"{strat}.config.set_breakeven": set_breakeven}},
+            upsert=True,
+        )
+    if breakeven_trigger_pct or breakeven_trigger_pct == 0:
+        coll.update_one(
+            {"_id": user},
+            {"$set": {f"{strat}.config.breakeven_trigger_pct": breakeven_trigger_pct}},
+            upsert=True,
+        )
+    if breakeven_sl_pct or breakeven_trigger_pct == 0:
+        coll.update_one(
+            {"_id": user},
+            {"$set": {f"{strat}.config.breakeven_sl_pct": breakeven_sl_pct}},
+            upsert=True,
         )
 
     print(f"Completed direct config update request for {user} {strat}")
@@ -664,11 +760,15 @@ class AlertHandler:
                     f"DEBUG {self.user} {self.strat} skipping logic because already in a trade"
                 )
             return
-        elif self.trade_status:
+        elif self.trade_status and is_trade_closed(self.trade_status):
             # check if we're out of cooldown
-            closed = parser.parse(self.trade_status['data']['closed_at'])
+            if DEBUG:
+                print(
+                    f"DEBUG Looking for data.closed_at key in {self.user} {self.strat} trade status: {self.trade_status}"
+                )
+            closed_time = parser.parse(self.trade_status["data"]["closed_at"])
             now = dt.datetime.now(pytz.UTC)
-            if self.cooldown and ((now - closed).total_seconds() < self.cooldown):
+            if self.cooldown and ((now - closed_time).total_seconds() < self.cooldown):
                 if DEBUG:
                     print(
                         f"DEBUG {self.user} {self.strat} skipping logic because still in cooldown"
@@ -744,7 +844,9 @@ class AlertHandler:
                 )
                 return
         elif enter_long:
-            print(f"Stars align: Opening {self.user} {self.strat} long and clearing conditions. Trigger condition was {self.alert['condition']}")
+            print(
+                f"Stars align: Opening {self.user} {self.strat} long and clearing conditions. Trigger condition was {self.alert['condition']}"
+            )
             trade_id = open_trade(
                 self.py3c,
                 account_id=self.account_id,
@@ -762,7 +864,7 @@ class AlertHandler:
                     "$set": {
                         f"{self.strat}.status.trade_id": trade_id,
                         f"{self.strat}.status.last_trend_entered": "long",
-                        f"{self.strat}.status.set_to_breakeven": False
+                        f"{self.strat}.status.breakeven_set": False,
                     }
                 },
                 upsert=True,
@@ -784,7 +886,9 @@ class AlertHandler:
                 },
             )
         elif enter_short:
-            print(f"Stars align: Opening {self.user} {self.strat} short and clearing conditions. Trigger condition was {self.alert['condition']}")
+            print(
+                f"Stars align: Opening {self.user} {self.strat} short and clearing conditions. Trigger condition was {self.alert['condition']}"
+            )
             trade_id = open_trade(
                 self.py3c,
                 account_id=self.account_id,
@@ -802,7 +906,7 @@ class AlertHandler:
                     "$set": {
                         f"{self.strat}.status.trade_id": trade_id,
                         f"{self.strat}.status.last_trend_entered": "short",
-                        f"{self.strat}.status.set_to_breakeven": False
+                        f"{self.strat}.status.breakeven_set": False,
                     }
                 },
                 upsert=True,
