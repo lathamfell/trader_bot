@@ -61,6 +61,7 @@ def main1():
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
     }
+    print("making base trade")
     error1, data1 = py3c.request(
         entity="smart_trades_v2", action="new", payload=working_base_trade
     )
@@ -131,9 +132,10 @@ def main1():
         action_id=str(data1["id"]),
         payload=failing_update_trade,
     )
+    print(error3)
 
     sleep(1)
-    error, data = close_trade(py3c=py3c, trade_id=str(data1["id"]))
+    data = close_trade(py3c=py3c, trade_id=str(data1["id"]))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "norse-botany-313902",
+  "private_key_id": "e681a09bd1bc9c3058b9b562ecc6d89111f49d97",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCaVGRwrOqjBX68\nzYYFgLyyKRJODYUP7b1EtzFP0ebbdIPse5d6yY4iZ3HOJOvahQ40FgOaasVaEkNv\nUHQAqZyWmT4Ihu5mHwv+2+bfiopVF5Aj3ZfdOOGTPx4NXq2vy3Ii84C2b+GxRzPK\n6+vlBddmmcMIBGNa6cF1Kbe3LSPwU1SdDTJvirTRCCovrxJXwyW73o3iLW+rrjJH\nyE9Qzrpxug2ghNSG4HhEU0J4hNZN+9Tp5TsWtTe6benL7YVw7imt+kszIQNNOosA\nJVibEyRGKJwqZG0zG4GC2OVBLQeinOUPW3fMTLv4sf4qB66A9FNdJgkBtT0TxqWe\n2JPASExLAgMBAAECggEAPioZTTOxzdnUS7vjrMrG92LI30zd2OU0FH5QLC1KNwLP\ncw3znf+bM6uEcXt4z4xCBOQLLoOsnBP4Otnm6C9qBlWS4b9sPxFpdQ7iCBBXmWAE\n7RWA6xjS8Et/0PXes42ZG5AHPDWD7TNXnvj6C8YXFlqAb3XJCaFYDlgwCuZxcAeY\nNlCbSPOSq7kRRPw2saNGqAQViZOjyy8OG2OZH/SkTFtBpvNMMVq6iAzGsbaqflfB\n/h53uH97x/bdLOd8lOpcing5kiulxqPkqKxjsblIoODQkQ/x1s6TNzp0YS9xDX08\nRbuw83zAXzSseGb9E4fZ4lcbiP+9nd63iNpxkX8u+QKBgQDYueSSMexcxUszdXQd\nTSh4fx/ANVPG1Q4fpYqfXIgGv7YYLaUiQJBVh0MQCRVHAkljWCNuFbZEZ11W+Y+p\nufrT2uGNVgVmu70JUyebPJ+s/mb5QJK5f4ibUBTk9S8eH9MIHOmABRB2kDFBQx/3\n6Qj18o7tsCY8pYQfGofvEMYAQwKBgQC2S9/Q5IEptBC9oMFM0KvoBpKYxNDhMn3K\nCyMWPj3OjXv/3KKtnk3jERbcl8saMrMB93XNiZ9OVNQKTWNHgOgjz691yvE5aIuy\nKuTD2cPSLuvthH/U44dl0dAht85Gjyyf++BaXI0RQCG0kPOZB8V0CfCj6Xezx8n7\nOdBjtngnWQKBgE42T9GeqKEWJjxs37mPVdKedfPkitZPnyg2kp9OQlzFJM728gg5\nap0jEkWgMYiNv7RVY3vf5AYtk1bG+1ySHH4GGK3r5Ekd6WuLEdkI+MryiHDdJ9Y/\nuynprZCvFxD1BTCBVpb3vOg8wzm9IrVR6QTxQzlt/26VgOfEqFfTItGHAoGAA9jQ\nDVF1JFMnc0j8K0nQBuJ0n4KvwcDWBLh9cg+4MC6uKjUWvcE0dZE7wUX2xEPDoUv+\nkWrREM8bdmgxqyWeQHs2ga7ZrlN1dzoOf8+NoVbaJbYBGJYAmnZ2BPAjCzwkPfAL\nyPxhAbcvvua8LUOLuCopiNv5abLSoVmT+zazjGkCgYEAuwXVUQyZrN2+fSzFdvBo\nlFdBFAp2FeU8BhKz31/PEDhuhuXTRasPNTGnTifUb07BM8heRFncCpugNdWG1hko\nompVcrmN1uIjSvvUZ6/MVBwiEnr5/4q+FsXnWDCEjg0AQl8KawHRSt/mG4W1QJJW\nLyp1g9WqFN8ZwPvSLFaCVpU=\n-----END PRIVATE KEY-----\n",
+  "client_email": "alphabot@norse-botany-313902.iam.gserviceaccount.com",
+  "client_id": "117534463728901652134",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/alphabot%40norse-botany-313902.iam.gserviceaccount.com"
+}

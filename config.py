@@ -1,6 +1,3 @@
-DEBUG = True  # turn all debug messages
-DEBUG2 = True  # just specific ones related to what I'm working on
-
 USER_ATTR = {
     "malcolm": {
         "c3_api_key": "b122f74e630541109a11b9cb61540e151fe44e5887d943a78d2a5dc0d7f8055a",
@@ -28,12 +25,12 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            #"eth3": {
-            #    "logic": "epsilon",
-            #    "coin": "eth",
-            #    "account_id": 30391847,  # COIN-M tk (trendking2021)
-            #    "pair": "ETH_ETHUSD_PERP",
-            #},
+            "eth3": {
+                "logic": "epsilon",
+                "coin": "eth",
+                "account_id": 30391847,  # COIN-M tk (trendking2021)
+                "pair": "ETH_ETHUSD_PERP",
+            },
             #"eth4": {
             #    "logic": "sigma",
             #    "coin": "eth",
@@ -56,4 +53,10 @@ DEFAULT_STRAT_CONFIG = {
     "sl_pct": 0.5,
     "leverage": 1,
     "units": 1,
+}
+
+TRADE_TYPES = {
+    "open": ["waiting_targets"],
+    "closing": ["stop_loss_in_progress"],
+    "closed": ["finished", "panic_sold", "stop_loss_finished"]
 }

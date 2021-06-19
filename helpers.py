@@ -4,24 +4,26 @@ import datetime as dt
 import pymongo
 from time import sleep
 
-from config import DEBUG, DEBUG2
+from config import TRADE_TYPES
 
 
-def trade_status(py3c, trade_id):
+def trade_status(py3c, trade_id, user, strat):
     error, data = py3c.request(
         entity="smart_trades_v2", action="get_by_id", action_id=str(trade_id)
     )
     if error.get("error"):
         print(
-            f"\n!!!! ERROR !!!! Error getting trade info for trade {trade_id}, {error['msg']}\n"
+            f"\n!!!! ERROR !!!! {user} {strat} Error getting trade info for trade {trade_id}, {error['msg']}\n"
         )
         raise Exception
 
+    print(f"DEBUG {user} {strat} trade_status returning {data}")
     return data
 
 
-def get_current_trade_direction(_trade_status):
-    _open = (_trade_status["status"]["type"] == "waiting_targets")
+def get_current_trade_direction(_trade_status, user, strat):
+    print(f"DEBUG get_current_trade_direction, {user} {strat}, type is {_trade_status['status']['type']}")
+    _open = (_trade_status["status"]["type"] in TRADE_TYPES["open"])
     long = (_trade_status["position"]["type"] == "buy")
     if _open and long:
         return "long"
@@ -48,42 +50,39 @@ def in_order(_dict):
     return json.dumps(_dict, sort_keys=True)
 
 
-def close_trade(py3c, trade_id):
+def close_trade(py3c, trade_id, user, strat):
     error, data = py3c.request(
         entity="smart_trades_v2", action="close_by_market", action_id=trade_id
     )
     if error.get("error"):
         print(
-            f"\n!!!!  ERROR !!! Error closing trade {trade_id}, {error['msg']}\n"
+            f"\n!!!!  ERROR !!! {user} {strat} Error closing trade {trade_id}, {error['msg']}\n"
         )
         raise Exception
-    print(f"trade {trade_id} successfully closed, response: {data}")
+    print(f"trade {trade_id} successfully closed for {user} {strat}, response: {data}")
     return data
 
 
 def open_trade(
-    py3c, account_id, pair, _type, leverage, units, tp_pct, tp_trail, sl_pct
+    py3c, account_id, pair, _type, leverage, units, tp_pct, tp_trail, sl_pct, user, strat
 ):
-    if DEBUG:
-        print(
-            f"DEBUG open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage {leverage}, units {units}, tp_pct {tp_pct}, tp_trail {tp_trail}, sl_pct {sl_pct}"
-        )
-    base_trade = get_base_trade(
-        account_id=account_id, pair=pair, _type=_type, leverage=leverage, units=units
+    print(
+        f"DEBUG {user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage {leverage}, units {units}, tp_pct {tp_pct}, tp_trail {tp_trail}, sl_pct {sl_pct}"
     )
-    if DEBUG:
-        print(f"DEBUG Sending base trade: {base_trade}")
+    base_trade = get_base_trade(
+        account_id=account_id, pair=pair, _type=_type, leverage=leverage, units=units, user=user, strat=strat
+    )
+    print(f"DEBUG {user} {strat} Sending base trade: {base_trade}")
     base_trade_error, base_trade_data = py3c.request(
         entity="smart_trades_v2", action="new", payload=base_trade
     )
     if base_trade_error.get("error"):
-        print(f"\n !!!! ERROR !!!! Error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}\n")
+        print(f"\n !!!! ERROR !!!! {user} {strat} Error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}\n")
         raise Exception
 
     trade_id = str(base_trade_data["id"])
     trade_entry = round(float(base_trade_data["position"]["price"]["value"]), 2)
-    if DEBUG:
-        print(f"DEBUG Entered trade at {trade_entry}")
+    print(f"DEBUG {user} {strat} Entered trade {trade_id} {_type} at {trade_entry}")
     if _type == 'buy':
         tp_price = round(trade_entry * (1 + tp_pct / 100))
         sl_price = round(trade_entry * (1 - sl_pct / 100))
@@ -98,26 +97,27 @@ def open_trade(
         tp_trail=tp_trail,
         sl_price=sl_price,
         sl_pct=sl_pct,
+        user=user,
+        strat=strat
     )
-    if DEBUG:
-        print(f"DEBUG Sending update trade while opening trade: {update_trade}")
+    print(f"DEBUG {user} {strat} Sending update trade while opening trade: {update_trade}")
+
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2", action="update", action_id=trade_id, payload=update_trade
     )
     if update_trade_error.get("error"):
-        print(f"\n !!!! ERROR !!!! Error updating trade while opening, {update_trade_error['msg']}\n")
-        print(f"Closing trade {trade_id} since we couldn't apply TP/SL")
+        print(f"\n !!!! ERROR !!!! {user} {strat} Error updating trade while opening, {update_trade_error['msg']}\n")
+        print(f"{user} {strat} Closing trade {trade_id} since we couldn't apply TP/SL")
         sleep(1)
-        close_trade(py3c, trade_id)
+        close_trade(py3c, trade_id, user, strat)
         raise Exception
-    if DEBUG:
-        print(f"DEBUG trade {trade_id} successfully updated with TP/SL, response: {update_trade_data}")
+
+    print(f"{user} {strat} DEBUG trade {trade_id} successfully updated with TP/SL, response: {update_trade_data}")
     return trade_id
 
 
-def get_base_trade(account_id, pair, _type, leverage, units):
-    if DEBUG:
-        print(f"DEBUG get_base_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage {leverage}, units {units}")
+def get_base_trade(account_id, pair, _type, leverage, units, user, strat):
+    print(f"{user} {strat} DEBUG get_base_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage {leverage}, units {units}")
     return {
         "account_id": account_id,
         "pair": pair,
@@ -132,9 +132,11 @@ def get_base_trade(account_id, pair, _type, leverage, units):
     }
 
 
-def get_update_trade(trade_id, _type, units, tp_price, sl_price, sl_pct, tp_trail):
-    if DEBUG:
-        print(f"DEBUG get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, sl_price {sl_price}, sl_pct {sl_pct}, tp_trail {tp_trail}")
+def get_update_trade(trade_id, _type, units, tp_price, sl_price, sl_pct, tp_trail, user, strat):
+    print(
+        f"DEBUG {user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, sl_price "
+        f"{sl_price}, sl_pct {sl_pct}, tp_trail {tp_trail}"
+    )
     update_trade = {
         "id": trade_id,
         "position": {"type": _type, "units": {"value": units}, "order_type": "market"},
@@ -238,10 +240,9 @@ def handle_kst_indicator(_update, indicator):
         },
         upsert=True,
     )
-    if DEBUG:
-        print(
-            f"DEBUG Indicator {indicator} change from {oldest_value} to {cur_value} over {number_of_minutes_to_count_back} minutes is {change}"
-        )
+    print(
+        f"DEBUG Indicator {indicator} change from {oldest_value} to {cur_value} over {number_of_minutes_to_count_back} minutes is {change}"
+    )
 
 
 def handle_ma_indicator(_update, indicator):
@@ -284,10 +285,9 @@ def handle_ma_indicator(_update, indicator):
             },
             upsert=True,
         )
-        if DEBUG:
-            print(
-                f"Indicator {indicator} pct for {coin} {interval} updated to {'{:.2f}'.format(MA_pct_per_2_bars)}, based on {state_to_print}"
-            )
+        print(
+            f"Indicator {indicator} pct for {coin} {interval} updated to {'{:.2f}'.format(MA_pct_per_2_bars)}, based on {state_to_print}"
+        )
     else:
         MA_3_bars_ago = cur[indicator][coin][interval]["MA_2_bars_ago"]
         MA_2_bars_ago = cur[indicator][coin][interval]["MA_1_bar_ago"]
@@ -303,10 +303,9 @@ def handle_ma_indicator(_update, indicator):
                 }
             },
         )
-        if DEBUG:
-            print(
-                f"Indicator {indicator} for {coin} {interval} updated to {'{:.2f}'.format(MA_1_bar_ago)}"
-            )
+        print(
+            f"Indicator {indicator} for {coin} {interval} updated to {'{:.2f}'.format(MA_1_bar_ago)}"
+        )
 
 
 def handle_supertrend_indicator(_update, indicator):

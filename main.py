@@ -1,3 +1,7 @@
+import google.cloud.logging
+from google.cloud.logging.handlers import CloudLoggingHandler
+
+import logging
 from flask import Flask, request
 import pymongo
 import datetime as dt
@@ -21,9 +25,16 @@ from helpers import (
     get_update_trade,
     is_trade_closed
 )
-from config import USER_ATTR, DEBUG, DEBUG2, DEFAULT_STRAT_CONFIG
+from config import USER_ATTR, DEFAULT_STRAT_CONFIG
+
 
 app = Flask(__name__)
+
+logging_client = google.cloud.logging.Client()
+handler = CloudLoggingHandler(logging_client)
+cloud_logger = logging.getLogger('cloudLogger')
+cloud_logger.setLevel(logging.DEBUG)  # defaults to WARN
+cloud_logger.addHandler(handler)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -33,8 +44,10 @@ def main():
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
 
         route = request.json.get("route")
-        if DEBUG or DEBUG2:
-            print(f"DEBUG received route {route}")
+        cloud_logger.info(f"Google logger: got route: {route}")
+        cloud_logger.debug(f"Google logger: got route: {route}")
+        cloud_logger.error(f"Google logger: got route: {route}")
+
         if route == "indicators":
             return indicators()
         if route == "report":
@@ -60,6 +73,7 @@ def main():
 
 
 def breakeven_check():
+    print("running breakeven check")
     client = pymongo.MongoClient(
         "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
         tls=True,
@@ -69,18 +83,20 @@ def breakeven_check():
     coll = db.indicators_coll
 
     for user in USER_ATTR:
+        print(f"DEBUG checking breakeven for user {user}")
         api_key = USER_ATTR[user]["c3_api_key"]
         secret = USER_ATTR[user]["c3_secret"]
         py3c = Py3CW(key=api_key, secret=secret)
         strat_states = coll.find_one({"_id": user})
         for strat in USER_ATTR[user]["strats"]:
+            print(f"DEBUG checking breakeven for {user} {strat}")
             if strat_states[strat]["status"].get("breakeven_set"):
-                if DEBUG:
-                    print(
-                        f"DEBUG skipping breakeven check because {user} {strat} was already set to breakeven"
-                    )
+                print(
+                    f"DEBUG skipping breakeven check because {user} {strat} was already set to breakeven"
+                )
                 continue
             trade_id = strat_states[strat]["status"].get("trade_id")
+            print(f"DEBUG {user} {strat} has trade_id {trade_id}")
             try:
                 set_breakeven = strat_states[strat]["config"]["set_breakeven"]
                 breakeven_trigger_pct = strat_states[strat]["config"][
@@ -88,33 +104,27 @@ def breakeven_check():
                 ]
                 breakeven_sl_pct = strat_states[strat]["config"]["breakeven_sl_pct"]
             except KeyError:
-                if DEBUG:
-                    print(
-                        f"DEBUG skipping breakeven check because {user} {strat} is missing a breakeven config item. Strat state is {strat_states[strat]}"
-                    )
+                print(
+                    f"DEBUG skipping breakeven check because {user} {strat} is missing a breakeven config item. "
+                    f"Strat state is {strat_states[strat]}"
+                )
                 continue
             if not set_breakeven:
-                if DEBUG:
-                    print(f"DEBUG {user} {strat} has breakeven disabled, skipping")
-                    continue
+                print(f"DEBUG {user} {strat} has breakeven disabled, skipping")
+                continue
             if trade_id:
-                _trade_status = trade_status(py3c, trade_id)
-                trade_direction = get_current_trade_direction(_trade_status)
+                _trade_status = trade_status(py3c, trade_id, user, strat)
+                trade_direction = get_current_trade_direction(_trade_status, user, strat)
                 if not trade_direction:
-                    if DEBUG:
-                        print(
-                            f"DEBUG trade {user} {strat} {trade_id} not open, skipping breakeven check"
-                        )
-                        continue
-                if DEBUG:
-                    print(f"Checking for profit pct in trade status: {_trade_status}")
+                    print(f"DEBUG {user} {strat} not in a trade, not setting breakeven")
+                    continue
                 profit_pct = float(_trade_status["profit"]["percent"])
                 if profit_pct < breakeven_trigger_pct:
-                    if DEBUG:
-                        print(
-                            f"DEBUG trade {user} {strat} {trade_id} not enough in profit, skipping breakeven check"
-                        )
-                        continue
+                    print(
+                        f"DEBUG trade {user} {strat} {trade_id} not setting breakeven, not enough in "
+                        f"profit: {profit_pct} < {breakeven_trigger_pct}"
+                    )
+                    continue
                 # all right, set it to breakeven!
                 # most things are the same
                 _type = _trade_status["position"]["type"]
@@ -141,11 +151,12 @@ def breakeven_check():
                     tp_trail=tp_trail,
                     sl_price=sl_price,
                     sl_pct=sl_pct,
+                    user=user,
+                    strat=strat
                 )
-                if DEBUG:
-                    print(
-                        f"DEBUG Sending update trade while setting trade to breakeven: {update_trade}"
-                    )
+                print(
+                    f"DEBUG {user} {strat} Sending update trade while setting trade to breakeven: {update_trade}"
+                )
                 update_trade_error, update_trade_data = py3c.request(
                     entity="smart_trades_v2",
                     action="update",
@@ -154,30 +165,27 @@ def breakeven_check():
                 )
                 if update_trade_error.get("error"):
                     print(
-                        f"\n !!!! ERROR !!!! Error updating trade to breakeven, {update_trade_error['msg']}\n"
+                        f"\n !!!! ERROR !!!! {user} {strat} Error updating trade to breakeven, {update_trade_error['msg']}\n"
                     )
-                    print(f"Closing trade {trade_id} since we couldn't apply breakeven")
+                    print(f"{user} {strat} Closing trade {trade_id} since we couldn't apply breakeven")
                     sleep(1)
-                    close_trade(py3c, trade_id)
+                    close_trade(py3c, trade_id, user, strat)
                     raise Exception
                 # update strat status so we don't set it to breakeven again
                 coll.update_one(
                     {"_id": user},
-                    {"$unset": {f"{strat}.status.breakeven_set": True}},
+                    {"$set": {f"{strat}.status.breakeven_set": True}},
                     upsert=True,
                 )
-                if DEBUG:
-                    print(
-                        f"DEBUG trade {user} {strat} {trade_id} successfully updated to breakeven, response: {update_trade_data}"
-                    )
+                print(
+                    f"DEBUG trade {user} {strat} {trade_id} successfully updated to breakeven, response: {update_trade_data}"
+                )
 
     return "breakeven check complete"
 
 
 def indicators():
     _update = request.json
-    if DEBUG:
-        print(f"DEBUG Received indicator update: {in_order(_update)}")
     indicator = _update["indicator"]
     if indicator == "MA":
         handle_ma_indicator(_update, indicator)
@@ -349,7 +357,7 @@ def config_update():
         coll.update_one(
             {"_id": user}, {"$set": {f"{strat}.config.cooldown": cooldown}}, upsert=True
         )
-    if set_breakeven:
+    if (set_breakeven == True) or (set_breakeven == False):
         coll.update_one(
             {"_id": user},
             {"$set": {f"{strat}.config.set_breakeven": set_breakeven}},
@@ -374,9 +382,6 @@ def config_update():
 
 class AlertHandler:
     def __init__(self):
-        if DEBUG:
-            print(f"DEBUG Received request: {request}")
-            print(f"DEBUG Data: {request.data}")
         # user ccbot, password hugegainz, default database ccbot
         # template: "mongodb+srv://ccbot:<password>@cluster0.4y4dc.mongodb.net/<default_db>?retryWrites=true&w=majority"
         client = pymongo.MongoClient(
@@ -389,8 +394,6 @@ class AlertHandler:
 
         # process in alert
         self.alert = request.json
-        if DEBUG:
-            print(f"DEBUG Received alert: {in_order(self.alert)}")
         self.user = self.alert["user"]
         self.strat = self.alert.get("strat")
         self.condition = self.alert.get("condition")
@@ -416,8 +419,7 @@ class AlertHandler:
 
         # pull state and get details
         self.state = self.coll.find_one({"_id": self.user})[self.strat]
-        if DEBUG:
-            print(f"DEBUG Current {self.user} {self.strat} state: {self.state}")
+        print(f"Current {self.user} {self.strat} state: {self.state}")
         config = self.state.get("config")
         if not config:
             # strat doesn't have a config yet, set a default and re-pull
@@ -442,7 +444,7 @@ class AlertHandler:
         # check status of previous trade, if there is one (whether open or closed)
         trade_id = self.state["status"].get("trade_id")
         if trade_id:
-            self.trade_status = trade_status(self.py3c, trade_id)
+            self.trade_status = trade_status(self.py3c, trade_id, self.user, self.strat)
         else:
             self.trade_status = None
 
@@ -475,26 +477,19 @@ class AlertHandler:
                 )
 
             else:
-                if DEBUG:
-                    print(
-                        f"DEBUG {self.user} {self.strat} {self.condition} value {self.value} same as existing, nothing to update"
-                    )
+                print(
+                    f"DEBUG {self.user} {self.strat} {self.condition} value {self.value} same as existing, nothing to update"
+                )
                 return
 
         self.run_logic(self.alert)
 
     def run_logic(self, alert):
-        if self.logic == "gamma":
-            self.run_logic_gamma(alert)
-            return
-        elif self.logic == "epsilon":
+        if self.logic == "epsilon":
             self.run_logic_epsilon(alert)
             return
         elif self.logic == "rho":
             self.run_logic_rho(alert)
-            return
-        elif self.logic == "sigma":
-            self.run_logic_sigma(alert)
             return
         elif self.logic == "":
             print(
@@ -506,185 +501,10 @@ class AlertHandler:
         )
         raise Exception
 
-    def run_logic_gamma(self, alert):
-        self.state = self.coll.find_one({"_id": "indicators"})["SuperTrend"][self.coin]
-
-        try:
-            UULTF = self.state["conditions"]["1m"]
-            ULTF = self.state["conditions"]["3m"]
-            LTF = self.state["conditions"]["5m"]
-            MTF = self.state["conditions"]["15m"]
-            HTF = self.state["conditions"]["1h"]
-            UHTF = self.state["conditions"]["4h"]
-        except KeyError:
-            print(
-                f"Incomplete dataset for user {self.user} {self.strat}, skipping decision"
-            )
-            return "Incomplete dataset, skipping decision"
-
-        _trade_status = trade_status(self.py3c, self.state)  # long, short, idle
-
-        if (
-            UULTF == "buy"
-            and ULTF == "buy"
-            and LTF == "buy"
-            and MTF == "buy"
-            and HTF == "buy"
-            and UHTF == "buy"
-        ):
-            if not _trade_status == "long":
-                print(f"Opening {self.user} {self.strat} long.  Reason: all 6 TFs buy")
-                trade_id = open_trade(
-                    self.py3c, account_id=self.account_id, pair=self.pair, _type="buy"
-                )
-                self.coll.update_one(
-                    {"_id": self.user},
-                    {"$set": {f"{self.strat}.status.trade_id": trade_id}},
-                )
-                return
-        elif _trade_status == "long":
-            print(f"Closing {self.user} {self.strat} long")
-            trade_id = self.state["status"]["trade_id"]
-            close_trade(self.py3c, trade_id)
-            return
-        if DEBUG:
-            print(
-                f"Stars misaligned for {self.user} {self.strat} long, or already in trade, nothing to do"
-            )
-
-        if (
-            UULTF == "sell"
-            and ULTF == "sell"
-            and LTF == "sell"
-            and MTF == "sell"
-            and HTF == "sell"
-            and UHTF == "sell"
-        ):
-            if not _trade_status == "short":
-                print(
-                    f"Opening {self.user} {self.strat} short.  Reason: all 6 TFs sell"
-                )
-                trade_id = open_trade(
-                    self.py3c, account_id=self.account_id, pair=self.pair, _type="sell"
-                )
-                self.coll.update_one(
-                    {"_id": self.user},
-                    {"$set": {f"{self.strat}.status.trade_id": trade_id}},
-                    upsert=True,
-                )
-                return
-        else:
-            if _trade_status == "short":
-                print(f"Closing {self.user} {self.strat} short")
-                trade_id = self.state["status"]["trade_id"]
-                close_trade(self.py3c, trade_id)
-                return
-        if DEBUG:
-            print(
-                f"Stars misaligned for {self.user} {self.strat} short, or already in trade, nothing to do"
-            )
-
-    def run_logic_sigma(self, alert):
-        try:
-            UULTF = self.state["conditions"]["UULTF"]["value"]
-            ULTF = self.state["conditions"]["ULTF"]["value"]
-            LTF = self.state["conditions"]["LTF"]["value"]
-            MTF = self.state["conditions"]["MTF"]["value"]
-            HTF = self.state["conditions"]["HTF"]["value"]
-            UHTF = self.state["conditions"]["UHTF"]["value"]
-        except KeyError:
-            print(
-                f"Incomplete dataset for user {self.user} {self.strat}, skipping decision"
-            )
-            return "Incomplete dataset, skipping decision"
-
-        _trade_status = trade_status(self.py3c, self.state)  # long, short, idle
-
-        if (
-            UULTF == "buy"
-            and ULTF == "buy"
-            and LTF == "buy"
-            and MTF == "buy"
-            and HTF == "buy"
-            and UHTF == "buy"
-        ):
-            if not _trade_status == "long":
-                print(f"Opening {self.user} {self.strat} long.  Reason: all 6 TFs buy")
-                trade_id = open_trade(
-                    self.py3c,
-                    account_id=self.account_id,
-                    pair=self.pair,
-                    _type="buy",
-                    leverage=self.leverage,
-                    units=self.units,
-                    tp_pct=self.tp_pct,
-                    tp_trail=self.tp_trail,
-                    sl_pct=self.sl_pct,
-                )
-                self.coll.update_one(
-                    {"_id": self.user},
-                    {"$set": {f"{self.strat}.status.trade_id": trade_id}},
-                    upsert=True,
-                )
-                return
-        else:
-            if _trade_status == "long":
-                print(f"Closing {self.user} {self.strat} long")
-                trade_id = self.state["status"]["trade_id"]
-                close_trade(self.py3c, trade_id)
-                return
-        if DEBUG:
-            print(
-                f"Stars misaligned for {self.user} {self.strat} long, or already in trade, nothing to do"
-            )
-
-        if (
-            UULTF == "sell"
-            and ULTF == "sell"
-            and LTF == "sell"
-            and MTF == "sell"
-            and HTF == "sell"
-            and UHTF == "sell"
-        ):
-            if not _trade_status == "short":
-                print(
-                    f"Opening {self.user} {self.strat} short.  Reason: all 6 TFs sell"
-                )
-                trade_id = open_trade(
-                    self.py3c,
-                    account_id=self.account_id,
-                    pair=self.pair,
-                    _type="sell",
-                    leverage=self.leverage,
-                    units=self.units,
-                    tp_pct=self.tp_pct,
-                    tp_trail=self.tp_trail,
-                    sl_pct=self.sl_pct,
-                )
-                self.coll.update_one(
-                    {"_id": self.user},
-                    {"$set": {f"{self.strat}.status.trade_id": trade_id}},
-                    upsert=True,
-                )
-                return
-        else:
-            if _trade_status == "short":
-                print(f"Closing {self.user} {self.strat} short")
-                trade_id = self.state["status"]["trade_id"]
-                close_trade(self.py3c, trade_id)
-                return
-        if DEBUG:
-            print(
-                f"Stars misaligned for {self.user} {self.strat} short, or already in trade, nothing to do"
-            )
-
     def run_logic_epsilon(self, alert):
-        _trade_status = trade_status(self.py3c, self.state)
-
-        if _trade_status != "idle":
-            if DEBUG:
-                print(f"DEBUG {self.user} {self.strat} already in trade, nothing to do")
-                return
+        if self.trade_status and get_current_trade_direction(self.trade_status, self.user, self.strat):
+            print(f"DEBUG {self.user} {self.strat} already in trade, nothing to do")
+            return
 
         indicatorz = self.coll.find_one({"_id": "indicators"})
         change = indicatorz["KST"][self.coin]["15m"]["change"]
@@ -692,14 +512,13 @@ class AlertHandler:
         trade_threshold = alert["threshold"]
         enter_long = change > trade_threshold
         enter_short = change < (-1 * trade_threshold)
-        if (enter_long and self.last_trend_entered == "long") or (
-            enter_short and self.last_trend_entered == "short"
+        if (enter_long and self.last_trend_entered == "long" and self.one_entry_per_trend) or (
+            enter_short and self.last_trend_entered == "short" and self.one_entry_per_trend
         ):
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do"
+            )
+            return
         elif enter_long:
             print(f"Opening {self.user} {self.strat} long")
             trade_id = open_trade(
@@ -712,6 +531,8 @@ class AlertHandler:
                 tp_pct=self.tp_pct,
                 tp_trail=self.tp_trail,
                 sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat
             )
             self.coll.update_one(
                 {"_id": self.user},
@@ -719,6 +540,7 @@ class AlertHandler:
                     "$set": {
                         f"{self.strat}.status.trade_id": trade_id,
                         f"{self.strat}.status.last_trend_entered": "long",
+                        f"{self.strat}.status.breakeven_set": False,
                     }
                 },
                 upsert=True,
@@ -735,6 +557,8 @@ class AlertHandler:
                 tp_pct=self.tp_pct,
                 tp_trail=self.tp_trail,
                 sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat
             )
             self.coll.update_one(
                 {"_id": self.user},
@@ -742,6 +566,7 @@ class AlertHandler:
                     "$set": {
                         f"{self.strat}.status.trade_id": trade_id,
                         f"{self.strat}.status.last_trend_entered": "short",
+                        f"{self.strat}.status.breakeven_set": False,
                     }
                 },
                 upsert=True,
@@ -754,25 +579,19 @@ class AlertHandler:
 
     def run_logic_rho(self, alert):
 
-        if self.trade_status and get_current_trade_direction(self.trade_status):
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} skipping logic because already in a trade"
-                )
+        if self.trade_status and get_current_trade_direction(self.trade_status, self.user, self.strat):
+            print(
+                f"DEBUG {self.user} {self.strat} skipping logic because already in a trade"
+            )
             return
         elif self.trade_status and is_trade_closed(self.trade_status):
             # check if we're out of cooldown
-            if DEBUG:
-                print(
-                    f"DEBUG Looking for data.closed_at key in {self.user} {self.strat} trade status: {self.trade_status}"
-                )
             closed_time = parser.parse(self.trade_status["data"]["closed_at"])
             now = dt.datetime.now(pytz.UTC)
             if self.cooldown and ((now - closed_time).total_seconds() < self.cooldown):
-                if DEBUG:
-                    print(
-                        f"DEBUG {self.user} {self.strat} skipping logic because still in cooldown"
-                    )
+                print(
+                    f"DEBUG {self.user} {self.strat} skipping logic because still in cooldown"
+                )
                 return
 
         try:
@@ -786,36 +605,32 @@ class AlertHandler:
             COND_4_EXP = self.state["conditions"]["condition_four"]["expiration"]
         except KeyError:
             print(
-                f"Incomplete dataset for user {self.user} {self.strat}, skipping decision"
+                f"{self.user} {self.strat} Incomplete dataset, skipping decision"
             )
             return "Incomplete dataset, skipping decision"
 
         # screen out expired signals
         time_now = dt.datetime.now()
         if COND_1_EXP <= time_now:
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} skipping logic because condition_one expired at {COND_1_EXP.ctime()}"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} skipping logic because condition_one expired at {COND_1_EXP.ctime()}"
+            )
+            return
         if COND_2_EXP <= time_now:
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} skipping logic because condition_two expired at {COND_2_EXP.ctime()}"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} skipping logic because condition_two expired at {COND_2_EXP.ctime()}"
+            )
+            return
         if COND_3_EXP <= time_now:
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} skipping logic because condition_three expired at {COND_3_EXP.ctime()}"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} skipping logic because condition_three expired at {COND_3_EXP.ctime()}"
+            )
+            return
         if COND_4_EXP <= time_now:
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} skipping logic because condition_four expired at {COND_4_EXP.ctime()}"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} skipping logic because condition_four expired at {COND_4_EXP.ctime()}"
+            )
+            return
 
         enter_long = (
             COND_1_VALUE == "long"
@@ -838,11 +653,10 @@ class AlertHandler:
             and self.last_trend_entered == "short"
             and self.one_entry_per_trend
         ):
-            if DEBUG:
-                print(
-                    f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do"
-                )
-                return
+            print(
+                f"DEBUG {self.user} {self.strat} already entered this trend, nothing to do"
+            )
+            return
         elif enter_long:
             print(
                 f"Stars align: Opening {self.user} {self.strat} long and clearing conditions. Trigger condition was {self.alert['condition']}"
@@ -857,6 +671,8 @@ class AlertHandler:
                 tp_pct=self.tp_pct,
                 tp_trail=self.tp_trail,
                 sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat
             )
             self.coll.update_one(
                 {"_id": self.user},
@@ -885,6 +701,7 @@ class AlertHandler:
                     }
                 },
             )
+            return
         elif enter_short:
             print(
                 f"Stars align: Opening {self.user} {self.strat} short and clearing conditions. Trigger condition was {self.alert['condition']}"
@@ -899,6 +716,8 @@ class AlertHandler:
                 tp_pct=self.tp_pct,
                 tp_trail=self.tp_trail,
                 sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat
             )
             self.coll.update_one(
                 {"_id": self.user},
@@ -927,10 +746,11 @@ class AlertHandler:
                     }
                 },
             )
-        elif DEBUG:
-            print(
-                f"DEBUG {self.user} {self.strat} not opening a trade because signals don't line up"
-            )
+            return
+
+        print(
+            f"DEBUG {self.user} {self.strat} not opening a trade because signals don't line up"
+        )
 
 
 if __name__ == "__main__":
