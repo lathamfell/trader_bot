@@ -8,7 +8,17 @@ Deploy:
 * Navigate to this dir (contains app.yaml).
 * `gcloud app deploy --version 1`.
 * NOTE: if substantive change made to app logic or TradingView input alerts, `db_flusher.py` should be run after deployment is complete to reset app state.
-  
+
+To connect to BetaBot:
+`ssh -i "alphabot-aws-key-pair.pem" ubuntu@ec2-100-25-132-178.compute-1.amazonaws.com`
+To kick off BetaBot:
+`cd /home/betabot`
+`nohup python3 -u main.py &`
+To monitor BetaBot:
+`tail -F nohup.out` in the same directory.
+To stop BetaBot:
+`pgrep -lf python`
+`kill <pid>`
 
 TradingView alerts:
 * Any indicator or condition can be used, the only important datapoints from the bot

@@ -6,47 +6,27 @@ data = {
         "type": "binance_futures_coin",
         "name": "COIN-M tk",
         "market": "Binance Futures COIN-M",
-        "link": "/accounts/30391847"
+        "link": "/accounts/30391847",
     },
     "pair": "ETH_ETHUSD_PERP",
     "instant": False,
-    "status": {
-        "type": "panic_sold",
-        "title": "Closed at Market Price"
-    },
-    "leverage": {
-        "enabled": True,
-        "type": "isolated",
-        "value": "1.0"
-    },
+    "status": {"type": "panic_sold", "title": "Closed at Market Price"},
+    "leverage": {"enabled": True, "type": "isolated", "value": "1.0"},
     "position": {
         "type": "buy",
         "editable": False,
-        "units": {
-            "value": "1.0",
-            "editable": False
-        },
+        "units": {"value": "1.0", "editable": False},
         "price": {
             "value": "2533.52",
             "value_without_commission": "2532.51",
-            "editable": False
+            "editable": False,
         },
-        "total": {
-            "value": "0.00394707"
-        },
+        "total": {"value": "0.00394707"},
         "order_type": "market",
-        "status": {
-            "type": "finished",
-            "title": "Finished"
-        }
+        "status": {"type": "finished", "title": "Finished"},
     },
-    "take_profit": {
-        "enabled": False,
-        "steps": []
-    },
-    "stop_loss": {
-        "enabled": False
-    },
+    "take_profit": {"enabled": False, "steps": []},
+    "stop_loss": {"enabled": False},
     "note": "",
     "skip_enter_step": False,
     "data": {
@@ -56,7 +36,7 @@ data = {
             "ask": "2406.67",
             "last": "2406.66",
             "day_change_percent": "-4.451",
-            "quote_volume": "895908.32095933"
+            "quote_volume": "895908.32095933",
         },
         "target_price_type": "price",
         "base_order_finished": True,
@@ -76,17 +56,14 @@ data = {
         "created_at": "2021-06-16T06:42:13.742Z",
         "updated_at": "2021-06-16T06:42:13.742Z",
         "closed_at": "2021-06-16T06:42:58.321Z",
-        "type": "smart_trade"
+        "type": "smart_trade",
     },
     "profit": {
         "volume": "-0.00000290882",
         "usd": "-0.00736708114939999999999988310357657001044",
         "percent": "-0.07",
-        "roe": "-0.07"
+        "roe": "-0.07",
     },
-    "margin": {
-        "amount": "1.0",
-        "total": "0.00394707054"
-    },
-    "is_position_not_filled": False
+    "margin": {"amount": "1.0", "total": "0.00394707054"},
+    "is_position_not_filled": False,
 }

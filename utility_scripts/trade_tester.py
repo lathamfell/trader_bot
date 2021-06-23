@@ -1,8 +1,8 @@
-from py3cw.request import Py3CW
+from alphabot.py3cw.request import Py3CW
 from time import sleep
 
-from config import USER_ATTR
-from helpers import open_trade, close_trade, get_base_trade, trade_status
+from alphabot.config import USER_ATTR
+from alphabot.helpers import close_trade, trade_status
 
 USER = "latham"
 
