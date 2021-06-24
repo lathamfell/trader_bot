@@ -3,8 +3,8 @@ import yagmail
 import datetime as dt
 from time import sleep
 
-from alphabot.config import TRADE_TYPES
-from alphabot.trade_checkup import log_profits
+from alphabot.config import TRADE_TYPES, DEFAULT_STRAT_CONFIG
+import alphabot.trade_checkup as tc
 
 
 def trade_status(py3c, trade_id, user, strat, logger):
@@ -17,7 +17,7 @@ def trade_status(py3c, trade_id, user, strat, logger):
         )
         raise Exception
 
-    #logger.debug(f"{user} {strat} trade_status returning {data}")
+    # logger.debug(f"{user} {strat} trade_status returning {data}")
     return data
 
 
@@ -33,6 +33,10 @@ def get_current_trade_direction(_trade_status, user, strat, logger):
         return "short"
     else:
         return None
+
+
+def is_trade_open(_trade_status):
+    return _trade_status["status"]["type"] in TRADE_TYPES["open"]
 
 
 def is_trade_closed(_trade_status):
@@ -61,12 +65,15 @@ def close_trade(py3c, trade_id, user, strat, logger):
         raise Exception
 
     while True:
-        _trade_status = trade_status(py3c, trade_id, user, strat, logger)
+        _trade_status = trade_status(
+            py3c=py3c, trade_id=trade_id, user=user, strat=strat, logger=logger
+        )
         if is_trade_closed(_trade_status):
             break
         logger.debug(
             f"{user} {strat} trade {trade_id} waiting for close. Status: {_trade_status['status']['type']}. "
-            f"Full status: {_trade_status}")
+            f"Full status: {_trade_status}"
+        )
         sleep(1)
 
     logger.info(
@@ -75,7 +82,13 @@ def close_trade(py3c, trade_id, user, strat, logger):
     )
     # Do a one off profit log, because we can, because we closed this one ourselves
     # This prevents the daemon profit checker from missing this profit when we open another trade within 15s
-    log_profits(_trade_status=_trade_status, trade_id=trade_id, user=user, strat=strat, logger=logger)
+    tc.log_profits(
+        _trade_status=_trade_status,
+        trade_id=trade_id,
+        user=user,
+        strat=strat,
+        logger=logger,
+    )
     return data
 
 
@@ -94,10 +107,10 @@ def open_trade(
     note,
     logger,
 ):
-    #logger.debug(
+    # logger.debug(
     #    f"{user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
     #    f"{leverage}, units {units}, tp_pct {tp_pct}, tp_trail {tp_trail}, sl_pct {sl_pct}, note {note}"
-    #)
+    # )
     base_trade = get_base_trade(
         account_id=account_id,
         pair=pair,
@@ -109,7 +122,7 @@ def open_trade(
         note=note,
         logger=logger,
     )
-    #logger.debug(f"{user} {strat} Sending base trade: {base_trade}")
+    # logger.debug(f"{user} {strat} Sending base trade: {base_trade}")
     base_trade_error, base_trade_data = py3c.request(
         entity="smart_trades_v2", action="new", payload=base_trade
     )
@@ -120,14 +133,34 @@ def open_trade(
         raise Exception
 
     trade_id = str(base_trade_data["id"])
-    trade_entry = round(float(base_trade_data["position"]["price"]["value"]), 2)
-    logger.info(f"{user} {strat} Entered trade {trade_id} {_type} at {trade_entry}")
+
+    while True:
+        _trade_status = trade_status(
+            py3c=py3c, trade_id=trade_id, user=user, strat=strat, logger=logger
+        )
+        if is_trade_open(_trade_status):
+            break
+        logger.debug(
+            f"{user} {strat} trade {trade_id} waiting for base open. Status: {_trade_status['status']['type']}. "
+            f"Full status: {_trade_status}"
+        )
+        sleep(1)
+
+    logger.debug(
+        f"{user} {strat} trade {trade_id} successfully opened base, status: {_trade_status['status']['type']}. "
+        f"Full response: {base_trade_data}"
+    )
+
+    trade_entry = float(base_trade_data["position"]["price"]["value"])
+    logger.info(
+        f"{user} {strat} Entered base trade {trade_id} {_type} at {trade_entry}"
+    )
     if _type == "buy":
-        tp_price = round(trade_entry * (1 + tp_pct / 100))
-        sl_price = round(trade_entry * (1 - sl_pct / 100))
+        tp_price = trade_entry * (1 + tp_pct / 100)
+        sl_price = trade_entry * (1 - sl_pct / 100)
     else:  # sell
-        tp_price = round(trade_entry * (1 - tp_pct / 100))
-        sl_price = round(trade_entry * (1 + sl_pct / 100))
+        tp_price = trade_entry * (1 - tp_pct / 100)
+        sl_price = trade_entry * (1 + sl_pct / 100)
     update_trade = get_update_trade(
         trade_id=trade_id,
         _type=_type,
@@ -140,9 +173,9 @@ def open_trade(
         strat=strat,
         logger=logger,
     )
-    #logger.debug(
+    # logger.debug(
     #    f"{user} {strat} Sending update trade while opening trade: {update_trade}"
-    #)
+    # )
 
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
@@ -157,21 +190,20 @@ def open_trade(
         logger.info(
             f"{user} {strat} Closing trade {trade_id} since we couldn't apply TP/SL"
         )
-        sleep(1)
-        close_trade(py3c, trade_id, user, strat, logger)
+        close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, logger=logger)
         raise Exception
 
-    #logger.debug(
-    #    f"{user} {strat} trade {trade_id} successfully updated with TP/SL, response: {update_trade_data}"
-    #)
+    logger.debug(
+        f"{user} {strat} trade {trade_id} successfully updated with TP/SL, response: {update_trade_data}"
+    )
     return trade_id
 
 
 def get_base_trade(account_id, pair, _type, leverage, units, user, strat, note, logger):
-    #logger.debug(
+    # logger.debug(
     #    f"{user} {strat} get_base_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
     #    f"{leverage}, units {units}, note {note}"
-    #)
+    # )
     return {
         "account_id": account_id,
         "note": note,
@@ -190,10 +222,10 @@ def get_base_trade(account_id, pair, _type, leverage, units, user, strat, note, 
 def get_update_trade(
     trade_id, _type, units, tp_price, sl_price, sl_pct, tp_trail, user, strat, logger
 ):
-    #logger.debug(
+    # logger.debug(
     #    f"{user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, "
     #    f"sl_price {sl_price}, sl_pct {sl_pct}, tp_trail {tp_trail}"
-    #)
+    # )
     update_trade = {
         "id": trade_id,
         "position": {"type": _type, "units": {"value": units}, "order_type": "market"},
@@ -237,14 +269,31 @@ def send_email(to, subject, body=None):
     yagmail.SMTP("lathamfell@gmail.com", "lrhnapmiegubspht").send(to, subject, body)
 
 
-def get_oldest_value(value_history):
-    oldest_dt = get_oldest_dt(value_history)
-    return value_history[oldest_dt]
+def get_default_open_trade_mongo_set_command(strat, trade_id, direction, tsl):
+    entry_time = dt.datetime.now().isoformat()[5:16].replace("T", " ")
+    return {
+        f"{strat}.status.trade_id": trade_id,
+        f"{strat}.status.tsl_reset_points_hit": [],
+        f"{strat}.status.profit_logged": False,
+        f"{strat}.status.last_entry_direction": direction,
+        f"{strat}.status.max_profit_this_entry": -100,
+        f"{strat}.status.max_drawdown_this_entry": 0,
+        f"{strat}.status.last_tsl_set": tsl,
+        f"{strat}.status.entry_time": entry_time,
+    }
 
 
-def get_oldest_dt(value_history):
-    oldest_dt = dt.datetime.now().isoformat()
-    for historical_dt in value_history:
-        if historical_dt < oldest_dt:
-            oldest_dt = historical_dt
-    return oldest_dt
+def set_up_default_strat_config(coll, user, strat):
+    coll.update_one(
+        {"_id": user},
+        {
+            "$set": {
+                f"{strat}.config.tp_pct": DEFAULT_STRAT_CONFIG["tp_pct"],
+                f"{strat}.config.tp_trail": DEFAULT_STRAT_CONFIG["tp_trail"],
+                f"{strat}.config.sl_pct": DEFAULT_STRAT_CONFIG["sl_pct"],
+                f"{strat}.config.leverage": DEFAULT_STRAT_CONFIG["leverage"],
+                f"{strat}.config.units": DEFAULT_STRAT_CONFIG["units"],
+            }
+        },
+        upsert=True,
+    )

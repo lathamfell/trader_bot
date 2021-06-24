@@ -1,5 +1,28 @@
 import logging
 
+DEFAULT_STRAT_CONFIG = {
+    "tp_pct": 0.2,
+    "tp_trail": None,
+    "sl_pct": 0.2,
+    "leverage": 1,
+    "units": 1,
+}
+
+TRADE_TYPES = {
+    "opening": ["waiting_position", "created"],
+    "open": ["waiting_targets"],
+    "closing": [
+        "stop_loss_in_progress",
+        "panic_sell_pending",
+        "panic_sell_in_progress",
+        "cancellation_in_progress",
+    ],
+    "closed": ["finished", "panic_sold", "stop_loss_finished", "cancelled"],
+}
+
+LOG_LEVEL = logging.DEBUG
+STARTING_PAPER = 10000
+
 USER_ATTR = {
     "malcolm": {
         "c3_api_key": "b122f74e630541109a11b9cb61540e151fe44e5887d943a78d2a5dc0d7f8055a",
@@ -12,14 +35,14 @@ USER_ATTR = {
                 "coin": "btc",
                 "account_id": 29896590,  # Binance COIN-M
                 "pair": "BTC_BTCUSD_PERP",
-                "description": ""
+                "description": "",
             },
             "eth": {
                 "logic": "gamma",
                 "coin": "eth",
                 "account_id": 29896590,  # Binance COIN-M
                 "pair": "ETH_ETHUSD_PERP",
-                "description": ""
+                "description": "",
             },
         },
     },
@@ -29,79 +52,86 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "eth1": {  # 1m Crayons/Heuristic with minimum TP/SL
-                "logic": "alpha",
+            "btc1": {
+                "logic": "gamma",
+                "coin": "btc",
+                "account_id": 30034871,  # Binance lec
+                "pair": "BTC_BTCUSD_PERP",
+                "interval": "1m",
+                "description": "1m Heuristic trend follower",
+            },
+            "btc2": {
+                "logic": "gamma",
+                "coin": "btc",
+                "account_id": 30391847,  # Binance tk (trendking2021)
+                "pair": "BTC_BTCUSD_PERP",
+                "interval": "15m",
+                "description": "15m Heuristic trend follower",
+            },
+            "eth1": {
+                "logic": "gamma",
                 "coin": "eth",
                 "account_id": 29799999,  # COIN-M lef35
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "1m",
-                "description": "1m Crayons + Heuristic entry with minimal TP/SL"
+                "description": "1m Heuristic with minimal TP/SL",
             },
-            "eth2": {  # 1m Heuristic trend follower
+            "eth2": {
                 "logic": "gamma",
                 "coin": "eth",
                 "account_id": 30548884,  # COIN-M lf2 (lathamfell2)
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "1m",
-                "description": "1m Heuristic trend follower"
+                "description": "1m Heuristic trend follower",
             },
-            "eth3": {  # 1m Crayons/Heuristic
-                "logic": "alpha",
+            "eth3": {
+                "logic": "gamma",
                 "coin": "eth",
                 "account_id": 30391847,  # COIN-M tk (trendking2021)
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "1m",
-                "description": "1m Crayons + Heuristic entry with TSL"
+                "description": "1m Heuristic with TSL",
             },
-            "eth4": {  # 1m Crayons/Heuristic with Hull alignment
+            "eth4": {
                 "logic": "beta",
                 "coin": "eth",
                 "account_id": 30398341,  # Binance lf Futures COIN-M (lathamfell)
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "1m",
-                "description": "1m Crayons + Heuristic entry with Hull alignment and TSL"
+                "description": "1m Heuristic with Hull alignment and TSL",
             },
-            "eth5": {  # 15m Crayons/Heuristic
-                "logic": "alpha",
+            "eth5": {
+                "logic": "gamma",
                 "coin": "eth",
                 "account_id": 30491505,  # Binance Eth8 Futures COIN-M (eth8eth8eth8)
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "15m",
-                "description": "15m Crayons + Heuristic entry with TSL"
+                "description": "15m Heuristic with TSL",
             },
-            "eth6": {  # 15m Crayons/Heuristic with Hull alignment
+            "eth6": {
                 "logic": "beta",
                 "coin": "eth",
-                "account_id": "30034871",  # Binance COIN-M lec
+                "account_id": 30034871,  # Binance COIN-M lec
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "15m",
-                "description": "15m Crayons + Heuristic entry with Hull alignment and TSL"
+                "description": "15m Heuristic with Hull alignment and TSL",
             },
-            "eth7": {  # 15m Heuristic trend follower
+            "eth7": {
                 "logic": "gamma",
                 "coin": "eth",
-                "account_id": "30549010",
+                "account_id": 30549010,  # Binance slackerbot
                 "pair": "ETH_ETHUSD_PERP",
                 "interval": "15m",
-                "description": "15m Heuristic trend follower"
-            }
+                "description": "15m Heuristic trend follower",
+            },
+            "xrp": {
+                "logic": "gamma",
+                "coin": "xrp",
+                "account_id": 29799999,  # COIN-M lef35
+                "pair": "XRP_XRPUSD_PERP",
+                "interval": "15m",
+                "description": "15m Heuristic trend follower",
+            },
         },
     },
 }
-
-DEFAULT_STRAT_CONFIG = {
-    "tp_pct": 0.2,
-    "tp_trail": None,
-    "sl_pct": 0.2,
-    "leverage": 1,
-    "units": 1,
-}
-
-TRADE_TYPES = {
-    "open": ["waiting_targets"],
-    "closing": ["stop_loss_in_progress", "panic_sell_pending", "panic_sell_in_progress"],
-    "closed": ["finished", "panic_sold", "stop_loss_finished"]
-}
-
-LOG_LEVEL = logging.DEBUG
-STARTING_PAPER = 10000

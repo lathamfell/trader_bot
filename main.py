@@ -20,6 +20,8 @@ from alphabot.helpers import (
     get_current_trade_direction,
     is_trade_closed,
     close_trade,
+    get_default_open_trade_mongo_set_command,
+    set_up_default_strat_config,
 )
 from alphabot.trade_checkup import trade_checkup
 from alphabot.updaters import config_update
@@ -97,20 +99,22 @@ def report():
                     {"_id": user}, {"$set": {f"{strat}.status": {}}}, upsert=True
                 )
                 # re-pull
-                state = coll.find_one({"_id": user}).get(strat)
+                status = coll.find_one({"_id": user}).get(strat)["status"]
             assets = status.get("paper_assets", 0)
+            potential_assets = status.get("potential_paper_assets", 0)
             description = USER_ATTR[user]["strats"][strat]["description"]
             entry = {
                 "assets": assets,
+                "potential_assets": potential_assets,
                 "designation": f"{user} {strat}. {description}",
             }
             output.append(entry)
-
     sorted_entries = sorted(output, key=lambda k: k["assets"])
     for entry in sorted_entries:
-        assets_no = entry['assets']
-        assets_str = f"{assets_no:,}"
-        logger.info(f"${assets_str}: {entry['designation']}")
+        assets_no = entry["assets"]
+        assets_po = entry["potential_assets"]
+        assets_str = f"${assets_no:,} out of potential ${assets_po:,}"
+        logger.info(f"{assets_str}: {entry['designation']}")
 
     logger.info("** REPORT COMPLETE **")
 
@@ -164,23 +168,8 @@ class AlertHandler:
 
         config = self.state.get("config")
         if not config:
-            # strat doesn't have a config yet, set a default and re-pull
-            self.coll.update_one(
-                {"_id": self.user},
-                {
-                    "$set": {
-                        f"{self.strat}.config.tp_pct": DEFAULT_STRAT_CONFIG["tp_pct"],
-                        f"{self.strat}.config.tp_trail": DEFAULT_STRAT_CONFIG[
-                            "tp_trail"
-                        ],
-                        f"{self.strat}.config.sl_pct": DEFAULT_STRAT_CONFIG["sl_pct"],
-                        f"{self.strat}.config.leverage": DEFAULT_STRAT_CONFIG[
-                            "leverage"
-                        ],
-                        f"{self.strat}.config.units": DEFAULT_STRAT_CONFIG["units"],
-                    }
-                },
-                upsert=True,
+            set_up_default_strat_config(
+                coll=self.coll, user=self.user, strat=self.strat
             )
             self.state = self.coll.find_one({"_id": self.user})[self.strat]
 
@@ -294,42 +283,66 @@ class AlertHandler:
         self.coll.update_one(
             {"_id": self.user},
             {
-                "$set": {
-                    f"{self.strat}.status.trade_id": trade_id,
-                    f"{self.strat}.status.tsl_reset_points_hit": [],
-                    f"{self.strat}.status.tp_reset_points_hit": [],
-                    f"{self.strat}.status.profit_logged": False,
-                    f"{self.strat}.status.last_entry_direction": direction,
-                }
+                "$set": get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=direction,
+                    tsl=self.sl_pct,
+                )
             },
             upsert=True,
         )
 
     def run_logic_beta(self, alert):
+        direction = get_current_trade_direction(
+            _trade_status=self.trade_status,
+            user=self.user,
+            strat=self.strat,
+            logger=logger,
+        )
+        if (alert.get("close_long") and direction == "long") or (
+            alert.get("close_short") and direction == "short"
+        ):
+            # exit criteria met
+            trade_id = self.state["status"]["trade_id"]
+            logger.info(
+                f"{self.user} {self.strat} exiting {direction} trade {trade_id} due to exit signal"
+            )
+            close_trade(self.py3c, trade_id, self.user, self.strat, logger)
+            return
+        elif alert.get("close_long") or alert.get("close_short"):
+            return
+
         hull = self.coll.find_one({"_id": "indicators"})["hull"][self.coin][
             self.interval
         ]["color"]
 
-        if self.trade_status and get_current_trade_direction(
-            self.trade_status, self.user, self.strat, logger
-        ):
-            logger.debug(f"{self.user} {self.strat} already in trade, nothing to do")
-            return
-
-        if alert.get("long") and hull == "green":
-            logger.info(f"{self.user} {self.strat} opening long")
+        if alert.get("long"):
+            new_direction = "long"
             _type = "buy"
-            direction = "long"
-        elif alert.get("short") and hull == "red":
-            logger.info(f"{self.user} {self.strat} opening short")
+        else:  # short
+            new_direction = "short"
             _type = "sell"
-            direction = "short"
-        else:
+
+        if direction and direction != new_direction:
+            # close current trade
+            trade_id = self.state["status"]["trade_id"]
+            close_trade(
+                py3c=self.py3c,
+                trade_id=trade_id,
+                user=self.user,
+                strat=self.strat,
+                logger=logger,
+            )
+
+        if (new_direction == "long" and hull != "green") or (
+            new_direction == "short" and hull != "red"
+        ):
             logger.debug(
-                f"{self.user} {self.strat} potential entry blocked by Hull color: {hull}"
+                f"{self.user} {self.strat} potential {new_direction} entry blocked by Hull color: {hull}"
             )
             return
-        logger.debug(f"{self.user} {self.strat} decided to open trade")
+
         trade_id = open_trade(
             self.py3c,
             account_id=self.account_id,
@@ -342,26 +355,28 @@ class AlertHandler:
             sl_pct=self.sl_pct,
             user=self.user,
             strat=self.strat,
-            note=f"{self.strat} {direction}",
+            note=f"{self.strat} {new_direction}",
             logger=logger,
         )
         self.coll.update_one(
             {"_id": self.user},
             {
-                "$set": {
-                    f"{self.strat}.status.trade_id": trade_id,
-                    f"{self.strat}.status.tsl_reset_points_hit": [],
-                    f"{self.strat}.status.tp_reset_points_hit": [],
-                    f"{self.strat}.status.profit_logged": False,
-                    f"{self.strat}.status.last_entry_direction": direction,
-                }
+                "$set": get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=new_direction,
+                    tsl=self.sl_pct,
+                )
             },
             upsert=True,
         )
 
     def run_logic_gamma(self, alert):
         direction = get_current_trade_direction(
-            self.trade_status, self.user, self.strat, logger
+            _trade_status=self.trade_status,
+            user=self.user,
+            strat=self.strat,
+            logger=logger,
         )
         if (alert.get("close_long") and direction == "long") or (
             alert.get("close_short") and direction == "short"
@@ -386,7 +401,13 @@ class AlertHandler:
         if direction and direction != new_direction:
             # close current trade first
             trade_id = self.state["status"]["trade_id"]
-            close_trade(self.py3c, trade_id, self.user, self.strat, logger)
+            close_trade(
+                py3c=self.py3c,
+                trade_id=trade_id,
+                user=self.user,
+                strat=self.strat,
+                logger=logger,
+            )
 
         trade_id = open_trade(
             self.py3c,
@@ -406,13 +427,12 @@ class AlertHandler:
         self.coll.update_one(
             {"_id": self.user},
             {
-                "$set": {
-                    f"{self.strat}.status.trade_id": trade_id,
-                    f"{self.strat}.status.tsl_reset_points_hit": [],
-                    f"{self.strat}.status.tp_reset_points_hit": [],
-                    f"{self.strat}.status.profit_logged": False,
-                    f"{self.strat}.status.last_entry_direction": new_direction,
-                }
+                "$set": get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=new_direction,
+                    tsl=self.sl_pct,
+                )
             },
             upsert=True,
         )
@@ -522,14 +542,12 @@ class AlertHandler:
             self.coll.update_one(
                 {"_id": self.user},
                 {
-                    "$set": {
-                        f"{self.strat}.status.trade_id": trade_id,
-                        f"{self.strat}.status.last_trend_entered": "long",
-                        f"{self.strat}.status.tsl_reset_points_hit": [],
-                        f"{self.strat}.status.tp_reset_points_hit": [],
-                        f"{self.strat}.status.profit_logged": False,
-                        f"{self.strat}.status.last_entry_direction": "long",
-                    }
+                    "$set": get_default_open_trade_mongo_set_command(
+                        strat=self.strat,
+                        trade_id=trade_id,
+                        direction="long",
+                        tsl=self.sl_pct,
+                    )
                 },
                 upsert=True,
             )
@@ -573,14 +591,12 @@ class AlertHandler:
             self.coll.update_one(
                 {"_id": self.user},
                 {
-                    "$set": {
-                        f"{self.strat}.status.trade_id": trade_id,
-                        f"{self.strat}.status.last_trend_entered": "short",
-                        f"{self.strat}.status.tsl_reset_points_hit": [],
-                        f"{self.strat}.status.tp_reset_points_hit": [],
-                        f"{self.strat}.status.profit_logged": False,
-                        f"{self.strat}.status.last_entry_direction": "short",
-                    }
+                    "$set": get_default_open_trade_mongo_set_command(
+                        strat=self.strat,
+                        trade_id=trade_id,
+                        direction="short",
+                        tsl=self.sl_pct,
+                    )
                 },
                 upsert=True,
             )

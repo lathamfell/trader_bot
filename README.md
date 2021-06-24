@@ -10,6 +10,7 @@ Deploy:
 * NOTE: if substantive change made to app logic or TradingView input alerts, `db_flusher.py` should be run after deployment is complete to reset app state.
 
 To connect to BetaBot:
+Navigate to location of pem file. (~/Documents on Chronos PC)
 `ssh -i "alphabot-aws-key-pair.pem" ubuntu@ec2-100-25-132-178.compute-1.amazonaws.com`
 To kick off BetaBot:
 `cd /home/betabot`

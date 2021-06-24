@@ -817,4 +817,45 @@ def report():
 
 
 
+def get_tp_reset(_trade_status, strat_states, strat, user, trade_id, logger):
+    try:
+        reset_tp = strat_states[strat]["config"]["reset_tp"]
+        tp_reset_points = strat_states[strat]["config"]["tp_reset_points"]
+    except KeyError:
+        #logger.debug(
+        #    f"{user} {strat} skipping TP reset check because {user} {strat} is missing a TP reset config item. "
+        #    f"Strat state is {strat_states[strat]}"
+        #)
+        return None, None, None
+    if not reset_tp:
+        #logger.debug(f"{user} {strat} has TP reset disabled, skipping")
+        return None, None, None
+    profit_pct = float(_trade_status["profit"]["percent"])
+    direction = strat_states[strat]["status"].get("last_entry_direction")
+    tp_reset_points_hit = strat_states[strat]["status"]["tp_reset_points_hit"]
+    for tp_reset_point in tp_reset_points:
+        tp_trigger = tp_reset_point[0]
+        new_tp = tp_reset_point[1]
+        if tp_trigger not in tp_reset_points_hit:
+            if profit_pct < tp_trigger:
+                #logger.debug(
+                #    f"trade {user} {strat} {trade_id} not resetting TP, not enough in profit: "
+                #    f"{profit_pct} < {tp_reset_point[0]}"
+                #)
+                return None, None, None
+            # all right, get new TP!
+            logger.info(
+                f"{user} {strat} {direction} {trade_id} resetting TP to {new_tp} because profit "
+                f"{profit_pct} >= {tp_trigger}")
+            _type = _trade_status["position"]["type"]
+            trade_entry = round(float(_trade_status["position"]["price"]["value"]))
+            if _type == "buy":
+                tp_price = round(trade_entry * (1 + new_tp / 100))
+            else:  # sell
+                tp_price = round(trade_entry * (1 - new_tp / 100))
+
+            return tp_price, tp_trigger, new_tp
+
+
+
 """
