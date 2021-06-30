@@ -44,6 +44,13 @@ def trade_checkup(logger):
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
             # logger.debug(f"{user} {strat} got trade status {_trade_status}")
+            # if a TP is triggered, this function will pass back an updated trade status
+            #   otherwise it returns the original
+            #_trade_status = check_take_profits(
+            #    _trade_status=_trade_status, strat_states=strat_states, strat=strat, py3c=py3c,
+            #    description=description, logger=logger, trade_id=trade_id, user=user
+            #)
+
             new_tsl = check_tsl(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
@@ -61,12 +68,31 @@ def trade_checkup(logger):
                 strat=strat,
                 logger=logger,
                 coll=coll,
-                strat_states=strat_states,
-                new_tsl=new_tsl,
-                py3c=py3c
+                new_tsl=new_tsl
             )
 
     return "Trade checkup complete"
+
+
+def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c, description, logger):
+    if not h.is_trade_open(_trade_status=_trade_status):
+        return
+    tp_pct = strat_states[strat]["config"]["tp_pct"]
+    tp_pct_2 = strat_states[strat]["config"].get("tp_pct_2")
+
+    profit, roe = h.get_profit_and_roe(_trade_status)
+    if (tp_pct_2 and tp_pct_2 >= profit) or (not tp_pct_2 and tp_pct >= profit):
+        # close trade completely
+        _trade_status = trading.close_trade(
+            py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
+    elif tp_pct_2 and tp_pct >= profit:
+        # partial close
+        _trade_status = trading.take_partial_profit(
+            py3c=py3c, trade_id=trade_id, description=description, user=user, strat=strat, logger=logger,
+        )
+        return _trade_status
+
+    return _trade_status
 
 
 def check_tsl(_trade_status, strat_states, strat, user, trade_id, py3c, coll, logger):
@@ -164,7 +190,6 @@ def get_tsl_reset(_trade_status, strat_states, strat, user, trade_id, logger):
         return None, None, None
     profit, roe = h.get_profit_and_roe(_trade_status)
     direction = strat_states[strat]["status"].get("last_entry_direction")
-    description = strat_states[strat]["config"].get("description")
     tsl_reset_points_hit = strat_states[strat]["status"]["tsl_reset_points_hit"]
     for tsl_reset_point in tsl_reset_points:
         sl_trigger = tsl_reset_point[0]
@@ -195,8 +220,15 @@ def get_tsl_reset(_trade_status, strat_states, strat, user, trade_id, logger):
 
 
 def log_profit_and_roe(
-    _trade_status, trade_id, user, strat, logger, py3c, coll=None, strat_states=None, new_tsl=None
+    _trade_status, trade_id, user, strat, logger, coll=None, new_tsl=None
 ):
+    strat_states = coll.find_one({"_id": user})  # pull our strat states, who knows what happened before this
+    profit_logged = strat_states[strat]["status"].get("profit_logged")
+    if profit_logged:
+        logger.debug(
+           f"{user} {strat} already logged profit for trade {trade_id}")
+        return
+
     if not coll:
         client = pymongo.MongoClient(
             "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
@@ -255,12 +287,6 @@ def log_profit_and_roe(
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{tsl_str} "
             f"Entry time: {entry_time} UTC"
         )
-        return
-
-    profit_logged = strat_states[strat]["status"].get("profit_logged")
-    if profit_logged:
-        # logger.debug(
-        #    f"{user} {strat} already logged profit for trade {trade_id}, current paper assets: ${paper_assets}")
         return
 
     new_paper_assets = int(paper_assets * (1 + roe / 100))

@@ -22,6 +22,7 @@ TRADE_TYPES = {
 
 LOG_LEVEL = logging.DEBUG
 STARTING_PAPER = 10000
+TP_ORDER_TYPE = "limit"
 
 USER_ATTR = {
     "malcolm": {

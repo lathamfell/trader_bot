@@ -2,6 +2,7 @@ from time import sleep
 
 import alphabot.trade_checkup as tc
 import alphabot.helpers as h
+from alphabot.config import TP_ORDER_TYPE
 
 
 def trade_status(py3c, trade_id, description, logger):
@@ -48,10 +49,9 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
         trade_id=trade_id,
         user=user,
         strat=strat,
-        logger=logger,
-        py3c=py3c
+        logger=logger
     )
-    return data
+    return _trade_status
 
 
 def open_trade(
@@ -226,7 +226,7 @@ def get_update_trade(
             "enabled": True,
             "steps": [
                 {
-                    "order_type": "market",
+                    "order_type": TP_ORDER_TYPE,
                     "price": {"value": tp_price_1, "type": "last"},
                     "volume": 100
                 }
@@ -249,12 +249,12 @@ def get_update_trade(
     if tp_price_2 is not None:
         update_trade["take_profit"]["steps"] = [
             {
-                "order_type": "market",
+                "order_type": TP_ORDER_TYPE,
                 "price": {"value": tp_price_1, "type": "last"},
                 "volume": 50
             },
             {
-                "order_type": "market",
+                "order_type": TP_ORDER_TYPE,
                 "price": {"value": tp_price_2, "type": "last"},
                 "volume": 50
             }
@@ -263,9 +263,15 @@ def get_update_trade(
     return update_trade
 
 
-def take_partial_profit(py3c, trade_id, description, user, strat, logger):
+def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_states=None, _trade_status=None):
     # get current trade attributes
-    _trade_status = trade_status(py3c=py3c, trade_id=trade_id, description=description, logger=logger)
+    if strat_states:
+        # check for ourselves whether partial profit has been taken
+        if strat_states[user]["strats"][strat].get("took_partial_profit"):
+            logger.debug(f"{description} already took partial profit, exiting")
+            return _trade_status
+    if not _trade_status:
+        _trade_status = trade_status(py3c=py3c, trade_id=trade_id, description=description, logger=logger)
     current_sl = _trade_status["stop_loss"]["conditional"]["price"]["value"]
     current_tp = h.get_last_tp_price(_trade_status=_trade_status)
     _type = _trade_status["position"]["type"]
@@ -306,4 +312,4 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger):
         f"{description} {direction} {trade_id} **PARTIAL CLOSE** Took partial profit.  Full trade status: "
         f"{update_trade_data}"
     )
-    return
+    return _trade_status
