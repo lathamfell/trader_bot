@@ -1,31 +1,20 @@
 import google.cloud.logging
 from google.cloud.logging.handlers import CloudLoggingHandler
 
-from time import sleep
 import logging
 from flask import Flask, request
 import pymongo
 import datetime as dt
 from alphabot.py3cw.request import Py3CW
 import traceback
-from dateutil import parser
-import pytz
 
-from alphabot.indicators import handle_hull_indicator
-from alphabot.helpers import (
-    open_trade,
-    screen_for_str_bools,
-    send_email,
-    trade_status,
-    get_current_trade_direction,
-    is_trade_closed,
-    close_trade,
-    get_default_open_trade_mongo_set_command,
-    set_up_default_strat_config,
-)
+from alphabot.indicators import handle_trend_indicator
+import alphabot.helpers as h
 from alphabot.trade_checkup import trade_checkup
 from alphabot.updaters import config_update
-from alphabot.config import USER_ATTR, DEFAULT_STRAT_CONFIG, LOG_LEVEL
+from alphabot.config import USER_ATTR, LOG_LEVEL
+import alphabot.trading as trading
+from alphabot.report import report
 
 
 app = Flask(__name__)
@@ -48,7 +37,7 @@ def main():
         if route == "indicators":
             return indicators()
         if route == "report":
-            return report()
+            return report(logger)
         if route == "config_update":
             return config_update(request, logger)
         if route == "trade_checkup":
@@ -61,7 +50,7 @@ def main():
             f"Caught exception while handling request {request} with {request.data}"
         )
         traceback.print_exc()
-        send_email(
+        h.send_email(
             to="lathamfell@gmail.com", subject="AlphaBot Error", body=f"{request.data}"
         )
         return "request not processed due to server error"
@@ -70,55 +59,12 @@ def main():
 def indicators():
     _update = request.json
     indicator = _update["indicator"].lower()
-    if indicator == "hull":
-        handle_hull_indicator(_update, indicator, logger)
+    if indicator == "hull" or "htf_guide":
+        handle_trend_indicator(_update, indicator, logger)
     else:
         logger.error(f"Unknown indicator {indicator} received")
         raise Exception
     return "indicator updated"
-
-
-def report():
-    client = pymongo.MongoClient(
-        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-    )
-    db = client.indicators_db
-    coll = db.indicators_coll
-
-    logger.info("** REPORT **")
-    output = []
-    for user in USER_ATTR:
-        for strat in USER_ATTR[user]["strats"]:
-            state = coll.find_one({"_id": user}).get(strat)
-            status = state.get("status")
-            if not status:
-                # strat doesn't have a status yet, let's add it
-                coll.update_one(
-                    {"_id": user}, {"$set": {f"{strat}.status": {}}}, upsert=True
-                )
-                # re-pull
-                status = coll.find_one({"_id": user}).get(strat)["status"]
-            assets = status.get("paper_assets", 0)
-            potential_assets = status.get("potential_paper_assets", 0)
-            description = USER_ATTR[user]["strats"][strat]["description"]
-            entry = {
-                "assets": assets,
-                "potential_assets": potential_assets,
-                "designation": f"{user} {strat}. {description}",
-            }
-            output.append(entry)
-    sorted_entries = sorted(output, key=lambda k: k["assets"])
-    for entry in sorted_entries:
-        assets_no = entry["assets"]
-        assets_po = entry["potential_assets"]
-        assets_str = f"${assets_no:,} out of potential ${assets_po:,}"
-        logger.info(f"{assets_str}: {entry['designation']}")
-
-    logger.info("** REPORT COMPLETE **")
-
-    return "report ack"
 
 
 class AlertHandler:
@@ -139,15 +85,16 @@ class AlertHandler:
         self.strat = self.alert.get("strat")
         self.condition = self.alert.get("condition")
         self.value = self.alert.get("value")
+        self.price = self.alert.get("price")
         exp_length = self.alert.get("expiration")
         if not exp_length:
             exp_time = dt.datetime.now() + dt.timedelta(weeks=52)
         else:
             exp_time = dt.datetime.now() + dt.timedelta(seconds=exp_length)
         self.expiration = exp_time
-        self.value = screen_for_str_bools(self.value)
+        self.value = h.screen_for_str_bools(self.value)
 
-        # get details from config
+        # get details from internal config
         self.api_key = USER_ATTR[self.user]["c3_api_key"]
         self.secret = USER_ATTR[self.user]["c3_secret"]
         self.email = USER_ATTR[self.user]["email"]
@@ -157,21 +104,33 @@ class AlertHandler:
         self.pair = USER_ATTR[self.user]["strats"][self.strat]["pair"]
         self.account_id = USER_ATTR[self.user]["strats"][self.strat]["account_id"]
         self.interval = USER_ATTR[self.user]["strats"][self.strat].get("interval")
+        self.pct_sell_per_exit_signal = USER_ATTR[self.user]["strats"][self.strat].get("pct_sell_per_exit_signal")
+        self.simulate_leverage = USER_ATTR[self.user]["strats"][self.strat].get("simulate_leverage")
         self.py3c = Py3CW(key=self.api_key, secret=self.secret)
 
-        # pull state and get details
+        # pull state
         try:
             self.state = self.coll.find_one({"_id": self.user})[self.strat]
         except KeyError:
             logger.debug(f"{self.user} {self.strat} not in db yet")
             self.state = {}
 
+        # pull status and user defined config
         config = self.state.get("config")
         if not config:
-            set_up_default_strat_config(
+            h.set_up_default_strat_config(
                 coll=self.coll, user=self.user, strat=self.strat
             )
             self.state = self.coll.find_one({"_id": self.user})[self.strat]
+            config = self.state["config"]
+
+        self.tp_pct = config["tp_pct"]
+        self.tp_pct_2 = config.get("tp_pct_2")
+        self.tp_trail = config["tp_trail"]
+        self.sl_pct = config["sl_pct"]
+        self.leverage = config["leverage"]
+        self.units = config["units"]
+        self.description = config.get("description")
 
         # check status of previous trade, if there is one (whether open or closed)
         try:
@@ -181,21 +140,11 @@ class AlertHandler:
             self.state["status"] = {}
             trade_id = None
         if trade_id:
-            self.trade_status = trade_status(
-                self.py3c, trade_id, self.user, self.strat, logger
+            self.trade_status = trading.trade_status(
+                self.py3c, trade_id, self.description, logger
             )
         else:
             self.trade_status = None
-
-        # pull config and status items
-        self.tp_pct = self.state["config"]["tp_pct"]
-        self.tp_trail = self.state["config"]["tp_trail"]
-        self.sl_pct = self.state["config"]["sl_pct"]
-        self.leverage = self.state["config"]["leverage"]
-        self.units = self.state["config"]["units"]
-        self.one_entry_per_trend = self.state["config"].get("one_entry_per_trend")
-        self.cooldown = self.state["config"].get("cooldown")
-        self.last_trend_entered = self.state["status"].get("last_trend_entered")
 
         if self.condition:
             # we need to update state before running
@@ -224,17 +173,8 @@ class AlertHandler:
         self.run_logic(self.alert)
 
     def run_logic(self, alert):
-        if self.logic == "alpha":
-            self.run_logic_alpha(alert)
-            return
-        if self.logic == "beta":
-            self.run_logic_beta(alert)
-            return
         if self.logic == "gamma":
             self.run_logic_gamma(alert)
-            return
-        elif self.logic == "rho":
-            self.run_logic_rho(alert)
             return
         elif self.logic == "":
             logger.info(
@@ -246,133 +186,8 @@ class AlertHandler:
         )
         raise Exception
 
-    def run_logic_alpha(self, alert):
-        if self.trade_status and get_current_trade_direction(
-            self.trade_status, self.user, self.strat, logger
-        ):
-            logger.debug(f"{self.user} {self.strat} already in trade, nothing to do")
-            return
-
-        if alert.get("long"):
-            logger.info(f"{self.user} {self.strat} opening long")
-            _type = "buy"
-            direction = "long"
-        elif alert.get("short"):
-            logger.info(f"{self.user} {self.strat} opening short")
-            _type = "sell"
-            direction = "short"
-        else:
-            logger.error(f"{self.user} {self.strat} got unexpected signal")
-            return
-
-        trade_id = open_trade(
-            self.py3c,
-            account_id=self.account_id,
-            pair=self.pair,
-            _type=_type,
-            leverage=self.leverage,
-            units=self.units,
-            tp_pct=self.tp_pct,
-            tp_trail=self.tp_trail,
-            sl_pct=self.sl_pct,
-            user=self.user,
-            strat=self.strat,
-            note=f"{self.strat} {direction}",
-            logger=logger,
-        )
-        self.coll.update_one(
-            {"_id": self.user},
-            {
-                "$set": get_default_open_trade_mongo_set_command(
-                    strat=self.strat,
-                    trade_id=trade_id,
-                    direction=direction,
-                    tsl=self.sl_pct,
-                )
-            },
-            upsert=True,
-        )
-
-    def run_logic_beta(self, alert):
-        direction = get_current_trade_direction(
-            _trade_status=self.trade_status,
-            user=self.user,
-            strat=self.strat,
-            logger=logger,
-        )
-        if (alert.get("close_long") and direction == "long") or (
-            alert.get("close_short") and direction == "short"
-        ):
-            # exit criteria met
-            trade_id = self.state["status"]["trade_id"]
-            logger.info(
-                f"{self.user} {self.strat} exiting {direction} trade {trade_id} due to exit signal"
-            )
-            close_trade(self.py3c, trade_id, self.user, self.strat, logger)
-            return
-        elif alert.get("close_long") or alert.get("close_short"):
-            return
-
-        hull = self.coll.find_one({"_id": "indicators"})["hull"][self.coin][
-            self.interval
-        ]["color"]
-
-        if alert.get("long"):
-            new_direction = "long"
-            _type = "buy"
-        else:  # short
-            new_direction = "short"
-            _type = "sell"
-
-        if direction and direction != new_direction:
-            # close current trade
-            trade_id = self.state["status"]["trade_id"]
-            close_trade(
-                py3c=self.py3c,
-                trade_id=trade_id,
-                user=self.user,
-                strat=self.strat,
-                logger=logger,
-            )
-
-        if (new_direction == "long" and hull != "green") or (
-            new_direction == "short" and hull != "red"
-        ):
-            logger.debug(
-                f"{self.user} {self.strat} potential {new_direction} entry blocked by Hull color: {hull}"
-            )
-            return
-
-        trade_id = open_trade(
-            self.py3c,
-            account_id=self.account_id,
-            pair=self.pair,
-            _type=_type,
-            leverage=self.leverage,
-            units=self.units,
-            tp_pct=self.tp_pct,
-            tp_trail=self.tp_trail,
-            sl_pct=self.sl_pct,
-            user=self.user,
-            strat=self.strat,
-            note=f"{self.strat} {new_direction}",
-            logger=logger,
-        )
-        self.coll.update_one(
-            {"_id": self.user},
-            {
-                "$set": get_default_open_trade_mongo_set_command(
-                    strat=self.strat,
-                    trade_id=trade_id,
-                    direction=new_direction,
-                    tsl=self.sl_pct,
-                )
-            },
-            upsert=True,
-        )
-
     def run_logic_gamma(self, alert):
-        direction = get_current_trade_direction(
+        direction = h.get_current_trade_direction(
             _trade_status=self.trade_status,
             user=self.user,
             strat=self.strat,
@@ -383,11 +198,29 @@ class AlertHandler:
         ):
             # exit criteria met
             trade_id = self.state["status"]["trade_id"]
-            logger.info(
-                f"{self.user} {self.strat} exiting {direction} trade {trade_id} due to exit signal"
-            )
-            close_trade(self.py3c, trade_id, self.user, self.strat, logger)
-            return
+            if (not alert.get("partial")) or self.state["status"]["took_partial_profit"]:  # regular full close
+                logger.info(
+                    f"{self.description} {direction} {trade_id} closing full position due to exit signal"
+                )
+                trading.close_trade(
+                    py3c=self.py3c, trade_id=trade_id, user=self.user, strat=self.strat, description=self.description,
+                    logger=logger)
+                return
+            else:  # only close half
+                logger.info(
+                    f"{self.description} {direction} {trade_id} closing partial position due to partial exit signal"
+                )
+                trading.take_partial_profit(
+                    py3c=self.py3c, trade_id=trade_id, description=self.description, user=self.user, strat=self.strat,
+                    logger=logger)
+                # update status so we don't do another partial close
+                self.coll.update_one(
+                    {"_id": self.user},
+                    {
+                        "$set": {f"{self.strat}.status.took_partial_profit": True}
+                    }
+                )
+                return
         elif alert.get("close_long") or alert.get("close_short"):
             return
 
@@ -401,33 +234,37 @@ class AlertHandler:
         if direction and direction != new_direction:
             # close current trade first
             trade_id = self.state["status"]["trade_id"]
-            close_trade(
+            trading.close_trade(
                 py3c=self.py3c,
                 trade_id=trade_id,
                 user=self.user,
                 strat=self.strat,
+                description=self.description,
                 logger=logger,
             )
 
-        trade_id = open_trade(
+        trade_id = trading.open_trade(
             self.py3c,
             account_id=self.account_id,
             pair=self.pair,
             _type=_type,
             leverage=self.leverage,
+            simulate_leverage=self.leverage,
             units=self.units,
             tp_pct=self.tp_pct,
+            tp_pct_2=self.tp_pct_2,
             tp_trail=self.tp_trail,
             sl_pct=self.sl_pct,
             user=self.user,
             strat=self.strat,
-            note=f"{self.strat} {new_direction}",
+            description=self.description,
             logger=logger,
+            price=self.price
         )
         self.coll.update_one(
             {"_id": self.user},
             {
-                "$set": get_default_open_trade_mongo_set_command(
+                "$set": h.get_default_open_trade_mongo_set_command(
                     strat=self.strat,
                     trade_id=trade_id,
                     direction=new_direction,
@@ -435,191 +272,6 @@ class AlertHandler:
                 )
             },
             upsert=True,
-        )
-
-    def run_logic_rho(self, alert):
-
-        if self.trade_status and get_current_trade_direction(
-            self.trade_status, self.user, self.strat, logger
-        ):
-            logger.debug(
-                f"{self.user} {self.strat} skipping logic because already in a trade"
-            )
-            return
-        elif self.trade_status and is_trade_closed(self.trade_status):
-            # check if we're out of cooldown
-            closed_time = parser.parse(self.trade_status["data"]["closed_at"])
-            now = dt.datetime.now(pytz.UTC)
-            if self.cooldown and ((now - closed_time).total_seconds() < self.cooldown):
-                logger.debug(
-                    f"{self.user} {self.strat} skipping logic because still in cooldown"
-                )
-                return
-
-        try:
-            COND_1_VALUE = self.state["conditions"]["condition_one"]["value"]
-            COND_1_EXP = self.state["conditions"]["condition_one"]["expiration"]
-            COND_2_VALUE = self.state["conditions"]["condition_two"]["value"]
-            COND_2_EXP = self.state["conditions"]["condition_two"]["expiration"]
-            COND_3_VALUE = self.state["conditions"]["condition_three"]["value"]
-            COND_3_EXP = self.state["conditions"]["condition_three"]["expiration"]
-            COND_4_VALUE = self.state["conditions"]["condition_four"]["value"]
-            COND_4_EXP = self.state["conditions"]["condition_four"]["expiration"]
-        except KeyError:
-            logger.info(
-                f"{self.user} {self.strat} Incomplete dataset, skipping decision"
-            )
-            return "Incomplete dataset, skipping decision"
-
-        # screen out expired signals
-        time_now = dt.datetime.now()
-        if COND_1_EXP <= time_now:
-            logger.debug(
-                f"{self.user} {self.strat} skipping logic because condition_one expired at {COND_1_EXP.ctime()}"
-            )
-            return
-        if COND_2_EXP <= time_now:
-            logger.debug(
-                f"{self.user} {self.strat} skipping logic because condition_two expired at {COND_2_EXP.ctime()}"
-            )
-            return
-        if COND_3_EXP <= time_now:
-            logger.debug(
-                f"{self.user} {self.strat} skipping logic because condition_three expired at {COND_3_EXP.ctime()}"
-            )
-            return
-        if COND_4_EXP <= time_now:
-            logger.debug(
-                f"{self.user} {self.strat} skipping logic because condition_four expired at {COND_4_EXP.ctime()}"
-            )
-            return
-
-        enter_long = (
-            COND_1_VALUE == "long"
-            and COND_2_VALUE == "long"
-            and COND_3_VALUE == "long"
-            and COND_4_VALUE == "long"
-        )
-        enter_short = (
-            COND_1_VALUE == "short"
-            and COND_2_VALUE == "short"
-            and COND_3_VALUE == "short"
-            and COND_4_VALUE == "short"
-        )
-        if (
-            enter_long
-            and self.last_trend_entered == "long"
-            and self.one_entry_per_trend
-        ) or (
-            enter_short
-            and self.last_trend_entered == "short"
-            and self.one_entry_per_trend
-        ):
-            logger.debug(
-                f"{self.user} {self.strat} already entered this trend, nothing to do"
-            )
-            return
-        elif enter_long:
-            logger.info(
-                f"{self.user} {self.strat} Stars align: Opening long and clearing conditions. Trigger condition "
-                f"was {self.alert['condition']}"
-            )
-            trade_id = open_trade(
-                self.py3c,
-                account_id=self.account_id,
-                pair=self.pair,
-                _type="buy",
-                leverage=self.leverage,
-                units=self.units,
-                tp_pct=self.tp_pct,
-                tp_trail=self.tp_trail,
-                sl_pct=self.sl_pct,
-                user=self.user,
-                strat=self.strat,
-                note=f"{self.strat} long",
-                logger=logger,
-            )
-            self.coll.update_one(
-                {"_id": self.user},
-                {
-                    "$set": get_default_open_trade_mongo_set_command(
-                        strat=self.strat,
-                        trade_id=trade_id,
-                        direction="long",
-                        tsl=self.sl_pct,
-                    )
-                },
-                upsert=True,
-            )
-            # clear expirations
-            self.coll.update_one(
-                {"_id": self.user},
-                {
-                    "$unset": {
-                        f"{self.strat}.conditions.condition_one.expiration": "",
-                        f"{self.strat}.conditions.condition_two.expiration": "",
-                        f"{self.strat}.conditions.condition_three.expiration": "",
-                        f"{self.strat}.conditions.condition_four.expiration": "",
-                        f"{self.strat}.conditions.condition_one.value": "",
-                        f"{self.strat}.conditions.condition_two.value": "",
-                        f"{self.strat}.conditions.condition_three.value": "",
-                        f"{self.strat}.conditions.condition_four.value": "",
-                    }
-                },
-            )
-            return
-        elif enter_short:
-            logger.info(
-                f"{self.user} {self.strat} Stars align: Opening short and clearing conditions. Trigger condition "
-                f"was {self.alert['condition']}"
-            )
-            trade_id = open_trade(
-                self.py3c,
-                account_id=self.account_id,
-                pair=self.pair,
-                _type="sell",
-                leverage=self.leverage,
-                units=self.units,
-                tp_pct=self.tp_pct,
-                tp_trail=self.tp_trail,
-                sl_pct=self.sl_pct,
-                user=self.user,
-                strat=self.strat,
-                note=f"{self.strat} short",
-                logger=logger,
-            )
-            self.coll.update_one(
-                {"_id": self.user},
-                {
-                    "$set": get_default_open_trade_mongo_set_command(
-                        strat=self.strat,
-                        trade_id=trade_id,
-                        direction="short",
-                        tsl=self.sl_pct,
-                    )
-                },
-                upsert=True,
-            )
-            # clear expirations
-            self.coll.update_one(
-                {"_id": self.user},
-                {
-                    "$unset": {
-                        f"{self.strat}.conditions.condition_one.expiration": "",
-                        f"{self.strat}.conditions.condition_two.expiration": "",
-                        f"{self.strat}.conditions.condition_three.expiration": "",
-                        f"{self.strat}.conditions.condition_four.expiration": "",
-                        f"{self.strat}.conditions.condition_one.value": "",
-                        f"{self.strat}.conditions.condition_two.value": "",
-                        f"{self.strat}.conditions.condition_three.value": "",
-                        f"{self.strat}.conditions.condition_four.value": "",
-                    }
-                },
-            )
-            return
-
-        logger.debug(
-            f"{self.user} {self.strat} not opening a trade because signals don't line up"
         )
 
 

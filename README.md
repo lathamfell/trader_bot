@@ -20,6 +20,9 @@ To monitor BetaBot:
 To stop BetaBot:
 `pgrep -lf python`
 `kill <pid>`
+BetBot is a collection of scripts executed as cronjobs.
+To update cron schedule:
+`crontab -e`
 
 TradingView alerts:
 * Any indicator or condition can be used, the only important datapoints from the bot

@@ -1,0 +1,12 @@
+runtime: python39
+instance_class: F4
+
+handlers:
+
+- url: /.*
+  script: auto
+
+entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT main:app --timeout 120
+
+env_variables:
+  GOOGLE_APPLICATION_CREDENTIALS: "norse-botany-313902-e681a09bd1bc.json"

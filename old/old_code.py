@@ -857,5 +857,386 @@ def get_tp_reset(_trade_status, strat_states, strat, user, trade_id, logger):
             return tp_price, tp_trigger, new_tp
 
 
+    def run_logic_rho(self, alert):
+
+        if self.trade_status and get_current_trade_direction(
+            self.trade_status, self.user, self.strat, logger
+        ):
+            logger.debug(
+                f"{self.user} {self.strat} skipping logic because already in a trade"
+            )
+            return
+        elif self.trade_status and is_trade_closed(self.trade_status):
+            # check if we're out of cooldown
+            closed_time = parser.parse(self.trade_status["data"]["closed_at"])
+            now = dt.datetime.now(pytz.UTC)
+            if self.cooldown and ((now - closed_time).total_seconds() < self.cooldown):
+                logger.debug(
+                    f"{self.user} {self.strat} skipping logic because still in cooldown"
+                )
+                return
+
+        try:
+            COND_1_VALUE = self.state["conditions"]["condition_one"]["value"]
+            COND_1_EXP = self.state["conditions"]["condition_one"]["expiration"]
+            COND_2_VALUE = self.state["conditions"]["condition_two"]["value"]
+            COND_2_EXP = self.state["conditions"]["condition_two"]["expiration"]
+            COND_3_VALUE = self.state["conditions"]["condition_three"]["value"]
+            COND_3_EXP = self.state["conditions"]["condition_three"]["expiration"]
+            COND_4_VALUE = self.state["conditions"]["condition_four"]["value"]
+            COND_4_EXP = self.state["conditions"]["condition_four"]["expiration"]
+        except KeyError:
+            logger.info(
+                f"{self.user} {self.strat} Incomplete dataset, skipping decision"
+            )
+            return "Incomplete dataset, skipping decision"
+
+        # screen out expired signals
+        time_now = dt.datetime.now()
+        if COND_1_EXP <= time_now:
+            logger.debug(
+                f"{self.user} {self.strat} skipping logic because condition_one expired at {COND_1_EXP.ctime()}"
+            )
+            return
+        if COND_2_EXP <= time_now:
+            logger.debug(
+                f"{self.user} {self.strat} skipping logic because condition_two expired at {COND_2_EXP.ctime()}"
+            )
+            return
+        if COND_3_EXP <= time_now:
+            logger.debug(
+                f"{self.user} {self.strat} skipping logic because condition_three expired at {COND_3_EXP.ctime()}"
+            )
+            return
+        if COND_4_EXP <= time_now:
+            logger.debug(
+                f"{self.user} {self.strat} skipping logic because condition_four expired at {COND_4_EXP.ctime()}"
+            )
+            return
+
+        enter_long = (
+            COND_1_VALUE == "long"
+            and COND_2_VALUE == "long"
+            and COND_3_VALUE == "long"
+            and COND_4_VALUE == "long"
+        )
+        enter_short = (
+            COND_1_VALUE == "short"
+            and COND_2_VALUE == "short"
+            and COND_3_VALUE == "short"
+            and COND_4_VALUE == "short"
+        )
+        if (
+            enter_long
+            and self.last_trend_entered == "long"
+            and self.one_entry_per_trend
+        ) or (
+            enter_short
+            and self.last_trend_entered == "short"
+            and self.one_entry_per_trend
+        ):
+            logger.debug(
+                f"{self.user} {self.strat} already entered this trend, nothing to do"
+            )
+            return
+        elif enter_long:
+            logger.info(
+                f"{self.user} {self.strat} Stars align: Opening long and clearing conditions. Trigger condition "
+                f"was {self.alert['condition']}"
+            )
+            trade_id = open_trade(
+                self.py3c,
+                account_id=self.account_id,
+                pair=self.pair,
+                _type="buy",
+                leverage=self.leverage,
+                units=self.units,
+                tp_pct=self.tp_pct,
+                tp_trail=self.tp_trail,
+                sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat,
+                note=f"{self.strat} long",
+                logger=logger,
+            )
+            self.coll.update_one(
+                {"_id": self.user},
+                {
+                    "$set": get_default_open_trade_mongo_set_command(
+                        strat=self.strat,
+                        trade_id=trade_id,
+                        direction="long",
+                        tsl=self.sl_pct,
+                    )
+                },
+                upsert=True,
+            )
+            # clear expirations
+            self.coll.update_one(
+                {"_id": self.user},
+                {
+                    "$unset": {
+                        f"{self.strat}.conditions.condition_one.expiration": "",
+                        f"{self.strat}.conditions.condition_two.expiration": "",
+                        f"{self.strat}.conditions.condition_three.expiration": "",
+                        f"{self.strat}.conditions.condition_four.expiration": "",
+                        f"{self.strat}.conditions.condition_one.value": "",
+                        f"{self.strat}.conditions.condition_two.value": "",
+                        f"{self.strat}.conditions.condition_three.value": "",
+                        f"{self.strat}.conditions.condition_four.value": "",
+                    }
+                },
+            )
+            return
+        elif enter_short:
+            logger.info(
+                f"{self.user} {self.strat} Stars align: Opening short and clearing conditions. Trigger condition "
+                f"was {self.alert['condition']}"
+            )
+            trade_id = open_trade(
+                self.py3c,
+                account_id=self.account_id,
+                pair=self.pair,
+                _type="sell",
+                leverage=self.leverage,
+                units=self.units,
+                tp_pct=self.tp_pct,
+                tp_trail=self.tp_trail,
+                sl_pct=self.sl_pct,
+                user=self.user,
+                strat=self.strat,
+                note=f"{self.strat} short",
+                logger=logger,
+            )
+            self.coll.update_one(
+                {"_id": self.user},
+                {
+                    "$set": get_default_open_trade_mongo_set_command(
+                        strat=self.strat,
+                        trade_id=trade_id,
+                        direction="short",
+                        tsl=self.sl_pct,
+                    )
+                },
+                upsert=True,
+            )
+            # clear expirations
+            self.coll.update_one(
+                {"_id": self.user},
+                {
+                    "$unset": {
+                        f"{self.strat}.conditions.condition_one.expiration": "",
+                        f"{self.strat}.conditions.condition_two.expiration": "",
+                        f"{self.strat}.conditions.condition_three.expiration": "",
+                        f"{self.strat}.conditions.condition_four.expiration": "",
+                        f"{self.strat}.conditions.condition_one.value": "",
+                        f"{self.strat}.conditions.condition_two.value": "",
+                        f"{self.strat}.conditions.condition_three.value": "",
+                        f"{self.strat}.conditions.condition_four.value": "",
+                    }
+                },
+            )
+            return
+
+        logger.debug(
+            f"{self.user} {self.strat} not opening a trade because signals don't line up"
+        )
+
+    def run_logic_alpha(self, alert):
+        if self.trade_status and get_current_trade_direction(
+            self.trade_status, self.user, self.strat, logger
+        ):
+            logger.debug(f"{self.user} {self.strat} already in trade, nothing to do")
+            return
+
+        if alert.get("long"):
+            logger.info(f"{self.user} {self.strat} opening long")
+            _type = "buy"
+            direction = "long"
+        elif alert.get("short"):
+            logger.info(f"{self.user} {self.strat} opening short")
+            _type = "sell"
+            direction = "short"
+        else:
+            logger.error(f"{self.user} {self.strat} got unexpected signal")
+            return
+
+        trade_id = open_trade(
+            self.py3c,
+            account_id=self.account_id,
+            pair=self.pair,
+            _type=_type,
+            leverage=self.leverage,
+            units=self.units,
+            tp_pct=self.tp_pct,
+            tp_trail=self.tp_trail,
+            sl_pct=self.sl_pct,
+            user=self.user,
+            strat=self.strat,
+            note=f"{self.strat} {direction}",
+            logger=logger,
+        )
+        self.coll.update_one(
+            {"_id": self.user},
+            {
+                "$set": get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=direction,
+                    tsl=self.sl_pct,
+                )
+            },
+            upsert=True,
+        )
+
+    def run_logic_beta(self, alert):
+        direction = get_current_trade_direction(
+            _trade_status=self.trade_status,
+            user=self.user,
+            strat=self.strat,
+            logger=logger,
+        )
+        if (alert.get("close_long") and direction == "long") or (
+            alert.get("close_short") and direction == "short"
+        ):
+            # exit criteria met
+            trade_id = self.state["status"]["trade_id"]
+            logger.info(
+                f"{self.user} {self.strat} exiting {direction} trade {trade_id} due to exit signal"
+            )
+            close_trade(self.py3c, trade_id, self.user, self.strat, logger)
+            return
+        elif alert.get("close_long") or alert.get("close_short"):
+            return
+
+        hull = self.coll.find_one({"_id": "indicators"})["hull"][self.coin][
+            self.interval
+        ]["color"]
+
+        if alert.get("long"):
+            new_direction = "long"
+            _type = "buy"
+        else:  # short
+            new_direction = "short"
+            _type = "sell"
+
+        if direction and direction != new_direction:
+            # close current trade
+            trade_id = self.state["status"]["trade_id"]
+            close_trade(
+                py3c=self.py3c,
+                trade_id=trade_id,
+                user=self.user,
+                strat=self.strat,
+                logger=logger,
+            )
+
+        if (new_direction == "long" and hull != "green") or (
+            new_direction == "short" and hull != "red"
+        ):
+            logger.debug(
+                f"{self.user} {self.strat} potential {new_direction} entry blocked by Hull color: {hull}"
+            )
+            return
+
+        trade_id = open_trade(
+            self.py3c,
+            account_id=self.account_id,
+            pair=self.pair,
+            _type=_type,
+            leverage=self.leverage,
+            units=self.units,
+            tp_pct=self.tp_pct,
+            tp_trail=self.tp_trail,
+            sl_pct=self.sl_pct,
+            user=self.user,
+            strat=self.strat,
+            note=f"{self.strat} {new_direction}",
+            logger=logger,
+        )
+        self.coll.update_one(
+            {"_id": self.user},
+            {
+                "$set": get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=new_direction,
+                    tsl=self.sl_pct,
+                )
+            },
+            upsert=True,
+        )
+
+
+    def run_logic_beta(self, alert):
+        direction = h.get_current_trade_direction(
+            _trade_status=self.trade_status,
+            user=self.user,
+            strat=self.strat,
+            logger=logger,
+        )
+        if (alert.get("close_long") and direction == "long") or (
+            alert.get("close_short") and direction == "short"
+        ):
+            # exit criteria met
+            trade_id = self.state["status"]["trade_id"]
+            logger.info(
+                f"{self.user} {self.strat} exiting {direction} trade {trade_id} due to exit signal"
+            )
+            trading.close_trade(self.py3c, trade_id, self.user, self.strat, logger)
+            return
+        elif alert.get("close_long") or alert.get("close_short"):
+            return
+
+        guide = self.coll.find_one({"_id": "indicators"})["htf_guide"][self.coin][
+            self.interval
+        ]["value"]
+
+        if alert.get("long"):
+            new_direction = "long"
+            _type = "buy"
+        else:  # short
+            new_direction = "short"
+            _type = "sell"
+
+        if direction and direction != new_direction:
+            # close current trade
+            trade_id = self.state["status"]["trade_id"]
+            trading.close_trade(
+                py3c=self.py3c,
+                trade_id=trade_id,
+                user=self.user,
+                strat=self.strat,
+                logger=logger,
+            )
+
+        trade_id = trading.open_trade(
+            self.py3c,
+            account_id=self.account_id,
+            pair=self.pair,
+            _type=_type,
+            leverage=self.leverage,
+            simulate_leverage=self.leverage,
+            units=self.units,
+            tp_pct=self.tp_pct,
+            tp_trail=self.tp_trail,
+            sl_pct=self.sl_pct,
+            user=self.user,
+            strat=self.strat,
+            note=f"{self.strat} {new_direction} {self.description}",
+            logger=logger,
+        )
+        self.coll.update_one(
+            {"_id": self.user},
+            {
+                "$set": h.get_default_open_trade_mongo_set_command(
+                    strat=self.strat,
+                    trade_id=trade_id,
+                    direction=new_direction,
+                    tsl=self.sl_pct,
+                )
+            },
+            upsert=True,
+        )
 
 """

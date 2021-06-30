@@ -30,20 +30,30 @@ USER_ATTR = {
         "email": "malcerlee@gmail.com",
         "email_enabled": False,
         "strats": {
-            "btc": {
+            "BTC_M1": {
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 29896590,  # Binance COIN-M
+                "account_id": 29896590,  # Binance Futures
                 "pair": "BTC_BTCUSD_PERP",
                 "description": "",
+                "simulate_leverage": True
             },
-            "eth": {
+            "ETH_M1": {
                 "logic": "gamma",
                 "coin": "eth",
-                "account_id": 29896590,  # Binance COIN-M
+                "account_id": 29896590,  # Binance Futures
                 "pair": "ETH_ETHUSD_PERP",
                 "description": "",
+                "simulate_leverage": True
             },
+            "BTC_M2": {
+                "logic": "gamma",
+                "coin": "btc",
+                "account_id": 30571928,  # Binance lathcolm
+                "pair": "BTC_BTCUSD_PERP",
+                "description": "",
+                "simulate_leverage": True
+            }
         },
     },
     "latham": {
@@ -52,86 +62,71 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "btc1": {
+            "BTC_L1": {  # 1m - Chrome
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 30034871,  # Binance lec
+                "account_id": 30034871,  # lec   2 BTC limit
                 "pair": "BTC_BTCUSD_PERP",
-                "interval": "1m",
-                "description": "1m Heuristic trend follower",
+                # configured leverage will be used to calculate paper profits, but trades will be made on the
+                # exchange at 1x
+                "simulate_leverage": True
             },
-            "btc2": {
+            "BTC_L2": {  # 1m = Firefox
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 30391847,  # Binance tk (trendking2021)
+                "account_id": 30391847,  # tk  2 BTC limit
                 "pair": "BTC_BTCUSD_PERP",
-                "interval": "15m",
-                "description": "15m Heuristic trend follower",
+                "simulate_leverage": True
             },
-            "eth1": {
+            "BTC_M3": {
                 "logic": "gamma",
-                "coin": "eth",
-                "account_id": 29799999,  # COIN-M lef35
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "1m",
-                "description": "1m Heuristic with minimal TP/SL",
+                "coin": "btc",
+                "account_id": 30549010,  # slackerbot  2 BTC limit.  Malcolm's $300 of BTC
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
-            "eth2": {
+            "BTC_M4": {
                 "logic": "gamma",
-                "coin": "eth",
-                "account_id": 30548884,  # COIN-M lf2 (lathamfell2)
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "1m",
-                "description": "1m Heuristic trend follower",
+                "coin": "btc",
+                "account_id": 30572521,  # lf2  2 BTC limit.  Malcolm's $300 of BTC
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
-            "eth3": {
+            "BTC_L3": {
                 "logic": "gamma",
-                "coin": "eth",
-                "account_id": 30391847,  # COIN-M tk (trendking2021)
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "1m",
-                "description": "1m Heuristic with TSL",
+                "coin": "btc",
+                "account_id": 30398341,  # lf  2 BTC limit
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
-            "eth4": {
-                "logic": "beta",
-                "coin": "eth",
-                "account_id": 30398341,  # Binance lf Futures COIN-M (lathamfell)
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "1m",
-                "description": "1m Heuristic with Hull alignment and TSL",
-            },
-            "eth5": {
+            "BTC_L4": {
                 "logic": "gamma",
-                "coin": "eth",
-                "account_id": 30491505,  # Binance Eth8 Futures COIN-M (eth8eth8eth8)
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "15m",
-                "description": "15m Heuristic with TSL",
+                "coin": "btc",
+                "account_id": 30491505,  # Eth8  2 BTC limit
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
-            "eth6": {
-                "logic": "beta",
-                "coin": "eth",
-                "account_id": 30034871,  # Binance COIN-M lec
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "15m",
-                "description": "15m Heuristic with Hull alignment and TSL",
-            },
-            "eth7": {
+            "BTC_M5": {
                 "logic": "gamma",
-                "coin": "eth",
-                "account_id": 30549010,  # Binance slackerbot
-                "pair": "ETH_ETHUSD_PERP",
-                "interval": "15m",
-                "description": "15m Heuristic trend follower",
+                "coin": "btc",
+                "account_id": 30572479,  # PsychoBot  2 BTC limit  # Malcolm's $300 of BTC
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
-            "xrp": {
+            "BTC_L5": {  # 1m - Brave
                 "logic": "gamma",
-                "coin": "xrp",
-                "account_id": 29799999,  # COIN-M lef35
-                "pair": "XRP_XRPUSD_PERP",
-                "interval": "15m",
-                "description": "15m Heuristic trend follower",
+                "coin": "btc",
+                "account_id": 29799999,  # lef35   0.05 BTC limit
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
             },
+            "BTC_L6": {
+                "logic": "gamma",
+                "coin": "btc",
+                "account_id": 30577995,  # Binance swethbot
+                "pair": "BTC_BTCUSD_PERP",
+                "simulate_leverage": True
+            }
         },
     },
 }
