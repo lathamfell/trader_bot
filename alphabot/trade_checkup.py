@@ -222,13 +222,6 @@ def get_tsl_reset(_trade_status, strat_states, strat, user, trade_id, logger):
 def log_profit_and_roe(
     _trade_status, trade_id, user, strat, logger, coll=None, new_tsl=None
 ):
-    strat_states = coll.find_one({"_id": user})  # pull our strat states, who knows what happened before this
-    profit_logged = strat_states[strat]["status"].get("profit_logged")
-    if profit_logged:
-        logger.debug(
-           f"{user} {strat} already logged profit for trade {trade_id}")
-        return
-
     if not coll:
         client = pymongo.MongoClient(
             "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
@@ -238,8 +231,12 @@ def log_profit_and_roe(
         db = client.indicators_db
         coll = db.indicators_coll
 
-    if not strat_states:
-        strat_states = coll.find_one({"_id": user})
+    strat_states = coll.find_one({"_id": user})  # pull our strat states, who knows what happened before this
+    profit_logged = strat_states[strat]["status"].get("profit_logged")
+    if profit_logged:
+        #logger.debug(
+        #   f"{user} {strat} already logged profit for trade {trade_id}")
+        return
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
     potential_paper_assets = strat_states[strat]["status"].get(
