@@ -1,4 +1,4 @@
 runtime: python39
 instance_class: F4
 
-entrypoint: gunicorn main:app --timeout 120
+entrypoint: gunicorn main:app --timeout 360
