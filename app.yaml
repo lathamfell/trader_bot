@@ -2,3 +2,7 @@ runtime: python39
 instance_class: F4
 
 entrypoint: gunicorn main:app --timeout 360
+
+env_variables:
+  GOOGLE_APPLICATION_CREDENTIALS: "norse-botany-313902-e681a09bd1bc.json"
+  MONGO_DB: "PROD"

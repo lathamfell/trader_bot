@@ -11,7 +11,7 @@ def trade_status(py3c, trade_id, description, logger):
         entity="smart_trades_v2", action="get_by_id", action_id=str(trade_id)
     )
     if error.get("error"):
-        logger.error(
+        print(
             f"{description} error getting trade info for trade {trade_id}, {error['msg']}"
         )
         raise Exception
@@ -20,19 +20,13 @@ def trade_status(py3c, trade_id, description, logger):
 
 
 def close_trade(py3c, trade_id, user, strat, description, logger):
-    client = pymongo.MongoClient(
-        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-    )
-    db = client.indicators_db
-    coll = db.indicators_coll
+    coll = h.get_mongo_coll()
 
     error, data = py3c.request(
         entity="smart_trades_v2", action="close_by_market", action_id=trade_id
     )
     if error.get("error"):
-        logger.error(f"{description} Error closing trade {trade_id}, {error['msg']}")
+        print(f"{description} Error closing trade {trade_id}, {error['msg']}")
         raise Exception
 
     while True:
@@ -41,13 +35,13 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
         )
         if h.is_trade_closed(_trade_status=_trade_status, logger=logger):
             break
-        logger.debug(
+        print(
             f"{description} trade {trade_id} waiting for close. Status: {_trade_status['status']['type']}. "
             f"Full status: {_trade_status}"
         )
         sleep(1)
 
-    logger.info(
+    print(
         f"{description} trade {trade_id} successfully closed, status: {_trade_status['status']['type']}. "
         f"Full response: {data}"
     )
@@ -96,7 +90,7 @@ def open_trade(
     #    f"{leverage}, units {units}, tp_pct {tp_pct}, tp_trail {tp_trail}, sl_pct {sl_pct}, note {note}"
     # )
     if tp_pct_2 is not None and units < 2:
-        logger.warning(f"Partial TP configured, but units are only 1. Rejecting trade")
+        print(f"Partial TP configured, but units are only 1. Rejecting trade")
         raise Exception
     if simulate_leverage:
         # use 1x for the actual trade. Configured leverage will still be used to calculate paper profits
@@ -124,7 +118,7 @@ def open_trade(
     )
     if base_trade_error.get("error"):
         error_msg = f"{description} error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}"
-        logger.error(error_msg)
+        print(error_msg)
         raise Exception(error_msg)
 
     trade_id = str(base_trade_data["id"])
@@ -135,13 +129,13 @@ def open_trade(
         )
         if h.is_trade_open(_trade_status):
             break
-        logger.debug(
+        print(
             f"{description} trade {trade_id} waiting for base open. Status: {_trade_status['status']['type']}. "
             f"Full status: {_trade_status}"
         )
         sleep(1)
 
-    logger.debug(
+    print(
         f"{description} {direction} {trade_id} base order in, status: {_trade_status['status']['type']}. "
         f"Full response: {_trade_status}"
     )
@@ -153,7 +147,7 @@ def open_trade(
             slippage = ((price - trade_entry) / trade_entry)
         else:
             slippage = ((trade_entry - price) / price)
-        logger.info(
+        print(
             f"{description} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {price}. "
             f"Slippage: {round(slippage * 100, 2)}%"
         )
@@ -195,16 +189,16 @@ def open_trade(
         payload=update_trade,
     )
     if update_trade_error.get("error"):
-        logger.error(
+        print(
             f"{description} Error updating trade while opening, {update_trade_error['msg']}"
         )
-        logger.info(
+        print(
             f"{description} Closing trade {trade_id} since we couldn't apply TP/SL"
         )
         close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
         raise Exception
 
-    logger.debug(
+    print(
         f"{description} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
     )
     return trade_id
@@ -287,7 +281,7 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
     if strat_states:
         # check for ourselves whether partial profit has been taken
         if strat_states[user]["strats"][strat].get("took_partial_profit"):
-            logger.debug(f"{description} already took partial profit, exiting")
+            print(f"{description} already took partial profit, exiting")
             return _trade_status
     if not _trade_status:
         _trade_status = trade_status(py3c=py3c, trade_id=trade_id, description=description, logger=logger)
@@ -313,10 +307,10 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
         payload=update_trade,
     )
     if update_trade_error.get("error"):
-        logger.error(
+        print(
             f"{description} Error updating trade while taking partial profit, {update_trade_error['msg']}"
         )
-        logger.info(
+        print(
             f"{description} Closing trade {trade_id} since we couldn't take partial profit"
         )
         close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
@@ -327,7 +321,7 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
     else:
         direction = "short"
 
-    logger.debug(
+    print(
         f"{description} {direction} {trade_id} **PARTIAL CLOSE** Took partial profit.  Full trade status: "
         f"{update_trade_data}"
     )

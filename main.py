@@ -18,8 +18,15 @@ from alphabot.report import report
 
 app = Flask(__name__)
 
+#logging_client = google.cloud.logging.Client()
+#handler = CloudLoggingHandler(logging_client)
+#logger = logging.getLogger("cloudLogger")
+#logger.setLevel(LOG_LEVEL)
+#logger.addHandler(handler)
+
 
 def get_logger():
+    print("getting logger")
     logging_client = google.cloud.logging.Client()
     handler = CloudLoggingHandler(logging_client)
     logger = logging.getLogger("cloudLogger")
@@ -30,13 +37,14 @@ def get_logger():
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    logger = get_logger()
+    #logger = get_logger()
+    logger = None
     try:
         if request.method == "GET":
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
-        #logger.debug(f"got route: {request}")
+        # logger.debug(f"got route: {request}")
         route = request.json.get("route")
-        # logger.debug(f"got route: {route}")
+        print(f"got route: {route}")
         if route == "report":
             return report(logger)
         if route == "config_update":
@@ -44,10 +52,10 @@ def main():
         if route == "trade_checkup":
             return trade_checkup(logger)
         else:
-            AlertHandler()
+            AlertHandler(logger)
             return "ok"
     except Exception as err:
-        logger.error(
+        print(
             f"Caught exception while handling request {request} with {request.data}"
         )
         traceback.print_exc()
@@ -58,20 +66,14 @@ def main():
 
 
 class AlertHandler:
-    def __init__(self):
+    def __init__(self, logger):
         # user ccbot, password hugegainz, default database ccbot
         # template: "mongodb+srv://ccbot:<password>@cluster0.4y4dc.mongodb.net/<default_db>?retryWrites=true&w=majority"
-        client = pymongo.MongoClient(
-            "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-            tls=True,
-            tlsAllowInvalidCertificates=True,
-        )
-        db = client.indicators_db
-        self.coll = db.indicators_coll
+
 
         # process in alert
         self.alert = request.json
-        logger.debug(f"Got alert: {self.alert}")
+        print(f"Got alert: {self.alert}")
         self.user = self.alert["user"]
         self.strat = self.alert.get("strat")
         self.condition = self.alert.get("condition")
@@ -103,7 +105,7 @@ class AlertHandler:
         try:
             self.state = self.coll.find_one({"_id": self.user})[self.strat]
         except KeyError:
-            logger.debug(f"{self.user} {self.strat} not in db yet")
+            print(f"{self.user} {self.strat} not in db yet")
             self.state = {}
 
         # pull status and user defined config
@@ -128,7 +130,7 @@ class AlertHandler:
         try:
             trade_id = self.state["status"].get("trade_id")
         except KeyError:
-            logger.debug(f"{self.user} {self.strat} no status in db yet")
+            print(f"{self.user} {self.strat} no status in db yet")
             self.state["status"] = {}
             trade_id = None
         if trade_id:
@@ -152,33 +154,33 @@ class AlertHandler:
             )
             if result.raw_result["nModified"] > 0:
                 self.state = self.coll.find_one({"_id": self.user})[self.strat]
-                logger.info(
+                print(
                     f"{self.user} {self.strat} switched {self.condition} to {self.value} with expiration "
                     f"{self.expiration}. New state: {self.state}"
                 )
 
             else:
-                logger.debug(
+                print(
                     f"{self.user} {self.strat} {self.condition} value {self.value} same as existing, nothing to update"
                 )
                 return
-        self.run_logic(self.alert)
+        self.run_logic(self.alert, logger)
 
-    def run_logic(self, alert):
+    def run_logic(self, alert, logger):
         if self.logic == "gamma":
-            self.run_logic_gamma(alert)
+            self.run_logic_gamma(alert, logger)
             return
         elif self.logic == "":
-            logger.info(
+            print(
                 f"{self.user} {self.strat} No logic configured, skipping trade decision."
             )
             return
-        logger.error(
+        print(
             f"{self.user} {self.strat} Something unexpected went wrong trying to run logic"
         )
         raise Exception
 
-    def run_logic_gamma(self, alert):
+    def run_logic_gamma(self, alert, logger):
         direction = h.get_current_trade_direction(
             _trade_status=self.trade_status,
             user=self.user,
@@ -191,7 +193,7 @@ class AlertHandler:
             # exit criteria met
             trade_id = self.state["status"]["trade_id"]
             if (not alert.get("partial")) or self.state["status"]["took_partial_profit"]:  # regular full close
-                logger.info(
+                print(
                     f"{self.description} {direction} {trade_id} closing full position due to exit signal"
                 )
                 trading.close_trade(
@@ -199,7 +201,7 @@ class AlertHandler:
                     logger=logger)
                 return
             else:  # only close half
-                logger.info(
+                print(
                     f"{self.description} {direction} {trade_id} closing partial position due to partial exit signal"
                 )
                 trading.take_partial_profit(

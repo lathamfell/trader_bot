@@ -1,6 +1,9 @@
 import json
 import yagmail
 import datetime as dt
+import os
+import pymongo
+
 from alphabot.config import TRADE_TYPES, DEFAULT_STRAT_CONFIG
 
 
@@ -109,3 +112,17 @@ def set_up_default_strat_config(coll, user, strat):
         },
         upsert=True,
     )
+
+
+def get_mongo_coll():
+    client = pymongo.MongoClient(
+        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
+        tls=True,
+        tlsAllowInvalidCertificates=True,
+    )
+    if os.environ["MONGO_DB"] == "TEST":
+        db = client.test_db
+        return db.test_coll
+    if os.environ["MONGO_DB"] == "PROD":
+        db = client.indicators_db
+        return db.indicators_coll

@@ -1,17 +1,12 @@
 import pymongo
 from alphabot.config import USER_ATTR
+import alphabot.helpers as h
 
 
 def report(logger):
-    client = pymongo.MongoClient(
-        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-    )
-    db = client.indicators_db
-    coll = db.indicators_coll
+    coll = h.get_mongo_coll()
 
-    logger.info("** REPORT **")
+    print("** REPORT **")
     output = []
     for user in USER_ATTR:
         for strat in USER_ATTR[user]["strats"]:
@@ -51,8 +46,8 @@ def report(logger):
         assets_no = entry["assets"]
         assets_po = entry["potential_assets"]
         assets_str = f"${assets_no:,} out of potential ${assets_po:,}"
-        logger.info(f"{assets_str}: {entry['designation']}")
+        print(f"Report: {assets_str}: {entry['designation']}")
 
-    logger.info("** REPORT COMPLETE **")
+    print("** REPORT COMPLETE **")
 
     return "report ack"

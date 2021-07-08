@@ -11,15 +11,9 @@ from alphabot.config import USER_ATTR, STARTING_PAPER
 
 
 def trade_checkup(logger):
-    client = pymongo.MongoClient(
-        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-    )
-    db = client.indicators_db
-    coll = db.indicators_coll
+    coll = h.get_mongo_coll()
 
-    logger.debug("--")
+    print("--")
 
     for user in USER_ATTR:
         api_key = USER_ATTR[user]["c3_api_key"]
@@ -37,7 +31,7 @@ def trade_checkup(logger):
 
             description = strat_states[strat]["config"].get("description", "")
             if not trade_id:
-                logger.debug(
+                print(
                     f"{description} skipping trade checkup because it's not in a trade"
                 )
                 continue
@@ -78,7 +72,7 @@ def trade_checkup(logger):
 
 
 def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c, description, logger):
-    logger.error("Check take profits should not be getting called")
+    print("Check take profits should not be getting called")
     if not h.is_trade_open(_trade_status=_trade_status):
         return
     tp_pct = strat_states[strat]["config"]["tp_pct"]
@@ -146,7 +140,7 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
         description=description,
         logger=logger,
     )
-    logger.debug(
+    print(
         f"{description} sending update trade while resetting TSL: {update_trade}"
     )
     update_trade_error, update_trade_data = py3c.request(
@@ -156,8 +150,8 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
         payload=update_trade,
     )
     if update_trade_error.get("error"):
-        logger.error(f"{description} error resetting TSL, {update_trade_error['msg']}")
-        logger.info(
+        print(f"{description} error resetting TSL, {update_trade_error['msg']}")
+        print(
             f"{description} closing trade {trade_id} since we couldn't reset TSL"
         )
         sleep(1)
@@ -174,7 +168,7 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
         set_command[f"{strat}.status.tsl_reset_points_hit"] = tsl_reset_points_hit
         # save the most recent tsl set, for convenience
         set_command[f"{strat}.status.last_tsl_set"] = new_tsl
-        logger.info(f"{description} {direction} {trade_id} set TSL to {new_tsl}")
+        print(f"{description} {direction} {trade_id} set TSL to {new_tsl}")
 
     coll.update_one(
         {"_id": user},
@@ -191,7 +185,7 @@ def get_tsl_reset(_trade_status, description, strat_states, strat, user, trade_i
         reset_tsl = strat_states[strat]["config"]["reset_tsl"]
         tsl_reset_points = strat_states[strat]["config"]["tsl_reset_points"]
     except KeyError:
-        logger.warning(
+        print(
             f"{description} skipping TSL reset check because missing a TSL reset config item. "
             f"Strat state is {strat_states[strat]}"
         )
@@ -207,7 +201,7 @@ def get_tsl_reset(_trade_status, description, strat_states, strat, user, trade_i
         new_tsl = tsl_reset_point[1]
         if sl_trigger not in tsl_reset_points_hit:
             if profit < sl_trigger:
-                logger.debug(
+                print(
                     f"{description} {direction} {trade_id} waiting for next TSL trigger {tsl_reset_point[0]}"
                 )
                 return None, None, None
@@ -220,7 +214,7 @@ def get_tsl_reset(_trade_status, description, strat_states, strat, user, trade_i
             else:  # sell
                 sl_price = trade_entry * (1 + new_tsl / 100)
 
-            logger.info(
+            print(
                 f"{description} {direction} {trade_id} resetting TSL to {new_tsl}% (price {round(sl_price, 2)}) because "
                 f"profit {profit}% >= {sl_trigger}%"
             )
@@ -234,18 +228,12 @@ def log_profit_and_roe(
     _trade_status, trade_id, description, user, strat, logger, coll=None, new_tsl=None
 ):
     if not coll:
-        client = pymongo.MongoClient(
-            "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
-            tls=True,
-            tlsAllowInvalidCertificates=True,
-        )
-        db = client.indicators_db
-        coll = db.indicators_coll
+        coll = h.get_mongo_coll()
 
     strat_states = coll.find_one({"_id": user})
     profit_logged = strat_states[strat]["status"].get("profit_logged")
     if profit_logged:
-        logger.debug(
+        print(
            f"{description} already logged profit for trade {trade_id}")
         return
 
@@ -281,7 +269,7 @@ def log_profit_and_roe(
         set_command[f"{strat}.status.most_recent_profit"] = profit
         if set_command:
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
-            logger.debug(f"{description} set most recent profit to {profit}")
+            print(f"{description} set most recent profit to {profit}")
 
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
@@ -291,7 +279,7 @@ def log_profit_and_roe(
         else:
             tsl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
-        logger.info(
+        print(
             f"{description} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{tsl_str} "
@@ -300,18 +288,18 @@ def log_profit_and_roe(
         return
 
     # trade is closed!
-    logger.debug(f"{description} Detected a closed trade, full status: {_trade_status}")
+    print(f"{description} Detected a closed trade, full status: {_trade_status}")
     new_paper_assets = int(paper_assets * (1 + roe / 100))
-    logger.debug(f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}")
+    print(f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}")
     # calculate potential profit for this trade. Take the max recorded profit, and subtract the observed close dump
     most_recent_profit = strat_states[strat]["status"].get("most_recent_profit", 0)
-    logger.debug(f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}")
+    print(f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}")
     close_dump = profit - most_recent_profit
-    logger.info(f"{description} close dump (slippage + fees) is {round(close_dump, 2)}%")
+    print(f"{description} close dump (slippage + fees) is {round(close_dump, 2)}%")
     new_potential_paper_assets = int(
         potential_paper_assets * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
     )
-    logger.debug(
+    print(
         f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
         f"{potential_paper_assets}, now is {new_potential_paper_assets}")
 
@@ -342,7 +330,7 @@ def log_profit_and_roe(
         "trade_id": trade_id
     }
     full_profit_history[entry_time] = new_history_entry
-    logger.debug(f"Added entry to full profit history: {new_history_entry}")
+    print(f"Added entry to full profit history: {new_history_entry}")
 
     coll.update_one(
         {"_id": user},
@@ -364,7 +352,7 @@ def log_profit_and_roe(
         },
         upsert=True,
     )
-    logger.info(
+    print(
         f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE) out "
         f"of "
         f"a potential "
