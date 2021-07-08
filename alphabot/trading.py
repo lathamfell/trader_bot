@@ -14,7 +14,7 @@ def trade_status(py3c, trade_id, description, logger):
             f"{description} error getting trade info for trade {trade_id}, {error['msg']}"
         )
         raise Exception
-
+    #logger.debug(f"Trade {trade_id} current status: {_trade_status}")
     return _trade_status
 
 
@@ -30,7 +30,7 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
         _trade_status = trade_status(
             py3c=py3c, trade_id=trade_id, description=description, logger=logger
         )
-        if h.is_trade_closed(_trade_status):
+        if h.is_trade_closed(_trade_status=_trade_status, logger=logger):
             break
         logger.debug(
             f"{description} trade {trade_id} waiting for close. Status: {_trade_status['status']['type']}. "
@@ -47,6 +47,7 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
     tc.log_profit_and_roe(
         _trade_status=_trade_status,
         trade_id=trade_id,
+        description=description,
         user=user,
         strat=strat,
         logger=logger

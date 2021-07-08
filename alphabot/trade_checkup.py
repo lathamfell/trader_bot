@@ -19,7 +19,7 @@ def trade_checkup(logger):
     db = client.indicators_db
     coll = db.indicators_coll
 
-    #logger.info("Checking profits")
+    logger.debug("--")
 
     for user in USER_ATTR:
         api_key = USER_ATTR[user]["c3_api_key"]
@@ -34,16 +34,17 @@ def trade_checkup(logger):
                 #    f"{user} {strat} skipping trade checkup because strat is missing the status field"
                 # )
                 continue
+
+            description = strat_states[strat]["config"].get("description", "")
             if not trade_id:
                 #logger.debug(
-                #    f"{user} {strat} skipping trade checkup because it's never opened a trade"
+                #    f"{description} skipping trade checkup because it's never opened a trade"
                 #)
                 continue
-            description = strat_states[strat]["config"].get("description", "")
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
-            # logger.debug(f"{user} {strat} got trade status {_trade_status}")
+            #logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
             # if a TP is triggered, this function will pass back an updated trade status
             #   otherwise it returns the original
             #_trade_status = check_take_profits(
@@ -59,11 +60,13 @@ def trade_checkup(logger):
                 trade_id=trade_id,
                 py3c=py3c,
                 coll=coll,
+                description=description,
                 logger=logger,
             )
             log_profit_and_roe(
                 _trade_status=_trade_status,
                 trade_id=trade_id,
+                description=description,
                 user=user,
                 strat=strat,
                 logger=logger,
@@ -75,6 +78,7 @@ def trade_checkup(logger):
 
 
 def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c, description, logger):
+    logger.error("Check take profits should not be getting called")
     if not h.is_trade_open(_trade_status=_trade_status):
         return
     tp_pct = strat_states[strat]["config"]["tp_pct"]
@@ -95,13 +99,14 @@ def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c,
     return _trade_status
 
 
-def check_tsl(_trade_status, strat_states, strat, user, trade_id, py3c, coll, logger):
+def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, py3c, coll, logger):
     if not h.is_trade_open(_trade_status=_trade_status):
-        # logger.debug(f"{user} {strat} not in a trade, not checking TSL resets")
+        #logger.debug(f"{description} not in a trade, not checking TSL resets")
         return
     sl_price, sl_trigger, new_tsl = get_tsl_reset(
         _trade_status=_trade_status,
         strat_states=strat_states,
+        description=description,
         strat=strat,
         user=user,
         trade_id=trade_id,
@@ -118,7 +123,13 @@ def check_tsl(_trade_status, strat_states, strat, user, trade_id, py3c, coll, lo
     # most things are the same
     _type = _trade_status["position"]["type"]
     units = _trade_status["position"]["units"]["value"]
-    tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
+    tp_price_1 = _trade_status["take_profit"]["steps"][0]["price"]["value"]
+    tp_price_2 = None
+    try:
+        tp_price_2 = _trade_status["take_profit"]["steps"][1]["price"]["value"]
+    except IndexError:
+        # only one TP
+        pass
     tp_trail = _trade_status["take_profit"]["steps"][0]["trailing"]["percent"]
     sl_pct = strat_states[strat]["config"]["sl_pct"]
     description = strat_states[strat]["config"].get("description")
@@ -127,7 +138,8 @@ def check_tsl(_trade_status, strat_states, strat, user, trade_id, py3c, coll, lo
         trade_id=trade_id,
         _type=_type,
         units=units,
-        tp_price_1=tp_price,
+        tp_price_1=tp_price_1,
+        tp_price_2=tp_price_2,
         tp_trail=tp_trail,
         sl_price=sl_price,
         sl_pct=sl_pct,
@@ -174,8 +186,7 @@ def check_tsl(_trade_status, strat_states, strat, user, trade_id, py3c, coll, lo
         return new_tsl
 
 
-def get_tsl_reset(_trade_status, strat_states, strat, user, trade_id, logger):
-    description = strat_states[strat]["config"].get("description")
+def get_tsl_reset(_trade_status, description, strat_states, strat, user, trade_id, logger):
     try:
         reset_tsl = strat_states[strat]["config"]["reset_tsl"]
         tsl_reset_points = strat_states[strat]["config"]["tsl_reset_points"]
@@ -220,7 +231,7 @@ def get_tsl_reset(_trade_status, strat_states, strat, user, trade_id, logger):
 
 
 def log_profit_and_roe(
-    _trade_status, trade_id, user, strat, logger, coll=None, new_tsl=None
+    _trade_status, trade_id, description, user, strat, logger, coll=None, new_tsl=None
 ):
     if not coll:
         client = pymongo.MongoClient(
@@ -231,11 +242,11 @@ def log_profit_and_roe(
         db = client.indicators_db
         coll = db.indicators_coll
 
-    strat_states = coll.find_one({"_id": user})  # pull our strat states, who knows what happened before this
+    strat_states = coll.find_one({"_id": user})
     profit_logged = strat_states[strat]["status"].get("profit_logged")
     if profit_logged:
         #logger.debug(
-        #   f"{user} {strat} already logged profit for trade {trade_id}")
+        #   f"{description} already logged profit for trade {trade_id}")
         return
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
@@ -265,16 +276,18 @@ def log_profit_and_roe(
     if max_drawdown_this_entry < cur_max_drawdown:
         set_command[f"{strat}.status.max_drawdown_this_entry"] = max_drawdown_this_entry
 
-    if not h.is_trade_closed(_trade_status):
+    if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # save listed profit for comparison to profit on close later
         set_command[f"{strat}.status.most_recent_profit"] = profit
         if set_command:
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
+            logger.debug(f"{description} set most recent profit to {profit}")
 
-    if not h.is_trade_closed(_trade_status):
+    if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
+        #logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
         if last_tsl_set is not None:
-            tsl_str = f" TSL was set at {-1 * last_tsl_set}% ({round(-1 * last_tsl_set * leverage, 2)}% ROE)."
+            tsl_str = f" TSL was set at {1 * last_tsl_set}% ({round(1 * last_tsl_set * leverage, 2)}% ROE)."
         else:
             tsl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
@@ -282,19 +295,23 @@ def log_profit_and_roe(
             f"{description} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{tsl_str} "
-            f"Entry time: {entry_time} UTC"
+            f"Entry time: {entry_time}"
         )
         return
 
+    # trade is closed!
+    logger.debug(f"{description} Detected a closed trade")
     new_paper_assets = int(paper_assets * (1 + roe / 100))
-
+    logger.debug(f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}")
     # calculate potential profit for this trade. Take the max recorded profit, and subtract the observed close dump
     most_recent_profit = strat_states[strat]["status"].get("most_recent_profit", 0)
+    logger.debug(f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}")
     close_dump = profit - most_recent_profit
-    logger.info(f"{description} close slippage + fees is {round(close_dump, 2)}%")
+    logger.info(f"{description} close dump (slippage + fees) is {round(close_dump, 2)}%")
     new_potential_paper_assets = int(
         potential_paper_assets * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
     )
+    logger.debug(f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were {potential_paper_assets}, now is {new_potential_paper_assets}")
 
     # add to profits record and history
     potential_profits = strat_states[strat]["status"].get("potential_profits", [])
@@ -308,9 +325,9 @@ def log_profit_and_roe(
     drawdown_std_dev = round(std(drawdowns), 2)
 
     full_profit_history = strat_states[strat]["status"].get("full_profit_history", {})
-    entry_time = _trade_status["data"]["created_at"][5:16].replace("T", " ")
-    exit_time = _trade_status["data"]["closed_at"][5:16].replace("T", " ")
-    full_profit_history[entry_time] = {
+    entry_time = h.get_readable_time(t=_trade_status["data"]["created_at"])
+    exit_time = h.get_readable_time(t=_trade_status["data"]["closed_at"])
+    new_history_entry = {
         "profit": profit,
         "roe": roe,
         "potential_profit": max_profit_this_entry,
@@ -318,7 +335,11 @@ def log_profit_and_roe(
         "assets": new_paper_assets,
         "potential_assets": new_potential_paper_assets,
         "exit_time": exit_time,
+        "close_dump": close_dump,
+        "trade_id": trade_id
     }
+    full_profit_history[entry_time] = new_history_entry
+    logger.debug(f"Added entry to full profit history: {new_history_entry}")
 
     coll.update_one(
         {"_id": user},
@@ -339,7 +360,8 @@ def log_profit_and_roe(
         upsert=True,
     )
     logger.info(
-        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE) out of "
+        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE) out "
+        f"of "
         f"a potential "
         f"{max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), paper assets are now "
         f"${new_paper_assets:,} out of a potential ${new_potential_paper_assets:,}. Median potential profit now "

@@ -8,7 +8,6 @@ import datetime as dt
 from alphabot.py3cw.request import Py3CW
 import traceback
 
-from alphabot.indicators import handle_trend_indicator
 import alphabot.helpers as h
 from alphabot.trade_checkup import trade_checkup
 from alphabot.updaters import config_update
@@ -31,11 +30,9 @@ def main():
     try:
         if request.method == "GET":
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
-        # logger.debug(f"got route: {request}")
+        #logger.debug(f"got route: {request}")
         route = request.json.get("route")
         # logger.debug(f"got route: {route}")
-        if route == "indicators":
-            return indicators()
         if route == "report":
             return report(logger)
         if route == "config_update":
@@ -56,17 +53,6 @@ def main():
         return "request not processed due to server error"
 
 
-def indicators():
-    _update = request.json
-    indicator = _update["indicator"].lower()
-    if indicator == "hull" or "htf_guide":
-        handle_trend_indicator(_update, indicator, logger)
-    else:
-        logger.error(f"Unknown indicator {indicator} received")
-        raise Exception
-    return "indicator updated"
-
-
 class AlertHandler:
     def __init__(self):
         # user ccbot, password hugegainz, default database ccbot
@@ -81,6 +67,7 @@ class AlertHandler:
 
         # process in alert
         self.alert = request.json
+        logger.debug(f"Got alert: {self.alert}")
         self.user = self.alert["user"]
         self.strat = self.alert.get("strat")
         self.condition = self.alert.get("condition")
@@ -126,6 +113,7 @@ class AlertHandler:
 
         self.tp_pct = config["tp_pct"]
         self.tp_pct_2 = config.get("tp_pct_2")
+        #logger.debug(f"got tp_pct {self.tp_pct} and tp_pct_2 {self.tp_pct_2} for alert {self.alert}")
         self.tp_trail = config["tp_trail"]
         self.sl_pct = config["sl_pct"]
         self.leverage = config["leverage"]

@@ -1,7 +1,6 @@
 import pymongo
-import datetime as dt
 
-from alphabot.helpers import in_order, screen_for_str_bools, set_up_default_strat_config
+import alphabot.helpers as h
 from alphabot.config import STARTING_PAPER, USER_ATTR
 
 
@@ -37,14 +36,14 @@ def config_update(request, logger):
 
     state = coll.find_one({"_id": user}).get(strat)
     if not state:
-        set_up_default_strat_config(coll=coll, user=user, strat=strat)
+        h.set_up_default_strat_config(coll=coll, user=user, strat=strat)
         state = coll.find_one({"_id": user})[strat]
     current_config = state.get("config", {})
     logger.debug(f"current config is {current_config}")
     current_description = current_config.get("description")
 
     logger.info(
-        f"{current_description} received direct config update request: {in_order(_update)}"
+        f"{current_description} received direct config update request: {h.in_order(_update)}"
     )
     new_config = _update["config"]
 
@@ -82,7 +81,7 @@ def config_update(request, logger):
         reset_profits = True
         logger.info(f"Changing sl_pct from {old_sl_pct} to {new_sl_pct}")
 
-    new_reset_tsl = screen_for_str_bools(new_config.get("reset_tsl"))
+    new_reset_tsl = h.screen_for_str_bools(new_config.get("reset_tsl"))
     old_reset_tsl = current_config.get("reset_tsl")
     if new_reset_tsl != old_reset_tsl:
         reset_profits = True
@@ -134,7 +133,7 @@ def config_update(request, logger):
 
     if new_tp_pct or new_tp_pct == 0:
         set_command[f"{strat}.config.tp_pct"] = new_tp_pct
-    if new_tp_pct_2 or new_tp_pct_2 == 0:
+    if new_tp_pct_2 or new_tp_pct_2 == 0 or new_tp_pct_2 is None:
         set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
     if new_tp_trail or (
         not new_tp_trail and "tp_trail" in new_config
@@ -160,7 +159,7 @@ def config_update(request, logger):
 
 
 def get_reset_set_command(strat):
-    now = dt.datetime.now().isoformat()[5:16].replace("T", " ")
+    now = h.get_readable_time()
     set_command = {
         f"{strat}.status.paper_assets": STARTING_PAPER,
         f"{strat}.status.potential_paper_assets": STARTING_PAPER,

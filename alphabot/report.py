@@ -35,7 +35,7 @@ def report(logger):
             median_drawdown = status.get("median_drawdown", 0)
             drawdown_std_dev = status.get("drawdown_std_dev", 0)
             description = config.get("description")
-            config_change_time = str(status.get("config_change_time")) + " UTC"
+            config_change_time = str(status.get("config_change_time"))
             entry = {
                 "assets": assets,
                 "potential_assets": potential_assets,

@@ -4,8 +4,11 @@ import datetime as dt
 from alphabot.config import TRADE_TYPES, DEFAULT_STRAT_CONFIG
 
 
-def get_readable_time():
-    return dt.datetime.now().isoformat()[5:16].replace("T", " ")
+def get_readable_time(t=None):
+    # always UTC in Google App Engine and from 3Commas
+    if not t:
+        t = dt.datetime.now().isoformat()
+    return t[5:16].replace("T", " ") + " UTC"
 
 
 def get_current_trade_direction(_trade_status, user, strat, logger):
@@ -35,11 +38,13 @@ def is_trade_opening(_trade_status):
     return _trade_status["status"]["type"] in TRADE_TYPES["opening"]
 
 
-def is_trade_closed(_trade_status):
+def is_trade_closed(_trade_status, logger):
     try:
         _trade_status["data"]["closed_at"]
     except KeyError:
+        #logger.debug(f"Determined that trade {_trade_status['id']} is not closed. Full status: {_trade_status}")
         return False
+    #logger.debug(f"Determined that trade {_trade_status['id']} is closed. Full status: {_trade_status}")
     return True
 
 
@@ -75,7 +80,7 @@ def send_email(to, subject, body=None):
 
 
 def get_default_open_trade_mongo_set_command(strat, trade_id, direction, tsl):
-    entry_time = dt.datetime.now().isoformat()[5:16].replace("T", " ")
+    entry_time = get_readable_time()
     return {
         f"{strat}.status.trade_id": trade_id,
         f"{strat}.status.tsl_reset_points_hit": [],
