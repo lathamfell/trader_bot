@@ -31,6 +31,7 @@ def report(logger):
             potential_assets = status.get("potential_paper_assets", 0)
             leverage = config.get("leverage", 1)
             median_potential_profit = status.get("median_potential_profit", 0)
+            mean_potential_profit = status.get("mean_potential_profit", 0)
             profit_std_dev = status.get("profit_std_dev", 0)
             median_drawdown = status.get("median_drawdown", 0)
             drawdown_std_dev = status.get("drawdown_std_dev", 0)
@@ -39,7 +40,8 @@ def report(logger):
             entry = {
                 "assets": assets,
                 "potential_assets": potential_assets,
-                "designation": f"{description}. Median potential profit: {median_potential_profit}%, std dev "
+                "designation": f"{description}. Median potential profit: {median_potential_profit}%, "
+                               f"mean potential profit: {mean_potential_profit}%, std dev "
                                f"{profit_std_dev}. Median drawdown: {median_drawdown}%, std dev: {drawdown_std_dev}. "
                                f"Leverage: {leverage}. Trades: {len(full_profit_history)} since {config_change_time}",
             }

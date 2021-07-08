@@ -1,4 +1,5 @@
 from time import sleep
+import pymongo
 
 import alphabot.trade_checkup as tc
 import alphabot.helpers as h
@@ -19,6 +20,14 @@ def trade_status(py3c, trade_id, description, logger):
 
 
 def close_trade(py3c, trade_id, user, strat, description, logger):
+    client = pymongo.MongoClient(
+        "mongodb+srv://ccbot:hugegainz@cluster0.4y4dc.mongodb.net/ccbot?retryWrites=true&w=majority",
+        tls=True,
+        tlsAllowInvalidCertificates=True,
+    )
+    db = client.indicators_db
+    coll = db.indicators_coll
+
     error, data = py3c.request(
         entity="smart_trades_v2", action="close_by_market", action_id=trade_id
     )
@@ -51,6 +60,15 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
         user=user,
         strat=strat,
         logger=logger
+    )
+    coll.update_one(
+        {"_id": user},
+        {
+            "$set": {
+                f"{strat}.status.trade_id": None
+            }
+        },
+        upsert=True
     )
     return _trade_status
 

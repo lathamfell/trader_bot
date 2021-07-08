@@ -18,15 +18,19 @@ from alphabot.report import report
 
 app = Flask(__name__)
 
-logging_client = google.cloud.logging.Client()
-handler = CloudLoggingHandler(logging_client)
-logger = logging.getLogger("cloudLogger")
-logger.setLevel(LOG_LEVEL)
-logger.addHandler(handler)
+
+def get_logger():
+    logging_client = google.cloud.logging.Client()
+    handler = CloudLoggingHandler(logging_client)
+    logger = logging.getLogger("cloudLogger")
+    logger.setLevel(LOG_LEVEL)
+    logger.addHandler(handler)
+    return logger
 
 
 @app.route("/", methods=["GET", "POST"])
 def main():
+    logger = get_logger()
     try:
         if request.method == "GET":
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
@@ -219,7 +223,7 @@ class AlertHandler:
             new_direction = "short"
             _type = "sell"
 
-        if direction and direction != new_direction:
+        if direction:
             # close current trade first
             trade_id = self.state["status"]["trade_id"]
             trading.close_trade(

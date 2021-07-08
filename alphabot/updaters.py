@@ -167,6 +167,7 @@ def get_reset_set_command(strat):
         f"{strat}.status.potential_profits": [],
         f"{strat}.status.drawdowns": [],
         f"{strat}.status.median_potential_profit": 0,
+        f"{strat}.status.mean_potential_profit": 0,
         f"{strat}.status.median_drawdown": 0,
         f"{strat}.status.config_change_time": now,
         f"{strat}.status.profit_std_dev": 0,

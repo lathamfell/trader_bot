@@ -1,6 +1,6 @@
 import pymongo
 from time import sleep
-from statistics import median
+from statistics import median, mean
 from numpy import std
 
 from alphabot.py3cw.request import Py3CW
@@ -37,9 +37,9 @@ def trade_checkup(logger):
 
             description = strat_states[strat]["config"].get("description", "")
             if not trade_id:
-                #logger.debug(
-                #    f"{description} skipping trade checkup because it's never opened a trade"
-                #)
+                logger.debug(
+                    f"{description} skipping trade checkup because it's not in a trade"
+                )
                 continue
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
@@ -245,8 +245,8 @@ def log_profit_and_roe(
     strat_states = coll.find_one({"_id": user})
     profit_logged = strat_states[strat]["status"].get("profit_logged")
     if profit_logged:
-        #logger.debug(
-        #   f"{description} already logged profit for trade {trade_id}")
+        logger.debug(
+           f"{description} already logged profit for trade {trade_id}")
         return
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
@@ -284,7 +284,7 @@ def log_profit_and_roe(
             logger.debug(f"{description} set most recent profit to {profit}")
 
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
-        #logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
+        # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
         if last_tsl_set is not None:
             tsl_str = f" TSL was set at {1 * last_tsl_set}% ({round(1 * last_tsl_set * leverage, 2)}% ROE)."
@@ -300,7 +300,7 @@ def log_profit_and_roe(
         return
 
     # trade is closed!
-    logger.debug(f"{description} Detected a closed trade")
+    logger.debug(f"{description} Detected a closed trade, full status: {_trade_status}")
     new_paper_assets = int(paper_assets * (1 + roe / 100))
     logger.debug(f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}")
     # calculate potential profit for this trade. Take the max recorded profit, and subtract the observed close dump
@@ -311,12 +311,15 @@ def log_profit_and_roe(
     new_potential_paper_assets = int(
         potential_paper_assets * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
     )
-    logger.debug(f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were {potential_paper_assets}, now is {new_potential_paper_assets}")
+    logger.debug(
+        f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
+        f"{potential_paper_assets}, now is {new_potential_paper_assets}")
 
     # add to profits record and history
     potential_profits = strat_states[strat]["status"].get("potential_profits", [])
     potential_profits.append(max_profit_this_entry)
     median_potential_profit = round(median(potential_profits), 2)
+    mean_potential_profit = round(mean(potential_profits), 2)
     profit_std_dev = round(std(potential_profits), 2)
 
     drawdowns = strat_states[strat]["status"].get("drawdowns", [])
@@ -352,9 +355,11 @@ def log_profit_and_roe(
                 f"{strat}.status.potential_profits": potential_profits,
                 f"{strat}.status.drawdowns": drawdowns,
                 f"{strat}.status.median_potential_profit": median_potential_profit,
+                f"{strat}.status.mean_potential_profit": mean_potential_profit,
                 f"{strat}.status.profit_std_dev": profit_std_dev,
                 f"{strat}.status.drawdown_std_dev": drawdown_std_dev,
-                f"{strat}.status.median_drawdown": median_drawdown
+                f"{strat}.status.median_drawdown": median_drawdown,
+                f"{strat}.status.trade_id": None
             }
         },
         upsert=True,
@@ -364,7 +369,5 @@ def log_profit_and_roe(
         f"of "
         f"a potential "
         f"{max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), paper assets are now "
-        f"${new_paper_assets:,} out of a potential ${new_potential_paper_assets:,}. Median potential profit now "
-        f"{median_potential_profit}% with a std dev of {profit_std_dev}, median drawdown now {median_drawdown}% "
-        f"with a std dev of {drawdown_std_dev}"
+        f"${new_paper_assets:,} out of a potential ${new_potential_paper_assets:,}"
     )
