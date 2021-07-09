@@ -1,4 +1,3 @@
-import pymongo
 from time import sleep
 from statistics import median, mean
 from numpy import std

@@ -1,5 +1,3 @@
-import pymongo
-
 import alphabot.helpers as h
 from alphabot.config import STARTING_PAPER, USER_ATTR
 
@@ -21,9 +19,7 @@ def config_update(request, logger):
 
     strat = _update["strat"]
     # make sure the strat exists
-    user_strats = []
-    for user_strat in USER_ATTR[user]["strats"]:
-        user_strats.append(user_strat)
+    user_strats = USER_ATTR[user]["strats"].keys()
     if strat not in user_strats:
         print(f"Strat {strat} not in the AlphaBot internal config. Strats for user {user} are: {user_strats}")
         raise Exception

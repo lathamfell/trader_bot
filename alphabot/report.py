@@ -1,4 +1,3 @@
-import pymongo
 from alphabot.config import USER_ATTR
 import alphabot.helpers as h
 

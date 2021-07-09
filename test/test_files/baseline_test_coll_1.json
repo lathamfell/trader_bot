@@ -495,8 +495,7 @@
           -8
         ]
       ],
-      "description": "latham BTC_L4 <15m Split TPs>",
-      "tp_pct_2": 0.5
+      "description": "latham BTC_L4 <15m Split TPs>"
     },
     "status": {
       "config_change_time": "07-06 05:23 UTC",

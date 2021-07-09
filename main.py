@@ -53,6 +53,7 @@ def main():
             return trade_checkup(logger)
         else:
             AlertHandler(logger)
+
             return "ok"
     except Exception as err:
         print(
@@ -69,8 +70,7 @@ class AlertHandler:
     def __init__(self, logger):
         # user ccbot, password hugegainz, default database ccbot
         # template: "mongodb+srv://ccbot:<password>@cluster0.4y4dc.mongodb.net/<default_db>?retryWrites=true&w=majority"
-
-
+        self.coll = h.get_mongo_coll()
         # process in alert
         self.alert = request.json
         print(f"Got alert: {self.alert}")
@@ -119,7 +119,7 @@ class AlertHandler:
 
         self.tp_pct = config["tp_pct"]
         self.tp_pct_2 = config.get("tp_pct_2")
-        #logger.debug(f"got tp_pct {self.tp_pct} and tp_pct_2 {self.tp_pct_2} for alert {self.alert}")
+        # logger.debug(f"got tp_pct {self.tp_pct} and tp_pct_2 {self.tp_pct_2} for alert {self.alert}")
         self.tp_trail = config["tp_trail"]
         self.sl_pct = config["sl_pct"]
         self.leverage = config["leverage"]

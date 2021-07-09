@@ -1,5 +1,4 @@
 from time import sleep
-import pymongo
 
 import alphabot.trade_checkup as tc
 import alphabot.helpers as h
@@ -116,6 +115,9 @@ def open_trade(
     base_trade_error, base_trade_data = py3c.request(
         entity="smart_trades_v2", action="new", payload=base_trade
     )
+    print(f"base_trade_data: {base_trade_data}")
+    print(f"base_trade_error: {base_trade_error}")
+
     if base_trade_error.get("error"):
         error_msg = f"{description} error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}"
         print(error_msg)

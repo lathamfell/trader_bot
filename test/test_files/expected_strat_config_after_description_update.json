@@ -1,0 +1,207 @@
+{
+  "BTC_L4": {
+    "config": {
+      "leverage": 1,
+      "sl_pct": 10,
+      "tp_pct": 10,
+      "tp_pct_2": null,
+      "tp_trail": null,
+      "units": 2,
+      "reset_tsl": false,
+      "tsl_reset_points": [
+        [
+          0.15,
+          -0.1
+        ],
+        [
+          0.2,
+          -0.15
+        ],
+        [
+          0.3,
+          -0.19
+        ],
+        [
+          0.4,
+          -0.28
+        ],
+        [
+          0.5,
+          -0.37
+        ],
+        [
+          0.6,
+          -0.46
+        ],
+        [
+          0.7,
+          -0.55
+        ],
+        [
+          0.8,
+          -0.63
+        ],
+        [
+          0.9,
+          -0.72
+        ],
+        [
+          1,
+          -0.8
+        ],
+        [
+          2,
+          -1.7
+        ],
+        [
+          3,
+          -2.6
+        ],
+        [
+          4,
+          -3.5
+        ],
+        [
+          5,
+          -4.4
+        ],
+        [
+          6,
+          -5.3
+        ],
+        [
+          7,
+          -6.2
+        ],
+        [
+          8,
+          -7.1
+        ],
+        [
+          9,
+          -8
+        ]
+      ],
+      "description": "latham BTC_L4 <20m Split TPs>"
+    },
+    "status": {
+      "config_change_time": "07-06 05:23 UTC",
+      "drawdown_std_dev": 0.29,
+      "drawdowns": [
+        -0.3,
+        -0.97,
+        -0.22,
+        -0.03,
+        -0.31,
+        0,
+        -0.55,
+        -0.34
+      ],
+      "full_profit_history": {
+        "07-06 09:30 UTC": {
+          "profit": -0.04,
+          "roe": -0.04,
+          "potential_profit": 0.34,
+          "max_drawdown": -0.3,
+          "assets": 9996,
+          "potential_assets": 10029,
+          "exit_time": "07-06 10:07 UTC",
+          "close_dump": -0.04,
+          "trade_id": "7824986"
+        },
+        "07-06 13:15 UTC": {
+          "profit": -0.97,
+          "roe": -0.97,
+          "potential_profit": -0.03,
+          "max_drawdown": -0.97,
+          "assets": 9899,
+          "potential_assets": 10019,
+          "exit_time": "07-06 13:45 UTC",
+          "close_dump": -0.05999999999999994,
+          "trade_id": "7827989"
+        },
+        "07-06 13:45 UTC": {
+          "profit": 0.33,
+          "roe": 0.33,
+          "potential_profit": 0.34,
+          "max_drawdown": -0.22,
+          "assets": 9931,
+          "potential_assets": 10057,
+          "exit_time": "07-06 15:02 UTC",
+          "close_dump": 0.040000000000000036,
+          "trade_id": "7828434"
+        },
+        "07-06 23:15 UTC": {
+          "profit": 0.4,
+          "roe": 0.4,
+          "potential_profit": 0.4,
+          "max_drawdown": -0.03,
+          "assets": 9970,
+          "potential_assets": 10106,
+          "exit_time": "07-06 23:57 UTC",
+          "close_dump": 0.09000000000000002,
+          "trade_id": "7835333"
+        },
+        "07-07 14:45 UTC": {
+          "profit": 0.15,
+          "roe": 0.15,
+          "potential_profit": 0.15,
+          "max_drawdown": 0,
+          "assets": 9998,
+          "potential_assets": 10164,
+          "exit_time": "07-07 16:14 UTC",
+          "close_dump": 0.15,
+          "trade_id": "7847685"
+        },
+        "07-07 18:15 UTC": {
+          "profit": -0.55,
+          "roe": -0.55,
+          "potential_profit": -0.55,
+          "max_drawdown": -0.55,
+          "assets": 9943,
+          "potential_assets": 10052,
+          "exit_time": "07-07 20:15 UTC",
+          "close_dump": -0.55,
+          "trade_id": "7851270"
+        },
+        "07-08 16:00 UTC": {
+          "profit": -0.32,
+          "roe": -0.32,
+          "potential_profit": 0.2,
+          "max_drawdown": -0.34,
+          "assets": 9911,
+          "potential_assets": 10064,
+          "exit_time": "07-08 16:16 UTC",
+          "close_dump": -0.08000000000000002,
+          "trade_id": "7869197"
+        }
+      },
+      "median_drawdown": -0.3,
+      "median_potential_profit": 0.27,
+      "paper_assets": 9911,
+      "potential_paper_assets": 10064,
+      "potential_profits": [
+        0.34,
+        -0.03,
+        0.34,
+        0.4,
+        0.33,
+        0.15,
+        -0.55,
+        0.2
+      ],
+      "profit_std_dev": 0.29,
+      "entry_time": "07-08 16:00 UTC",
+      "last_entry_direction": "long",
+      "last_tsl_set": 10,
+      "max_drawdown_this_entry": -0.34,
+      "max_profit_this_entry": 0.2,
+      "tsl_reset_points_hit": [],
+      "most_recent_profit": -0.24,
+      "took_partial_profit": false,
+      "profit_logged": true,
+      "trade_id": null,
+      "mean_potential_profit": 0.15
+    }
+  }
+}
