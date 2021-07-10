@@ -30,13 +30,14 @@ def trade_checkup(logger):
 
             description = strat_states[strat]["config"].get("description", "")
             if not trade_id:
-                print(
-                    f"{description} skipping trade checkup because it's not in a trade"
-                )
+                #print(
+                #    f"{description} skipping trade checkup because it's not in a trade"
+                #)
                 continue
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
+            print(f"{_trade_status} for trade {trade_id}")
             #logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
             # if a TP is triggered, this function will pass back an updated trade status
             #   otherwise it returns the original
@@ -268,7 +269,7 @@ def log_profit_and_roe(
         set_command[f"{strat}.status.most_recent_profit"] = profit
         if set_command:
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
-            print(f"{description} set most recent profit to {profit}")
+            #print(f"{description} set most recent profit to {profit}")
 
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")

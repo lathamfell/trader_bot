@@ -26,10 +26,10 @@ def get_expected_calls(_expected_str_set):
     return expected_calls
 
 
-def reset_test_coll():
+def reset_test_coll(reset_file):
     coll = h.get_mongo_coll()
     coll.drop()
-    with open('test/test_files/baseline_test_coll_1.json') as _f:
+    with open(f"test/test_files/{reset_file}") as _f:
         file_data = json.load(_f)
     coll.insert_many(file_data)
     return coll

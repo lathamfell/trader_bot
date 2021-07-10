@@ -24,6 +24,7 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
     error, data = py3c.request(
         entity="smart_trades_v2", action="close_by_market", action_id=trade_id
     )
+    print(f"{description} direct response to close trade req: {data}")
     if error.get("error"):
         print(f"{description} Error closing trade {trade_id}, {error['msg']}")
         raise Exception
@@ -42,7 +43,7 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
 
     print(
         f"{description} trade {trade_id} successfully closed, status: {_trade_status['status']['type']}. "
-        f"Full response: {data}"
+        f"Full response: {_trade_status}"
     )
     # Do a one off profit log, because we can, because we closed this one ourselves
     # This prevents the daemon profit checker from missing this profit when we open another trade within 15s
@@ -82,12 +83,16 @@ def open_trade(
     user=None,
     strat=None,
     simulate_leverage=False,
-    tp_pct_2=None
+    tp_pct_2=None,
+    coll=None
 ):
     # logger.debug(
     #    f"{user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
     #    f"{leverage}, units {units}, tp_pct {tp_pct}, tp_trail {tp_trail}, sl_pct {sl_pct}, note {note}"
     # )
+    if not coll:
+        h.get_mongo_coll()
+
     if tp_pct_2 is not None and units < 2:
         print(f"Partial TP configured, but units are only 1. Rejecting trade")
         raise Exception
@@ -161,6 +166,8 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 - sl_pct / 100)
+
+        direction = "long"
     else:  # sell
         tp_price = trade_entry * (1 - tp_pct / 100)
         if tp_pct_2 is not None:
@@ -168,6 +175,7 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 + sl_pct / 100)
+        direction = "short"
     update_trade = get_update_trade(
         trade_id=trade_id,
         _type=_type,
@@ -200,9 +208,23 @@ def open_trade(
         close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
         raise Exception
 
+    coll.update_one(
+        {"_id": user},
+        {
+            "$set": h.get_default_open_trade_mongo_set_command(
+                strat=strat,
+                trade_id=trade_id,
+                direction=direction,
+                tsl=sl_pct,
+            )
+        },
+        upsert=True,
+    )
+
     print(
         f"{description} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
     )
+
     return trade_id
 
 

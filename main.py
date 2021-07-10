@@ -42,7 +42,7 @@ def main():
     try:
         if request.method == "GET":
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
-        # logger.debug(f"got route: {request}")
+        print(f"got request: {request.json}")
         route = request.json.get("route")
         print(f"got route: {route}")
         if route == "report":
@@ -137,6 +137,7 @@ class AlertHandler:
             self.trade_status = trading.trade_status(
                 self.py3c, trade_id, self.description, logger
             )
+            print(f"{self.description} __init__ AH trade status: {self.trade_status}")
         else:
             self.trade_status = None
 
@@ -219,10 +220,8 @@ class AlertHandler:
             return
 
         if alert.get("long"):
-            new_direction = "long"
             _type = "buy"
         else:
-            new_direction = "short"
             _type = "sell"
 
         if direction:
@@ -237,8 +236,8 @@ class AlertHandler:
                 logger=logger,
             )
 
-        trade_id = trading.open_trade(
-            self.py3c,
+        trading.open_trade(
+            py3c=self.py3c,
             account_id=self.account_id,
             pair=self.pair,
             _type=_type,
@@ -253,19 +252,8 @@ class AlertHandler:
             strat=self.strat,
             description=self.description,
             logger=logger,
-            price=self.price
-        )
-        self.coll.update_one(
-            {"_id": self.user},
-            {
-                "$set": h.get_default_open_trade_mongo_set_command(
-                    strat=self.strat,
-                    trade_id=trade_id,
-                    direction=new_direction,
-                    tsl=self.sl_pct,
-                )
-            },
-            upsert=True,
+            price=self.price,
+            coll=self.coll
         )
 
 
