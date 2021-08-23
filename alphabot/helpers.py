@@ -18,15 +18,15 @@ def get_current_trade_direction(_trade_status, user, strat, logger):
     # logger.debug(f"{user} {strat} get_current_trade_direction, type is {_trade_status['status']['type']}")
     if not _trade_status:
         return None
-    #logger.debug(f"get_current_trade_direction, trade status: {_trade_status}")
-    _open = is_trade_open(_trade_status=_trade_status) or is_trade_opening(_trade_status=_trade_status)
+    # logger.debug(f"get_current_trade_direction, trade status: {_trade_status}")
+    _open = is_trade_open(_trade_status=_trade_status) or is_trade_opening(
+        _trade_status=_trade_status
+    )
     long = _trade_status["position"]["type"] == "buy"
     if _open and long:
         return "long"
     elif _open and not long:
         return "short"
-    else:
-        return None
 
 
 def get_trade_entry(_trade_status):
@@ -45,18 +45,15 @@ def is_trade_closed(_trade_status, logger):
     try:
         _trade_status["data"]["closed_at"]
     except KeyError:
-        #logger.debug(f"Determined that trade {_trade_status['id']} is not closed. Full status: {_trade_status}")
+        # logger.debug(f"Determined that trade {_trade_status['id']} is not closed. Full status: {_trade_status}")
         return False
-    #logger.debug(f"Determined that trade {_trade_status['id']} is closed. Full status: {_trade_status}")
+    # logger.debug(f"Determined that trade {_trade_status['id']} is closed. Full status: {_trade_status}")
     return True
 
 
 def get_profit_and_roe(_trade_status):
-    try:
-        profit = float(_trade_status["profit"]["percent"])
-        roe = float(_trade_status["profit"]["roe"])
-    except KeyError:
-        return None, None
+    profit = float(_trade_status["profit"]["percent"])
+    roe = float(_trade_status["profit"]["roe"])
     return profit, roe
 
 
@@ -94,7 +91,7 @@ def get_default_open_trade_mongo_set_command(strat, trade_id, direction, tsl):
         f"{strat}.status.last_tsl_set": tsl,
         f"{strat}.status.entry_time": entry_time,
         f"{strat}.status.most_recent_profit": 0,
-        f"{strat}.status.took_partial_profit": False
+        f"{strat}.status.took_partial_profit": False,
     }
 
 

@@ -12,7 +12,7 @@ from alphabot.config import USER_ATTR, STARTING_PAPER
 def trade_checkup(logger):
     coll = h.get_mongo_coll()
 
-    print("--")
+    # print("--")
 
     for user in USER_ATTR:
         api_key = USER_ATTR[user]["c3_api_key"]
@@ -30,21 +30,21 @@ def trade_checkup(logger):
 
             description = strat_states[strat]["config"].get("description", "")
             if not trade_id:
-                #print(
+                # print(
                 #    f"{description} skipping trade checkup because it's not in a trade"
-                #)
+                # )
                 continue
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
             print(f"{_trade_status} for trade {trade_id}")
-            #logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
+            # logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
             # if a TP is triggered, this function will pass back an updated trade status
             #   otherwise it returns the original
-            #_trade_status = check_take_profits(
+            # _trade_status = check_take_profits(
             #    _trade_status=_trade_status, strat_states=strat_states, strat=strat, py3c=py3c,
             #    description=description, logger=logger, trade_id=trade_id, user=user
-            #)
+            # )
 
             new_tsl = check_tsl(
                 _trade_status=_trade_status,
@@ -65,13 +65,15 @@ def trade_checkup(logger):
                 strat=strat,
                 logger=logger,
                 coll=coll,
-                new_tsl=new_tsl
+                new_tsl=new_tsl,
             )
 
     return "Trade checkup complete"
 
 
-def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c, description, logger):
+def check_take_profits(
+    _trade_status, strat_states, user, strat, trade_id, py3c, description, logger
+):
     print("Check take profits should not be getting called")
     if not h.is_trade_open(_trade_status=_trade_status):
         return
@@ -82,20 +84,33 @@ def check_take_profits(_trade_status, strat_states, user, strat, trade_id, py3c,
     if (tp_pct_2 and tp_pct_2 >= profit) or (not tp_pct_2 and tp_pct >= profit):
         # close trade completely
         _trade_status = trading.close_trade(
-            py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger,
+        )
     elif tp_pct_2 and tp_pct >= profit:
         # partial close
         _trade_status = trading.take_partial_profit(
-            py3c=py3c, trade_id=trade_id, description=description, user=user, strat=strat, logger=logger,
+            py3c=py3c,
+            trade_id=trade_id,
+            description=description,
+            user=user,
+            strat=strat,
+            logger=logger,
         )
         return _trade_status
 
     return _trade_status
 
 
-def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, py3c, coll, logger):
+def check_tsl(
+    _trade_status, description, strat_states, strat, user, trade_id, py3c, coll, logger
+):
     if not h.is_trade_open(_trade_status=_trade_status):
-        #logger.debug(f"{description} not in a trade, not checking TSL resets")
+        # logger.debug(f"{description} not in a trade, not checking TSL resets")
         return
     sl_price, sl_trigger, new_tsl = get_tsl_reset(
         _trade_status=_trade_status,
@@ -140,9 +155,7 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
         description=description,
         logger=logger,
     )
-    print(
-        f"{description} sending update trade while resetting TSL: {update_trade}"
-    )
+    print(f"{description} sending update trade while resetting TSL: {update_trade}")
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
         action="update",
@@ -151,12 +164,15 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
     )
     if update_trade_error.get("error"):
         print(f"{description} error resetting TSL, {update_trade_error['msg']}")
-        print(
-            f"{description} closing trade {trade_id} since we couldn't reset TSL"
-        )
+        print(f"{description} closing trade {trade_id} since we couldn't reset TSL")
         sleep(1)
         trading.close_trade(
-            py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger,
         )
         raise Exception
     # update strat status so we don't do these triggers again
@@ -180,7 +196,9 @@ def check_tsl(_trade_status, description, strat_states, strat, user, trade_id, p
         return new_tsl
 
 
-def get_tsl_reset(_trade_status, description, strat_states, strat, user, trade_id, logger):
+def get_tsl_reset(
+    _trade_status, description, strat_states, strat, user, trade_id, logger
+):
     try:
         reset_tsl = strat_states[strat]["config"]["reset_tsl"]
         tsl_reset_points = strat_states[strat]["config"]["tsl_reset_points"]
@@ -233,8 +251,7 @@ def log_profit_and_roe(
     strat_states = coll.find_one({"_id": user})
     profit_logged = strat_states[strat]["status"].get("profit_logged")
     if profit_logged:
-        print(
-           f"{description} already logged profit for trade {trade_id}")
+        print(f"{description} already logged profit for trade {trade_id}")
         return
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
@@ -269,7 +286,7 @@ def log_profit_and_roe(
         set_command[f"{strat}.status.most_recent_profit"] = profit
         if set_command:
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
-            #print(f"{description} set most recent profit to {profit}")
+            # print(f"{description} set most recent profit to {profit}")
 
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
@@ -290,18 +307,24 @@ def log_profit_and_roe(
     # trade is closed!
     print(f"{description} Detected a closed trade, full status: {_trade_status}")
     new_paper_assets = int(paper_assets * (1 + roe / 100))
-    print(f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}")
+    print(
+        f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}"
+    )
     # calculate potential profit for this trade. Take the max recorded profit, and subtract the observed close dump
     most_recent_profit = strat_states[strat]["status"].get("most_recent_profit", 0)
-    print(f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}")
+    print(
+        f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}"
+    )
     close_dump = profit - most_recent_profit
     print(f"{description} close dump (slippage + fees) is {round(close_dump, 2)}%")
     new_potential_paper_assets = int(
-        potential_paper_assets * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
+        potential_paper_assets
+        * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
     )
     print(
         f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
-        f"{potential_paper_assets}, now is {new_potential_paper_assets}")
+        f"{potential_paper_assets}, now is {new_potential_paper_assets}"
+    )
 
     # add to profits record and history
     potential_profits = strat_states[strat]["status"].get("potential_profits", [])
@@ -327,7 +350,7 @@ def log_profit_and_roe(
         "potential_assets": new_potential_paper_assets,
         "exit_time": exit_time,
         "close_dump": close_dump,
-        "trade_id": trade_id
+        "trade_id": trade_id,
     }
     full_profit_history[entry_time] = new_history_entry
     print(f"Added entry to full profit history: {new_history_entry}")
@@ -347,7 +370,7 @@ def log_profit_and_roe(
                 f"{strat}.status.profit_std_dev": profit_std_dev,
                 f"{strat}.status.drawdown_std_dev": drawdown_std_dev,
                 f"{strat}.status.median_drawdown": median_drawdown,
-                f"{strat}.status.trade_id": None
+                f"{strat}.status.trade_id": None,
             }
         },
         upsert=True,

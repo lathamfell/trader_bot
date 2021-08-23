@@ -6,17 +6,15 @@ from alphabot.py3cw.request import Py3CW
 
 def main():
     # change this to whatever you need
-    user = "malcolm"
+    user = "latham"
 
     api_key = USER_ATTR[user]["c3_api_key"]
     secret = USER_ATTR[user]["c3_secret"]
     py3c = Py3CW(key=api_key, secret=secret)
 
-    error, data = py3c.request(entity="accounts", action="")
+    # bybit market code is 'bybit'
+    error, data = py3c.request(entity="accounts", action="market_pairs", payload={"market_code": "bybit"})
     print(json.dumps(data, indent=4, sort_keys=True))
-    for acct in data:
-        if "COIN-M" in acct['name'] or "Bybit" in acct['name']:
-            print(f"Account {acct['name']}: {acct['id']}")
 
 
 if __name__ == "__main__":

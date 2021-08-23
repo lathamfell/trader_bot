@@ -14,7 +14,7 @@ def trade_status(py3c, trade_id, description, logger):
             f"{description} error getting trade info for trade {trade_id}, {error['msg']}"
         )
         raise Exception
-    #logger.debug(f"Trade {trade_id} current status: {_trade_status}")
+    # logger.debug(f"Trade {trade_id} current status: {_trade_status}")
     return _trade_status
 
 
@@ -53,16 +53,10 @@ def close_trade(py3c, trade_id, user, strat, description, logger):
         description=description,
         user=user,
         strat=strat,
-        logger=logger
+        logger=logger,
     )
     coll.update_one(
-        {"_id": user},
-        {
-            "$set": {
-                f"{strat}.status.trade_id": None
-            }
-        },
-        upsert=True
+        {"_id": user}, {"$set": {f"{strat}.status.trade_id": None}}, upsert=True
     )
     return _trade_status
 
@@ -84,7 +78,7 @@ def open_trade(
     strat=None,
     simulate_leverage=False,
     tp_pct_2=None,
-    coll=None
+    coll=None,
 ):
     # logger.debug(
     #    f"{user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
@@ -151,9 +145,9 @@ def open_trade(
 
     if price:
         if _type == "buy":
-            slippage = ((price - trade_entry) / trade_entry)
+            slippage = (price - trade_entry) / trade_entry
         else:
-            slippage = ((trade_entry - price) / price)
+            slippage = (trade_entry - price) / price
         print(
             f"{description} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {price}. "
             f"Slippage: {round(slippage * 100, 2)}%"
@@ -202,10 +196,15 @@ def open_trade(
         print(
             f"{description} Error updating trade while opening, {update_trade_error['msg']}"
         )
-        print(
-            f"{description} Closing trade {trade_id} since we couldn't apply TP/SL"
+        print(f"{description} Closing trade {trade_id} since we couldn't apply TP/SL")
+        close_trade(
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger,
         )
-        close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
         raise Exception
 
     coll.update_one(
@@ -250,7 +249,16 @@ def get_base_trade(account_id, pair, _type, leverage, units, user, strat, note, 
 
 
 def get_update_trade(
-    trade_id, _type, units, tp_price_1, sl_price, sl_pct, description, logger, tp_price_2=None, tp_trail=None
+    trade_id,
+    _type,
+    units,
+    tp_price_1,
+    sl_price,
+    sl_pct,
+    description,
+    logger,
+    tp_price_2=None,
+    tp_trail=None,
 ):
     # logger.debug(
     #    f"{user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, "
@@ -265,7 +273,7 @@ def get_update_trade(
                 {
                     "order_type": TP_ORDER_TYPE,
                     "price": {"value": tp_price_1, "type": "last"},
-                    "volume": 100
+                    "volume": 100,
                 }
             ],
         },
@@ -278,7 +286,7 @@ def get_update_trade(
             },
         },
     }
-    #if tp_trail:
+    # if tp_trail:
     #    update_trade["take_profit"]["steps"][0]["trailing"] = {
     #        "enabled": True,
     #        "percent": tp_trail,
@@ -288,19 +296,28 @@ def get_update_trade(
             {
                 "order_type": TP_ORDER_TYPE,
                 "price": {"value": tp_price_1, "type": "last"},
-                "volume": 50
+                "volume": 50,
             },
             {
                 "order_type": TP_ORDER_TYPE,
                 "price": {"value": tp_price_2, "type": "last"},
-                "volume": 50
-            }
+                "volume": 50,
+            },
         ]
 
     return update_trade
 
 
-def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_states=None, _trade_status=None):
+def take_partial_profit(
+    py3c,
+    trade_id,
+    description,
+    user,
+    strat,
+    logger,
+    strat_states=None,
+    _trade_status=None,
+):
     # get current trade attributes
     if strat_states:
         # check for ourselves whether partial profit has been taken
@@ -308,7 +325,9 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
             print(f"{description} already took partial profit, exiting")
             return _trade_status
     if not _trade_status:
-        _trade_status = trade_status(py3c=py3c, trade_id=trade_id, description=description, logger=logger)
+        _trade_status = trade_status(
+            py3c=py3c, trade_id=trade_id, description=description, logger=logger
+        )
     current_sl = _trade_status["stop_loss"]["conditional"]["price"]["value"]
     current_tp = h.get_last_tp_price(_trade_status=_trade_status)
     _type = _trade_status["position"]["type"]
@@ -321,8 +340,16 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
 
     tp_price_2 = current_tp
     update_trade = get_update_trade(
-        trade_id=trade_id, _type=_type, units=units, tp_price_1=tp_price_1, tp_price_2=tp_price_2, sl_price=current_sl,
-        sl_pct=None, description=description, logger=logger)
+        trade_id=trade_id,
+        _type=_type,
+        units=units,
+        tp_price_1=tp_price_1,
+        tp_price_2=tp_price_2,
+        sl_price=current_sl,
+        sl_pct=None,
+        description=description,
+        logger=logger,
+    )
 
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
@@ -337,7 +364,14 @@ def take_partial_profit(py3c, trade_id, description, user, strat, logger, strat_
         print(
             f"{description} Closing trade {trade_id} since we couldn't take partial profit"
         )
-        close_trade(py3c=py3c, trade_id=trade_id, user=user, strat=strat, description=description, logger=logger)
+        close_trade(
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger,
+        )
         raise Exception
 
     if _type == "buy":

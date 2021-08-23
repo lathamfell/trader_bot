@@ -7,6 +7,7 @@ from freezegun import freeze_time
 
 import alphabot.helpers as h
 import test.helpers as th
+from test.helpers import MOCK_USER_ATTR
 
 waiting_for_base_open_long_call_count = 0
 waiting_for_base_open_short_call_count = 0
@@ -18,35 +19,54 @@ waiting_for_trade_checkup_call_count = 0
 @pytest.fixture
 def mock_main_py3c_open_long():
     with patch("main.Py3CW") as mock_main_py3c_open_long:
-        mock_main_py3c_open_long().request.side_effect = mock_py3c_request_side_effect_open_long
+        mock_main_py3c_open_long().request.side_effect = (
+            mock_py3c_request_side_effect_open_long
+        )
         yield mock_main_py3c_open_long
+
+
+@pytest.fixture
+def mock_open_long_with_leverage():
+    with patch("main.Py3CW") as mock_main_py3c_open_long_with_leverage:
+        mock_main_py3c_open_long_with_leverage().request.side_effect = (
+            mock_py3c_request_side_effect_open_long_with_leverage
+        )
+        yield mock_main_py3c_open_long_with_leverage
 
 
 @pytest.fixture
 def mock_main_py3c_open_short():
     with patch("main.Py3CW") as mock_main_py3c_open_short:
-        mock_main_py3c_open_short().request.side_effect = mock_py3c_request_side_effect_open_short
+        mock_main_py3c_open_short().request.side_effect = (
+            mock_py3c_request_side_effect_open_short
+        )
         yield mock_main_py3c_open_short
 
 
 @pytest.fixture
 def mock_main_py3c_close_long():
     with patch("main.Py3CW") as mock_main_py3c_close_long:
-        mock_main_py3c_close_long().request.side_effect = mock_py3c_request_side_effect_close_long
+        mock_main_py3c_close_long().request.side_effect = (
+            mock_py3c_request_side_effect_close_long
+        )
         yield mock_main_py3c_close_long
 
 
 @pytest.fixture
 def mock_main_py3c_close_short():
     with patch("main.Py3CW") as mock_main_py3c_close_short:
-        mock_main_py3c_close_short().request.side_effect = mock_py3c_request_side_effect_close_short
+        mock_main_py3c_close_short().request.side_effect = (
+            mock_py3c_request_side_effect_close_short
+        )
         yield mock_main_py3c_close_short
 
 
 @pytest.fixture
 def mock_tc_py3c():
     with patch("alphabot.trade_checkup.Py3CW") as mock_trade_checkup_py3c:
-        mock_trade_checkup_py3c().request.side_effect = mock_py3c_request_side_effect_trade_checkup
+        mock_trade_checkup_py3c().request.side_effect = (
+            mock_py3c_request_side_effect_trade_checkup
+        )
         yield mock_trade_checkup_py3c
 
 
@@ -57,7 +77,18 @@ def mock_main_py3c_two_longs():
         yield mock_main_py3c
 
 
-def mock_py3c_request_side_effect_open_long(entity, action, payload=None, action_id=None):
+@pytest.fixture
+def mock_main_py3c_partial_close_long():
+    with patch("main.Py3CW") as mock_main_py3c:
+        mock_main_py3c().request.side_effect = (
+            mock_py3c_request_side_effect_partial_close_long
+        )
+        yield mock_main_py3c
+
+
+def mock_py3c_request_side_effect_open_long(
+    entity, action, payload=None, action_id=None
+):
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30491505,
@@ -130,7 +161,89 @@ def mock_py3c_request_side_effect_open_long(entity, action, payload=None, action
     raise Exception("side effect called but no conditions were fulfilled")
 
 
-def mock_py3c_request_side_effect_open_short(entity, action, payload=None, action_id=None):
+def mock_py3c_request_side_effect_open_long_with_leverage(
+    entity, action, payload=None, action_id=None
+):
+    global waiting_for_base_open_long_call_count
+    expected_base_payload = {
+        "account_id": 30391847,
+        "note": "latham BTC_L2 <1m Split TP> long",
+        "pair": "BTC_BTCUSD_PERP",
+        "leverage": {"enabled": True, "type": "isolated", "value": 5},
+        "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
+        "take_profit": {"enabled": False},
+        "stop_loss": {"enabled": False},
+    }
+    expected_update_payload = {
+        "id": "6762491",
+        "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
+        "take_profit": {
+            "enabled": True,
+            "steps": [
+                {
+                    "order_type": "market",
+                    "price": {"value": 32845.7949, "type": "last"},
+                    "volume": 50,
+                },
+                {
+                    "order_type": "market",
+                    "price": {"value": 32878.591499999995, "type": "last"},
+                    "volume": 50,
+                }
+            ],
+        },
+        "stop_loss": {
+            "enabled": True,
+            "order_type": "market",
+            "conditional": {
+                "price": {"value": 29516.94, "type": "last"},
+                "trailing": {"enabled": True, "percent": 10},
+            },
+        },
+    }
+
+    if (
+        entity == "smart_trades_v2"
+        and action == "new"
+        and payload == expected_base_payload
+    ):
+        with open(
+            "test/test_files/BTC_L2_open_long_base_trade_initial_response.json"
+        ) as _f:
+            mock_base_trade_initial_response = json.load(_f)
+        return {}, mock_base_trade_initial_response
+    if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "6762491":
+        if waiting_for_base_open_long_call_count == 0:
+            # initial call, still waiting for base open
+            waiting_for_base_open_long_call_count += 1
+            with open(
+                "test/test_files/BTC_L2_open_long_first_base_waiting_response.json"
+            ) as _f:
+                mock_first_base_waiting_response = json.load(_f)
+            return {}, mock_first_base_waiting_response
+        if waiting_for_base_open_long_call_count == 1:
+            # second call, send status indicating base open is complete
+            with open(
+                "test/test_files/BTC_L2_open_long_base_complete_response.json"
+            ) as _f:
+                mock_base_complete_response = json.load(_f)
+            return {}, mock_base_complete_response
+    if (
+        entity == "smart_trades_v2"
+        and action == "update"
+        and action_id == "6762491"
+        and payload == expected_update_payload
+    ):
+        with open("test/test_files/BTC_L2_open_long_update_trade_response.json") as _f:
+            mock_update_complete_response = json.load(_f)
+        return {}, mock_update_complete_response
+
+    raise Exception("side effect called but no conditions were fulfilled")
+
+
+def mock_py3c_request_side_effect_open_short(
+    entity, action, payload=None, action_id=None
+):
     global waiting_for_base_open_short_call_count
     expected_base_payload = {
         "account_id": 30491505,
@@ -221,7 +334,11 @@ def mock_py3c_request_side_effect_close_long(entity, action, action_id=None):
                 mock_successful_close_response = json.load(_f)
             return {}, mock_successful_close_response
 
-    if entity == "smart_trades_v2" and action == "close_by_market" and action_id == "7886336":
+    if (
+        entity == "smart_trades_v2"
+        and action == "close_by_market"
+        and action_id == "7886336"
+    ):
         with open("test/test_files/BTC_L4_close_long_direct_response.json") as _f:
             mock_direct_response = json.load(_f)
         return {}, mock_direct_response
@@ -247,7 +364,11 @@ def mock_py3c_request_side_effect_close_short(entity, action, action_id=None):
                 mock_successful_close_response = json.load(_f)
             return {}, mock_successful_close_response
 
-    if entity == "smart_trades_v2" and action == "close_by_market" and action_id == "7886809":
+    if (
+        entity == "smart_trades_v2"
+        and action == "close_by_market"
+        and action_id == "7886809"
+    ):
         with open("test/test_files/BTC_L4_close_short_direct_response.json") as _f:
             mock_direct_response = json.load(_f)
         return {}, mock_direct_response
@@ -276,6 +397,10 @@ def mock_py3c_request_side_effect_trade_checkup(entity, action, action_id=None):
 def mock_py3c_request_side_effect_two_longs(entity, action, action_id):
     with open("test/test_files/two_longs_status.json") as _f:
         return {}, json.load(_f)
+
+
+def mock_py3c_request_side_effect_partial_close_long(entity, action, action_id):
+    return
 
 
 @pytest.fixture
@@ -310,6 +435,7 @@ def test_get(client, mock_print):
     )
 
 
+@patch("alphabot.report.USER_ATTR", MOCK_USER_ATTR)
 def test_report(client, mock_print):
     th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -318,6 +444,7 @@ def test_report(client, mock_print):
         assert _call in mock_print.mock_calls
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_description(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -372,6 +499,7 @@ def test_config_update_of_description(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_tp_pct(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -424,6 +552,7 @@ def test_config_update_of_tp_pct(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_tp_pct_2(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -477,6 +606,7 @@ def test_config_update_of_tp_pct_2(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_sl_pct(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -529,6 +659,7 @@ def test_config_update_of_sl_pct(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_reset_tsl(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -583,6 +714,7 @@ def test_config_update_of_reset_tsl(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_tsl_reset_points(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -618,6 +750,7 @@ def test_config_update_of_tsl_reset_points(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_leverage(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -670,6 +803,7 @@ def test_config_update_of_leverage(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_units(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -722,6 +856,7 @@ def test_config_update_of_units(client):
     assert actual == expected
 
 
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_open_long(client, mock_main_py3c_open_long):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -742,6 +877,24 @@ def test_open_long(client, mock_main_py3c_open_long):
     assert post_state == expected_post_open_state
 
 
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
+def test_open_long_with_leverage(client, mock_open_long_with_leverage):
+    coll = th.reset_test_coll("baseline_test_coll_1.json")
+
+    user = "latham"
+    strat = "BTC_L2"
+
+    #with open("test/test_files/BTC_L2_pre_open_long.json") as _f:
+    #    pre_open_state = json.load(_f)[strat]
+
+    #coll.update_one({"_id": user}, {"$set"})
+
+    client.post("/", json=dict(user=user, strat=strat, long=True, price=53001))
+
+    post_state = coll.find_one({"_id": user})[strat]
+
+
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_open_short(client, mock_main_py3c_open_short):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -762,6 +915,7 @@ def test_open_short(client, mock_main_py3c_open_short):
     assert post_state == expected_post_open_state
 
 
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_close_long(client, mock_main_py3c_close_long):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -782,6 +936,7 @@ def test_close_long(client, mock_main_py3c_close_long):
     assert post_state == expected_post_close_state
 
 
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_close_short(client, mock_main_py3c_close_short):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -802,6 +957,7 @@ def test_close_short(client, mock_main_py3c_close_short):
     assert post_state == expected_post_close_state
 
 
+@patch("alphabot.trade_checkup.USER_ATTR", MOCK_USER_ATTR)
 def test_trade_checkup(client, mock_tc_py3c):
     coll = th.reset_test_coll("baseline_test_coll_2.json")
 
@@ -811,13 +967,16 @@ def test_trade_checkup(client, mock_tc_py3c):
     #   update their expected json accordingly
     with open("test/test_files/expected_post_trade_checkup.json") as _f:
         expected_post_close_state = json.load(_f)
-        assert expected_post_close_state[0] == coll.find_one({"_id": 'latham'})
+        assert expected_post_close_state[0] == coll.find_one({"_id": "latham"})
         assert expected_post_close_state[1] == coll.find_one({"_id": "malcolm"})
 
 
+@patch("main.USER_ATTR", MOCK_USER_ATTR)
 @patch("alphabot.trading.close_trade")
 @patch("alphabot.trading.open_trade", return_value="7876616")
-def test_opening_two_longs(mock_open_trade, mock_close_trade, client, mock_main_py3c_two_longs):
+def test_opening_two_longs(
+    mock_open_trade, mock_close_trade, client, mock_main_py3c_two_longs
+):
     coll = th.reset_test_coll("baseline_test_coll_2.json")
     user = "latham"
     strat = "BTC_M3"
@@ -825,11 +984,11 @@ def test_opening_two_longs(mock_open_trade, mock_close_trade, client, mock_main_
 
     mock_close_trade.assert_called_with(
         py3c=mock_main_py3c_two_longs(),
-        trade_id='7876616',
+        trade_id="7876616",
         user=user,
         strat=strat,
-        description=f'{user} {strat} <1h TSL/TP>',
-        logger=None
+        description=f"{user} {strat} <1h TSL/TP>",
+        logger=None,
     )
     mock_open_trade.assert_called_with(
         py3c=mock_main_py3c_two_longs(),
@@ -848,5 +1007,35 @@ def test_opening_two_longs(mock_open_trade, mock_close_trade, client, mock_main_
         description=f"{user} {strat} <1h TSL/TP>",
         logger=None,
         price=19010,
-        coll=coll
+        coll=coll,
     )
+
+
+
+
+
+def test_close_long_but_no_trade_is_open(client):
+    pass
+
+
+def test_close_long_but_current_open_trade_is_short(client):
+    pass
+
+
+def test_close_long_while_another_worker_is_waiting_for_long_open(client):
+    # the close long would be ignored because the trade id is not put into the strat status
+    #   until the trade is confirmed open
+    # so this test is essentially a dupe of test_close_long_but_no_trade_is_open
+    pass
+
+
+def test_partial_profit_signal_received(client, mock_main_py3c_partial_close_long):
+    coll = th.reset_test_coll("baseline_test_coll_2.json")
+    user = "latham"
+    strat = "BTC_M3"
+    client.post(
+        "/",
+        json=dict(user=user, strat=strat, close_long=True, partial=True, price=33333),
+    )
+
+    #assert False

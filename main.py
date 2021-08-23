@@ -18,11 +18,11 @@ from alphabot.report import report
 
 app = Flask(__name__)
 
-#logging_client = google.cloud.logging.Client()
-#handler = CloudLoggingHandler(logging_client)
-#logger = logging.getLogger("cloudLogger")
-#logger.setLevel(LOG_LEVEL)
-#logger.addHandler(handler)
+# logging_client = google.cloud.logging.Client()
+# handler = CloudLoggingHandler(logging_client)
+# logger = logging.getLogger("cloudLogger")
+# logger.setLevel(LOG_LEVEL)
+# logger.addHandler(handler)
 
 
 def get_logger():
@@ -37,14 +37,14 @@ def get_logger():
 
 @app.route("/", methods=["GET", "POST"])
 def main():
-    #logger = get_logger()
+    # logger = get_logger()
     logger = None
     try:
         if request.method == "GET":
             return "Crypto Bros reporting for duty! None yet died of natural causes!"
-        print(f"got request: {request.json}")
+        # print(f"got request: {request.json}")
         route = request.json.get("route")
-        print(f"got route: {route}")
+        # print(f"got route: {route}")
         if route == "report":
             return report(logger)
         if route == "config_update":
@@ -56,9 +56,7 @@ def main():
 
             return "ok"
     except Exception as err:
-        print(
-            f"Caught exception while handling request {request} with {request.data}"
-        )
+        print(f"Caught exception while handling request {request} with {request.data}")
         traceback.print_exc()
         h.send_email(
             to="lathamfell@gmail.com", subject="AlphaBot Error", body=f"{request.data}"
@@ -97,8 +95,12 @@ class AlertHandler:
         self.pair = USER_ATTR[self.user]["strats"][self.strat]["pair"]
         self.account_id = USER_ATTR[self.user]["strats"][self.strat]["account_id"]
         self.interval = USER_ATTR[self.user]["strats"][self.strat].get("interval")
-        self.pct_sell_per_exit_signal = USER_ATTR[self.user]["strats"][self.strat].get("pct_sell_per_exit_signal")
-        self.simulate_leverage = USER_ATTR[self.user]["strats"][self.strat].get("simulate_leverage")
+        self.pct_sell_per_exit_signal = USER_ATTR[self.user]["strats"][self.strat].get(
+            "pct_sell_per_exit_signal"
+        )
+        self.simulate_leverage = USER_ATTR[self.user]["strats"][self.strat].get(
+            "simulate_leverage"
+        )
         self.py3c = Py3CW(key=self.api_key, secret=self.secret)
 
         # pull state
@@ -193,27 +195,37 @@ class AlertHandler:
         ):
             # exit criteria met
             trade_id = self.state["status"]["trade_id"]
-            if (not alert.get("partial")) or self.state["status"]["took_partial_profit"]:  # regular full close
+            if (not alert.get("partial")) or self.state["status"][
+                "took_partial_profit"
+            ]:  # regular full close
                 print(
                     f"{self.description} {direction} {trade_id} closing full position due to exit signal"
                 )
                 trading.close_trade(
-                    py3c=self.py3c, trade_id=trade_id, user=self.user, strat=self.strat, description=self.description,
-                    logger=logger)
+                    py3c=self.py3c,
+                    trade_id=trade_id,
+                    user=self.user,
+                    strat=self.strat,
+                    description=self.description,
+                    logger=logger,
+                )
                 return
             else:  # only close half
                 print(
                     f"{self.description} {direction} {trade_id} closing partial position due to partial exit signal"
                 )
                 trading.take_partial_profit(
-                    py3c=self.py3c, trade_id=trade_id, description=self.description, user=self.user, strat=self.strat,
-                    logger=logger)
+                    py3c=self.py3c,
+                    trade_id=trade_id,
+                    description=self.description,
+                    user=self.user,
+                    strat=self.strat,
+                    logger=logger,
+                )
                 # update status so we don't do another partial close
                 self.coll.update_one(
                     {"_id": self.user},
-                    {
-                        "$set": {f"{self.strat}.status.took_partial_profit": True}
-                    }
+                    {"$set": {f"{self.strat}.status.took_partial_profit": True}},
                 )
                 return
         elif alert.get("close_long") or alert.get("close_short"):
@@ -242,7 +254,7 @@ class AlertHandler:
             pair=self.pair,
             _type=_type,
             leverage=self.leverage,
-            simulate_leverage=self.leverage,
+            simulate_leverage=self.simulate_leverage,
             units=self.units,
             tp_pct=self.tp_pct,
             tp_pct_2=self.tp_pct_2,
@@ -253,7 +265,7 @@ class AlertHandler:
             description=self.description,
             logger=logger,
             price=self.price,
-            coll=self.coll
+            coll=self.coll,
         )
 
 

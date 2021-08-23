@@ -26,34 +26,17 @@ TP_ORDER_TYPE = "market"
 
 USER_ATTR = {
     "malcolm": {
-        "c3_api_key": "b122f74e630541109a11b9cb61540e151fe44e5887d943a78d2a5dc0d7f8055a",
-        "c3_secret": "f57e76a3095e03d9701c0880a442b23e950cdbee8190e521de4ce0b01f2462e8b49779862a5046346c094d5a531c99f829726698036af968ce50f746d7876fe6e9d23de6a71682b8537867d591709e992f4b1eb6d7aaf22d092e29f6a818d431b7d62217",
+        "c3_api_key": "a9fbc731bfcb41b590534b8b938ec06a66c7438cc2b242b0b02991f858f5cc12",
+        "c3_secret": "13fac45a153dbe6948ee225b863243decd79060eb146029f6d01f8150b0561ab7f5fa7fb238c3a74f1bb6ec34359be2f22e8a9f38d6e48f73444dce17876096b18899f01558a4628981e526858155793dda952019937fb9f0629c356f18c2f9014fc4ea6",
         "email": "malcerlee@gmail.com",
         "email_enabled": False,
         "strats": {
             "BTC_M1": {
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 29896590,  # Binance Futures
-                "pair": "BTC_BTCUSD_PERP",
-                "description": "",
-                "simulate_leverage": True
-            },
-            "ETH_M1": {
-                "logic": "gamma",
-                "coin": "eth",
-                "account_id": 29896590,  # Binance Futures
-                "pair": "ETH_ETHUSD_PERP",
-                "description": "",
-                "simulate_leverage": True
-            },
-            "BTC_M2": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30571928,  # Binance lathcolm
-                "pair": "BTC_BTCUSD_PERP",
-                "description": "",
-                "simulate_leverage": True
+                "account_id": 30841543,
+                "pair": "BTC_BTCUSD",
+                "simulate_leverage": False,
             }
         },
     },
@@ -63,71 +46,22 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "BTC_L1": {  # 1m - Chrome
+            "BTC_L1": {  # lambda
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 30034871,  # lec   2 BTC limit
-                "pair": "BTC_BTCUSD_PERP",
+                "account_id": 30823191,  # lathamfell@gmail.com - Chrome
+                "pair": "BTC_BTCUSD",
                 # configured leverage will be used to calculate paper profits, but trades will be made on the
                 # exchange at 1x
-                "simulate_leverage": True
+                "simulate_leverage": False,
             },
-            "BTC_L2": {  # 1m = Firefox
+            "BTC_L2": {  # T3
                 "logic": "gamma",
                 "coin": "btc",
-                "account_id": 30391847,  # tk  2 BTC limit
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
+                "account_id": 29834950,  # trendking2021@gmail.com - Brave
+                "pair": "BTC_BTCUSD",
+                "simulate_leverage": False,
             },
-            "BTC_M3": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30549010,  # slackerbot  2 BTC limit.  Malcolm's $300 of BTC
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_M4": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30572521,  # lf2  2 BTC limit.  Malcolm's $300 of BTC
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_L3": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30398341,  # lf  2 BTC limit
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_L4": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30491505,  # Eth8  2 BTC limit
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_M5": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30572479,  # PsychoBot  2 BTC limit  # Malcolm's $300 of BTC
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_L5": {  # 1m - Brave
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 29799999,  # lef35   0.05 BTC limit
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            },
-            "BTC_L6": {
-                "logic": "gamma",
-                "coin": "btc",
-                "account_id": 30577995,  # Binance swethbot
-                "pair": "BTC_BTCUSD_PERP",
-                "simulate_leverage": True
-            }
         },
     },
 }

@@ -108,7 +108,7 @@
   },
   "BTC_L2": {
     "config": {
-      "leverage": 1,
+      "leverage": 5,
       "sl_pct": 10,
       "tp_pct": 0.15,
       "tp_trail": null,

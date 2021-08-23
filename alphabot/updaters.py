@@ -21,7 +21,9 @@ def config_update(request, logger):
     # make sure the strat exists
     user_strats = USER_ATTR[user]["strats"].keys()
     if strat not in user_strats:
-        print(f"Strat {strat} not in the AlphaBot internal config. Strats for user {user} are: {user_strats}")
+        print(
+            f"Strat {strat} not in the AlphaBot internal config. Strats for user {user} are: {user_strats}"
+        )
         raise Exception
 
     state = coll.find_one({"_id": user}).get(strat)
@@ -85,7 +87,9 @@ def config_update(request, logger):
             tsl_reset_point[1] = float(tsl_reset_point[1])
     if new_tsl_reset_points != old_tsl_reset_points:
         reset_profits = True
-        print(f"Changing tsl_reset_points from {old_tsl_reset_points} to {new_tsl_reset_points}")
+        print(
+            f"Changing tsl_reset_points from {old_tsl_reset_points} to {new_tsl_reset_points}"
+        )
 
     new_leverage = new_config.get("leverage")
     old_leverage = current_config.get("leverage")
@@ -102,14 +106,16 @@ def config_update(request, logger):
     if new_units != old_units:
         print(f"Changing units from {old_units} to {new_units}")
 
-    new_description = new_config.get('description', '')
+    new_description = new_config.get("description", "")
     full_new_description = f"{user} {strat} <{new_description}>"
     if full_new_description != current_description:
         print(f"Changing description from {current_description} to {new_description}")
 
     # check to make sure tp_pct_2 and units are aligned
     if new_tp_pct_2 is not None and new_units < 2:
-        print(f"Config update failed, need more than one unit in trade if using multiple TP points")
+        print(
+            f"Config update failed, need more than one unit in trade if using multiple TP points"
+        )
         raise Exception
 
     if reset_profits:

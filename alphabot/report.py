@@ -35,9 +35,9 @@ def report(logger):
                 "assets": assets,
                 "potential_assets": potential_assets,
                 "designation": f"{description}. Median potential profit: {median_potential_profit}%, "
-                               f"mean potential profit: {mean_potential_profit}%, std dev "
-                               f"{profit_std_dev}. Median drawdown: {median_drawdown}%, std dev: {drawdown_std_dev}. "
-                               f"Leverage: {leverage}. Trades: {len(full_profit_history)} since {config_change_time}",
+                f"mean potential profit: {mean_potential_profit}%, std dev "
+                f"{profit_std_dev}. Median drawdown: {median_drawdown}%, std dev: {drawdown_std_dev}. "
+                f"Leverage: {leverage}. Trades: {len(full_profit_history)} since {config_change_time}",
             }
             output.append(entry)
     sorted_entries = sorted(output, key=lambda k: k["assets"])

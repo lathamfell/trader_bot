@@ -53,3 +53,8 @@ Direct condition update:
 
 Config update:
 {"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 0.4, "tp_trail": null, "sl_pct": 0.4, "leverage": 2, "units": 2 }}
+
+
+Tests:
+Ensure venv is activated.  In PyCharm Windows terminal, execute the command inside test.sh. 
+To run test suite with breakpoints: use a Pytest debug configuration
