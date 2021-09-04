@@ -95,6 +95,7 @@
       ],
       "full_profit_history": {
         "07-08 23:27 UTC": {
+          "direction": "short",
           "profit": 0.04,
           "roe": 0.04,
           "potential_profit": 0.23,
@@ -106,6 +107,7 @@
           "trade_id": "7873502"
         },
         "07-09 00:45 UTC": {
+          "direction": "long",
           "profit": 0.22,
           "roe": 0.22,
           "potential_profit": 0.35,
@@ -117,6 +119,7 @@
           "trade_id": "7874365"
         },
         "07-09 02:30 UTC": {
+          "direction": "short",
           "profit": 0.48,
           "roe": 0.48,
           "potential_profit": 0.61,
@@ -128,6 +131,7 @@
           "trade_id": "7875290"
         },
         "07-09 04:19 UTC": {
+          "direction": "long",
           "profit": -0.11,
           "roe": -0.11,
           "potential_profit": 0,

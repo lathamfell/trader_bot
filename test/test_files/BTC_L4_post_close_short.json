@@ -101,6 +101,7 @@
       ],
       "full_profit_history":{
         "07-08 23:27 UTC":{
+          "direction": "short",
           "profit":0.04,
           "roe":0.04,
           "potential_profit":0.23,
@@ -112,6 +113,7 @@
           "trade_id":"7873502"
         },
         "07-09 00:45 UTC":{
+          "direction": "long",
           "profit":0.22,
           "roe":0.22,
           "potential_profit":0.35,
@@ -123,6 +125,7 @@
           "trade_id":"7874365"
         },
         "07-09 02:30 UTC":{
+          "direction": "short",
           "profit":0.48,
           "roe":0.48,
           "potential_profit":0.61,
@@ -134,6 +137,7 @@
           "trade_id":"7875290"
         },
         "07-09 04:19 UTC":{
+          "direction": "long",
           "profit":-0.11,
           "roe":-0.11,
           "potential_profit":0,
@@ -145,6 +149,7 @@
           "trade_id":"7876207"
         },
         "07-09 04:29 UTC":{
+          "direction": "short",
           "profit":0.83,
           "roe":0.83,
           "potential_profit":1.2,
@@ -156,6 +161,7 @@
           "trade_id":"7876280"
         },
         "07-09 11:30 UTC":{
+          "direction": "long",
           "profit":-1.03,
           "roe":-1.03,
           "potential_profit":0.23,
@@ -167,6 +173,7 @@
           "trade_id":"7879813"
         },
         "07-09 13:00 UTC":{
+          "direction": "short",
           "profit":0.17,
           "roe":0.17,
           "potential_profit":0.24,
@@ -178,6 +185,7 @@
           "trade_id":"7880598"
         },
         "07-09 21:04 UTC":{
+          "direction": "long",
           "profit":-0.18,
           "roe":-0.18,
           "potential_profit":0.01,
@@ -189,6 +197,7 @@
           "trade_id":"7886193"
         },
         "07-09 21:20 UTC":{
+          "direction": "short",
           "profit":-0.03,
           "roe":-0.03,
           "potential_profit":0.05,
@@ -200,6 +209,7 @@
           "trade_id":"7886336"
         },
         "07-09 21:58 UTC":{
+          "direction": "short",
           "profit":-0.13,
           "roe":-0.13,
           "potential_profit":0.01,

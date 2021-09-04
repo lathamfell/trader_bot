@@ -99,6 +99,7 @@
       ],
       "full_profit_history": {
         "07-06 09:30 UTC": {
+          "direction": "short",
           "profit": -0.04,
           "roe": -0.04,
           "potential_profit": 0.34,
@@ -110,6 +111,7 @@
           "trade_id": "7824986"
         },
         "07-06 13:15 UTC": {
+          "direction": "long",
           "profit": -0.97,
           "roe": -0.97,
           "potential_profit": -0.03,
@@ -121,6 +123,7 @@
           "trade_id": "7827989"
         },
         "07-06 13:45 UTC": {
+          "direction": "short",
           "profit": 0.33,
           "roe": 0.33,
           "potential_profit": 0.34,
@@ -132,6 +135,7 @@
           "trade_id": "7828434"
         },
         "07-06 23:15 UTC": {
+          "direction": "long",
           "profit": 0.4,
           "roe": 0.4,
           "potential_profit": 0.4,
@@ -143,6 +147,7 @@
           "trade_id": "7835333"
         },
         "07-07 14:45 UTC": {
+          "direction": "short",
           "profit": 0.15,
           "roe": 0.15,
           "potential_profit": 0.15,
@@ -154,6 +159,7 @@
           "trade_id": "7847685"
         },
         "07-07 18:15 UTC": {
+          "direction": "long",
           "profit": -0.55,
           "roe": -0.55,
           "potential_profit": -0.55,
@@ -165,6 +171,7 @@
           "trade_id": "7851270"
         },
         "07-08 16:00 UTC": {
+          "direction": "short",
           "profit": -0.32,
           "roe": -0.32,
           "potential_profit": 0.2,

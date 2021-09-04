@@ -342,6 +342,7 @@ def log_profit_and_roe(
     entry_time = h.get_readable_time(t=_trade_status["data"]["created_at"])
     exit_time = h.get_readable_time(t=_trade_status["data"]["closed_at"])
     new_history_entry = {
+        "direction": direction,
         "profit": profit,
         "roe": roe,
         "potential_profit": max_profit_this_entry,
