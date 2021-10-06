@@ -8,7 +8,7 @@ from freezegun import freeze_time
 import alphabot.helpers as h
 import test.helpers as th
 from test.helpers import MOCK_USER_ATTR
-from alphabot.trading import get_adjusted_leverage
+from alphabot.trading import get_adjusted_leverage_and_units
 
 waiting_for_base_open_long_call_count = 0
 waiting_for_base_open_short_call_count = 0
@@ -171,7 +171,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
         "note": "latham BTC_L2 <1m Split TP> long",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 2},
-        "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
+        "position": {"type": "buy", "units": {"value": 1}, "order_type": "market"},
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
     }
@@ -1237,26 +1237,28 @@ def test_opening_two_longs(
     )
 
 
-def test_get_adjusted_leverage():
+def test_get_adjusted_leverage_and_units():
     loss_limit_fractions = [None, 0, 0.1, 0.2, 0.5, 15]
-    leverages = [1, 2, 5, 10]
+    leverages_and_units = [(1, 100), (2, 5000), (5, 40), (10, 1000000)]
     stop_losses = [1, 2, 4, 5, 10]
     pct_of_starting_assets = [None, 50, 100, 150, 200, 250, 300, 401, 499, 567, 600, 10099]
     results = []
 
     for llf in loss_limit_fractions:
-        for l in leverages:
+        for lu in leverages_and_units:
             for sl in stop_losses:
                 for psa in pct_of_starting_assets:
-                    adj_leverage, loss_limit = get_adjusted_leverage(
-                        stop_loss=sl, max_leverage=l, pct_of_starting_assets=psa,
-                        loss_limit_fraction=llf)
+                    adj_leverage, adj_units, loss_limit = get_adjusted_leverage_and_units(
+                        stop_loss=sl, max_leverage=lu[0], pct_of_starting_assets=psa,
+                        loss_limit_fraction=llf, max_units=lu[1])
                     results.append(
                         {"psa": psa,
                          "sl": sl,
-                         "l": l,
+                         "l": lu[0],
+                         "u": lu[1],
                          "llf": llf,
                          "adj_leverage": adj_leverage,
+                         "adj_units": adj_units,
                          "loss_limit": loss_limit,
                          "potential_loss": round(sl / 100 * adj_leverage, 3)})
     with open("test/test_files/expected_adjusted_leverages.json") as _f:

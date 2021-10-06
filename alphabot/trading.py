@@ -101,19 +101,20 @@ def open_trade(
     else:
         direction = "short"
 
-    adj_leverage = get_adjusted_leverage(
+    adj_leverage, adj_units, _ = get_adjusted_leverage_and_units(
         stop_loss=sl_pct,
         max_leverage=leverage,
         pct_of_starting_assets=pct_of_starting_assets,
-        loss_limit_fraction=loss_limit_fraction
-    )[0]
+        loss_limit_fraction=loss_limit_fraction,
+        max_units=units
+    )
 
     base_trade = get_base_trade(
         account_id=account_id,
         pair=pair,
         _type=_type,
         leverage=adj_leverage,
-        units=units,
+        units=adj_units,
         user=user,
         strat=strat,
         note=f"{description} {direction}",
@@ -392,19 +393,22 @@ def take_partial_profit(
     return _trade_status
 
 
-def get_adjusted_leverage(stop_loss, max_leverage, pct_of_starting_assets, loss_limit_fraction):
+def get_adjusted_leverage_and_units(stop_loss, max_leverage, pct_of_starting_assets, loss_limit_fraction, max_units):
     if not loss_limit_fraction:  # llf not configured, or disabled (set to 0)
         print(f"Leverage not adjusted because loss limit fraction set to 0 or not configured")
-        return max_leverage, 0
+        return max_leverage, max_units, 0
     if pct_of_starting_assets is None:
         print(f"Leverage not adjusted because pct of starting assets not configured")
-        return max_leverage, 0
+        return max_leverage, max_units, 0
     loss_limit = max(0.1, round(pct_of_starting_assets * loss_limit_fraction / 100, 3))
     potential_loss = stop_loss / 100 * max_leverage
     if (potential_loss <= loss_limit) or max_leverage == 1:
         # there are no problems.  leverage is fine
-        return max_leverage, loss_limit
+        print(f"Leverage not adjusted because potential loss is within limits, or configured leverage is 1")
+        return max_leverage, max_units, loss_limit
     # max with 1 to avoid sub-1 lev. Multiple both by 100 to avoid float division imprecision
     adj_leverage = max(1, (loss_limit * 100) // stop_loss)
-    adj_leverage = min(max_leverage, adj_leverage)  # make sure we don't exceed configured lev
-    return int(adj_leverage), loss_limit
+    adj_leverage = int(min(max_leverage, adj_leverage))  # make sure we don't exceed configured lev
+    adj_units = int(max(1, max_units * (adj_leverage / max_leverage)))
+    print(f"Leverage adjusted from {max_leverage} to {adj_leverage}, units adjusted from {max_units} to {adj_units}")
+    return adj_leverage, adj_units, loss_limit
