@@ -3,12 +3,13 @@
   "BTC_L1": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.1,
       "sl_pct": 10,
+      "sl_trail": true,
       "tp_pct": 10,
-      "tp_trail": null,
       "units": 1,
-      "reset_tsl": false,
-      "tsl_reset_points": [
+      "reset_sl": false,
+      "sl_reset_points": [
         [
           0.15,
           -0.1
@@ -97,11 +98,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-01 13:38",
       "last_entry_direction": "short",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": 0,
       "max_profit_this_entry": 0.33,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": 0.29,
       "took_partial_profit": false
     }
@@ -109,13 +110,15 @@
   "BTC_L2": {
     "config": {
       "leverage": 5,
+      "loss_limit_fraction": 0.2,
+      "pct_of_starting_assets": 100,
       "sl_pct": 10,
+      "sl_trail": true,
       "tp_pct": 0.15,
-      "tp_trail": null,
       "units": 2,
-      "reset_tsl": false,
+      "reset_sl": false,
       "tp_pct_2": 0.25,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           0.25,
           -0.1
@@ -200,11 +203,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-06 05:19 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": -0.09,
       "max_profit_this_entry": 0.05,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.08,
       "took_partial_profit": false
     }
@@ -212,12 +215,13 @@
   "BTC_L3": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.3,
       "sl_pct": 10,
+      "sl_trail": false,
       "tp_pct": 10,
-      "tp_trail": null,
       "units": 1,
-      "reset_tsl": false,
-      "tsl_reset_points": [
+      "reset_sl": false,
+      "sl_reset_points": [
         [
           0.15,
           -0.1
@@ -409,11 +413,11 @@
       "profit_std_dev": 0.31,
       "entry_time": "07-08 16:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": -0.33,
       "max_profit_this_entry": 0.21,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.24,
       "took_partial_profit": false,
       "trade_id": null,
@@ -423,12 +427,14 @@
   "BTC_L4": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.4,
+      "pct_of_starting_assets": 100,
       "sl_pct": 10,
+      "sl_trail": false,
       "tp_pct": 10,
-      "tp_trail": null,
       "units": 2,
-      "reset_tsl": false,
-      "tsl_reset_points": [
+      "reset_sl": false,
+      "sl_reset_points": [
         [
           0.15,
           -0.1
@@ -620,10 +626,10 @@
       "profit_std_dev": 0.29,
       "entry_time": "07-08 16:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": -0.34,
       "max_profit_this_entry": 0.2,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.24,
       "took_partial_profit": false,
       "profit_logged": true,
@@ -634,12 +640,13 @@
   "BTC_L5": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.5,
       "sl_pct": 0.5,
+      "sl_trail": false,
       "tp_pct": 10,
-      "tp_trail": null,
       "units": 2,
-      "reset_tsl": true,
-      "tsl_reset_points": [
+      "reset_sl": true,
+      "sl_reset_points": [
         [
           0.2,
           0
@@ -689,7 +696,7 @@
           -1.9
         ]
       ],
-      "description": "latham BTC_L5 <15m TP and TSL>",
+      "description": "latham BTC_L5 <15m TP and SL>",
       "tp_pct_2": 2.5
     },
     "status": {
@@ -796,11 +803,11 @@
       "profit_std_dev": 0.28,
       "entry_time": "07-08 16:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 0.5,
+      "last_sl_set": 0.5,
       "max_drawdown_this_entry": -0.29,
       "max_profit_this_entry": 0.19,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.29,
       "took_partial_profit": false,
       "trade_id": null,
@@ -821,11 +828,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-07 22:00 UTC",
       "last_entry_direction": "short",
-      "last_tsl_set": 0,
+      "last_sl_set": 0,
       "max_drawdown_this_entry": 0,
       "max_profit_this_entry": -100000,
       "profit_logged": true,
-      "tsl_reset_points_hit": [
+      "sl_reset_points_hit": [
         2
       ],
       "most_recent_profit": 0,
@@ -836,12 +843,13 @@
     },
     "config": {
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0.3,
+      "reset_sl": true,
       "sl_pct": 3,
+      "sl_trail": true,
       "tp_pct": 10,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           2,
           0
@@ -856,7 +864,7 @@
         ]
       ],
       "units": 2,
-      "description": "latham BTC_M3 <1h TSL/TP>"
+      "description": "latham BTC_M3 <1h SL/TP>"
     }
   },
   "BTC_M4": {
@@ -873,23 +881,24 @@
       "profit_std_dev": 0,
       "entry_time": "07-07 23:05 UTC",
       "last_entry_direction": "short",
-      "last_tsl_set": 1,
+      "last_sl_set": 1,
       "max_drawdown_this_entry": -0.1,
       "max_profit_this_entry": 1.71,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": 1.18,
       "took_partial_profit": true,
       "mean_potential_profit": 0
     },
     "config": {
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0.4,
+      "reset_sl": true,
       "sl_pct": 1,
+      "sl_trail": true,
       "tp_pct": 10,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           2,
           -0.1
@@ -904,7 +913,7 @@
         ]
       ],
       "units": 2,
-      "description": "latham BTC_M4 < 5/15 A2A HTSL>"
+      "description": "latham BTC_M4 < 5/15 A2A HSL>"
     }
   },
   "BTC_M5": {
@@ -921,11 +930,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-07 01:02 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 0.2,
+      "last_sl_set": 0.2,
       "max_drawdown_this_entry": -0.62,
       "max_profit_this_entry": 0.23,
       "profit_logged": true,
-      "tsl_reset_points_hit": [
+      "sl_reset_points_hit": [
         0.2
       ],
       "most_recent_profit": 0.23,
@@ -934,12 +943,13 @@
     },
     "config": {
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0.5,
+      "reset_sl": true,
       "sl_pct": 2,
+      "sl_trail": false,
       "tp_pct": 10,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           4,
           -2.75
@@ -950,7 +960,7 @@
         ]
       ],
       "units": 2,
-      "description": "latham BTC_M5 <15m A2A HTSL>"
+      "description": "latham BTC_M5 <15m A2A HSL>"
     }
   },
   "BTC_L6": {
@@ -1046,11 +1056,11 @@
       "profit_std_dev": 0.3,
       "entry_time": "07-08 16:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": -0.1,
+      "last_sl_set": -0.1,
       "max_drawdown_this_entry": -0.08,
       "max_profit_this_entry": 0.27,
       "profit_logged": true,
-      "tsl_reset_points_hit": [
+      "sl_reset_points_hit": [
         0.25
       ],
       "most_recent_profit": 0.13,
@@ -1059,13 +1069,15 @@
       "mean_potential_profit": 0.12
     },
     "config": {
-      "description": "latham BTC_L6 <15m TSL>",
+      "description": "latham BTC_L6 <15m SL>",
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0,
+      "pct_of_starting_assets": 100,
+      "reset_sl": true,
       "sl_pct": 10,
+      "sl_trail": false,
       "tp_pct": 10,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           0.25,
           -0.1
@@ -1171,11 +1183,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-08 17:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 0.5,
+      "last_sl_set": 0.5,
       "max_drawdown_this_entry": -0.11,
       "max_profit_this_entry": 0.32,
       "profit_logged": true,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.1,
       "took_partial_profit": false,
       "mean_potential_profit": 0.32,
@@ -1183,12 +1195,13 @@
     },
     "config": {
       "leverage": 1,
-      "reset_tsl": false,
+      "loss_limit_fraction": 0.1,
+      "reset_sl": false,
       "sl_pct": 0.5,
+      "sl_trail": true,
       "tp_pct": 5,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           0.8,
           0
@@ -1220,13 +1233,13 @@
       "profit_std_dev": 0,
       "entry_time": "07-07 14:07 UTC",
       "last_entry_direction": "short",
-      "last_tsl_set": -0.75,
+      "last_sl_set": -0.75,
       "max_drawdown_this_entry": -0.13,
       "max_profit_this_entry": 1.26,
       "most_recent_profit": 0.55,
       "profit_logged": true,
       "took_partial_profit": true,
-      "tsl_reset_points_hit": [
+      "sl_reset_points_hit": [
         0.35,
         1
       ],
@@ -1235,12 +1248,13 @@
     "config": {
       "description": "malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>",
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0.1,
+      "reset_sl": true,
       "sl_pct": 0.75,
+      "sl_trail": false,
       "tp_pct": 6,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           0.5,
           0.5
@@ -1275,11 +1289,11 @@
       "profit_std_dev": 0,
       "entry_time": "07-08 17:35 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 1,
+      "last_sl_set": 1,
       "max_drawdown_this_entry": -0.54,
       "max_profit_this_entry": 0.16,
       "profit_logged": false,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.33,
       "took_partial_profit": false,
       "mean_potential_profit": 0,
@@ -1287,12 +1301,13 @@
     },
     "config": {
       "leverage": 1,
-      "reset_tsl": true,
+      "loss_limit_fraction": 0.2,
+      "reset_sl": true,
       "sl_pct": 1,
+      "sl_trail": false,
       "tp_pct": 10,
       "tp_pct_2": null,
-      "tp_trail": null,
-      "tsl_reset_points": [
+      "sl_reset_points": [
         [
           1,
           1
@@ -1311,7 +1326,7 @@
         ]
       ],
       "units": 2,
-      "description": "malcolm BTC_M2 <30m A2A HTSL>"
+      "description": "malcolm BTC_M2 <30m A2A HSL>"
     }
   }
 },{

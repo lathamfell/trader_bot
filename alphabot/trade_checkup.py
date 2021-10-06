@@ -46,7 +46,7 @@ def trade_checkup(logger):
             #    description=description, logger=logger, trade_id=trade_id, user=user
             # )
 
-            new_tsl = check_tsl(
+            new_sl = check_sl(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
                 strat=strat,
@@ -65,7 +65,7 @@ def trade_checkup(logger):
                 strat=strat,
                 logger=logger,
                 coll=coll,
-                new_tsl=new_tsl,
+                new_sl=new_sl,
             )
 
     return "Trade checkup complete"
@@ -106,13 +106,13 @@ def check_take_profits(
     return _trade_status
 
 
-def check_tsl(
+def check_sl(
     _trade_status, description, strat_states, strat, user, trade_id, py3c, coll, logger
 ):
     if not h.is_trade_open(_trade_status=_trade_status):
-        # logger.debug(f"{description} not in a trade, not checking TSL resets")
+        # logger.debug(f"{description} not in a trade, not checking SL resets")
         return
-    sl_price, sl_trigger, new_tsl = get_tsl_reset(
+    sl_price, sl_trigger, new_sl = get_sl_reset(
         _trade_status=_trade_status,
         strat_states=strat_states,
         description=description,
@@ -139,8 +139,8 @@ def check_tsl(
     except IndexError:
         # only one TP
         pass
-    tp_trail = _trade_status["take_profit"]["steps"][0]["trailing"]["percent"]
     sl_pct = strat_states[strat]["config"]["sl_pct"]
+    sl_trail = strat_states[strat]["config"]["sl_trail"]
     description = strat_states[strat]["config"].get("description")
 
     update_trade = trading.get_update_trade(
@@ -149,13 +149,13 @@ def check_tsl(
         units=units,
         tp_price_1=tp_price_1,
         tp_price_2=tp_price_2,
-        tp_trail=tp_trail,
         sl_price=sl_price,
         sl_pct=sl_pct,
+        sl_trail=sl_trail,
         description=description,
         logger=logger,
     )
-    print(f"{description} sending update trade while resetting TSL: {update_trade}")
+    print(f"{description} sending update trade while resetting SL: {update_trade}")
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
         action="update",
@@ -163,8 +163,8 @@ def check_tsl(
         payload=update_trade,
     )
     if update_trade_error.get("error"):
-        print(f"{description} error resetting TSL, {update_trade_error['msg']}")
-        print(f"{description} closing trade {trade_id} since we couldn't reset TSL")
+        print(f"{description} error resetting SL, {update_trade_error['msg']}")
+        print(f"{description} closing trade {trade_id} since we couldn't reset SL")
         sleep(1)
         trading.close_trade(
             py3c=py3c,
@@ -179,12 +179,12 @@ def check_tsl(
     set_command = {}
     direction = strat_states[strat]["status"].get("last_entry_direction")
     if sl_trigger:
-        tsl_reset_points_hit = strat_states[strat]["status"]["tsl_reset_points_hit"]
-        tsl_reset_points_hit.append(sl_trigger)
-        set_command[f"{strat}.status.tsl_reset_points_hit"] = tsl_reset_points_hit
-        # save the most recent tsl set, for convenience
-        set_command[f"{strat}.status.last_tsl_set"] = new_tsl
-        print(f"{description} {direction} {trade_id} set TSL to {new_tsl}")
+        sl_reset_points_hit = strat_states[strat]["status"]["sl_reset_points_hit"]
+        sl_reset_points_hit.append(sl_trigger)
+        set_command[f"{strat}.status.sl_reset_points_hit"] = sl_reset_points_hit
+        # save the most recent sl set, for convenience
+        set_command[f"{strat}.status.last_sl_set"] = new_sl
+        print(f"{description} {direction} {trade_id} set SL to {new_sl}")
 
     coll.update_one(
         {"_id": user},
@@ -192,58 +192,58 @@ def check_tsl(
         upsert=True,
     )
 
-    if new_tsl:
-        return new_tsl
+    if new_sl:
+        return new_sl
 
 
-def get_tsl_reset(
+def get_sl_reset(
     _trade_status, description, strat_states, strat, user, trade_id, logger
 ):
     try:
-        reset_tsl = strat_states[strat]["config"]["reset_tsl"]
-        tsl_reset_points = strat_states[strat]["config"]["tsl_reset_points"]
+        reset_sl = strat_states[strat]["config"]["reset_sl"]
+        sl_reset_points = strat_states[strat]["config"]["sl_reset_points"]
     except KeyError:
         print(
-            f"{description} skipping TSL reset check because missing a TSL reset config item. "
+            f"{description} skipping SL reset check because missing a SL reset config item. "
             f"Strat state is {strat_states[strat]}"
         )
         return None, None, None
-    if not reset_tsl:
-        # logger.debug(f"{user} {strat} has TSL reset disabled, skipping")
+    if not reset_sl:
+        # logger.debug(f"{user} {strat} has SL reset disabled, skipping")
         return None, None, None
     profit, roe = h.get_profit_and_roe(_trade_status)
     direction = strat_states[strat]["status"].get("last_entry_direction")
-    tsl_reset_points_hit = strat_states[strat]["status"]["tsl_reset_points_hit"]
-    for tsl_reset_point in tsl_reset_points:
-        sl_trigger = tsl_reset_point[0]
-        new_tsl = tsl_reset_point[1]
-        if sl_trigger not in tsl_reset_points_hit:
+    sl_reset_points_hit = strat_states[strat]["status"]["sl_reset_points_hit"]
+    for sl_reset_point in sl_reset_points:
+        sl_trigger = sl_reset_point[0]
+        new_sl = sl_reset_point[1]
+        if sl_trigger not in sl_reset_points_hit:
             if profit < sl_trigger:
                 print(
-                    f"{description} {direction} {trade_id} waiting for next TSL trigger {tsl_reset_point[0]}"
+                    f"{description} {direction} {trade_id} waiting for next SL trigger {sl_reset_point[0]}"
                 )
                 return None, None, None
-            # all right, get new TSL!
+            # all right, get new SL!
 
             _type = _trade_status["position"]["type"]
             trade_entry = h.get_trade_entry(_trade_status=_trade_status)
             if _type == "buy":
-                sl_price = trade_entry * (1 - new_tsl / 100)
+                sl_price = trade_entry * (1 - new_sl / 100)
             else:  # sell
-                sl_price = trade_entry * (1 + new_tsl / 100)
+                sl_price = trade_entry * (1 + new_sl / 100)
 
             print(
-                f"{description} {direction} {trade_id} resetting TSL to {new_tsl}% (price {round(sl_price, 2)}) because "
+                f"{description} {direction} {trade_id} resetting SL to {new_sl}% (price {round(sl_price, 2)}) because "
                 f"profit {profit}% >= {sl_trigger}%"
             )
 
-            return sl_price, sl_trigger, new_tsl
+            return sl_price, sl_trigger, new_sl
 
     return None, None, None
 
 
 def log_profit_and_roe(
-    _trade_status, trade_id, description, user, strat, logger, coll=None, new_tsl=None
+    _trade_status, trade_id, description, user, strat, logger, coll=None, new_sl=None
 ):
     if not coll:
         coll = h.get_mongo_coll()
@@ -260,10 +260,10 @@ def log_profit_and_roe(
     )
     leverage = strat_states[strat]["config"].get("leverage", 1)
     profit, roe = h.get_profit_and_roe(_trade_status=_trade_status)
-    if new_tsl:
-        last_tsl_set = new_tsl
+    if new_sl:
+        last_sl_set = new_sl
     else:
-        last_tsl_set = strat_states[strat]["status"].get("last_tsl_set")
+        last_sl_set = strat_states[strat]["status"].get("last_sl_set")
     direction = strat_states[strat]["status"].get("last_entry_direction")
     description = strat_states[strat]["config"].get("description")
 
@@ -291,15 +291,15 @@ def log_profit_and_roe(
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
-        if last_tsl_set is not None:
-            tsl_str = f" TSL was set at {1 * last_tsl_set}% ({round(1 * last_tsl_set * leverage, 2)}% ROE)."
+        if last_sl_set is not None:
+            sl_str = f" SL was set at {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
         else:
-            tsl_str = ""
+            sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
         print(
             f"{description} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
-            f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{tsl_str} "
+            f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
             f"Entry time: {entry_time}"
         )
         return

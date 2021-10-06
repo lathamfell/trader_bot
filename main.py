@@ -122,11 +122,13 @@ class AlertHandler:
         self.tp_pct = config["tp_pct"]
         self.tp_pct_2 = config.get("tp_pct_2")
         # logger.debug(f"got tp_pct {self.tp_pct} and tp_pct_2 {self.tp_pct_2} for alert {self.alert}")
-        self.tp_trail = config["tp_trail"]
         self.sl_pct = config["sl_pct"]
+        self.sl_trail = config["sl_trail"]
         self.leverage = config["leverage"]
         self.units = config["units"]
         self.description = config.get("description")
+        self.loss_limit_fraction = config.get("loss_limit_fraction")
+        self.pct_of_starting_assets = config.get("pct_of_starting_assets")
 
         # check status of previous trade, if there is one (whether open or closed)
         try:
@@ -258,14 +260,16 @@ class AlertHandler:
             units=self.units,
             tp_pct=self.tp_pct,
             tp_pct_2=self.tp_pct_2,
-            tp_trail=self.tp_trail,
             sl_pct=self.sl_pct,
+            sl_trail=self.sl_trail,
             user=self.user,
             strat=self.strat,
             description=self.description,
             logger=logger,
             price=self.price,
             coll=self.coll,
+            loss_limit_fraction=self.loss_limit_fraction,
+            pct_of_starting_assets=self.pct_of_starting_assets
         )
 
 

@@ -8,6 +8,7 @@ from freezegun import freeze_time
 import alphabot.helpers as h
 import test.helpers as th
 from test.helpers import MOCK_USER_ATTR
+from alphabot.trading import get_adjusted_leverage
 
 waiting_for_base_open_long_call_count = 0
 waiting_for_base_open_short_call_count = 0
@@ -117,7 +118,7 @@ def mock_py3c_request_side_effect_open_long(
             "order_type": "market",
             "conditional": {
                 "price": {"value": 29516.94, "type": "last"},
-                "trailing": {"enabled": True, "percent": 10},
+                "trailing": {"enabled": False, "percent": 10},
             },
         },
     }
@@ -169,7 +170,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
         "account_id": 30391847,
         "note": "latham BTC_L2 <1m Split TP> long",
         "pair": "BTC_BTCUSD_PERP",
-        "leverage": {"enabled": True, "type": "isolated", "value": 5},
+        "leverage": {"enabled": True, "type": "isolated", "value": 2},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
@@ -272,7 +273,7 @@ def mock_py3c_request_side_effect_open_short(
             "order_type": "market",
             "conditional": {
                 "price": {"value": 36307.48, "type": "last"},
-                "trailing": {"enabled": True, "percent": 10},
+                "trailing": {"enabled": False, "percent": 10},
             },
         },
     }
@@ -460,12 +461,13 @@ def test_config_update_of_description(client):
             config={
                 "description": new_description,
                 "tp_pct": "10",
-                "tp_trail": None,
                 "sl_pct": "10",
+                "sl_trail": False,
                 "leverage": "1",
+                "loss_limit_fraction": 0.4,
                 "units": "2",
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -495,7 +497,6 @@ def test_config_update_of_description(client):
         "test/test_files/expected_strat_config_after_description_update.json"
     ) as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
@@ -516,12 +517,13 @@ def test_config_update_of_tp_pct(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": new_tp_pct,
-                "tp_trail": None,
                 "sl_pct": "10",
+                "sl_trail": False,
                 "leverage": "1",
+                "loss_limit_fraction": 0.4,
                 "units": "2",
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -548,7 +550,6 @@ def test_config_update_of_tp_pct(client):
     actual = coll.find_one({"_id": user})[strat]
     with open("test/test_files/expected_strat_config_after_tp_pct_update.json") as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
@@ -570,12 +571,13 @@ def test_config_update_of_tp_pct_2(client):
                 "description": "15m Split TPs",
                 "tp_pct": 10,
                 "tp_pct_2": new_tp_pct_2,
-                "tp_trail": None,
                 "sl_pct": 10,
+                "sl_trail": False,
                 "leverage": 1,
+                "loss_limit_fraction": 0.4,
                 "units": 2,
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -602,7 +604,6 @@ def test_config_update_of_tp_pct_2(client):
     actual = coll.find_one({"_id": user})[strat]
     with open("test/test_files/expected_strat_config_after_tp_pct_2_update.json") as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
@@ -623,12 +624,13 @@ def test_config_update_of_sl_pct(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": 10,
-                "tp_trail": None,
                 "sl_pct": new_sl_pct,
+                "sl_trail": False,
                 "leverage": 1,
+                "loss_limit_fraction": 0.4,
                 "units": 2,
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -655,17 +657,16 @@ def test_config_update_of_sl_pct(client):
     actual = coll.find_one({"_id": user})[strat]
     with open("test/test_files/expected_strat_config_after_sl_pct_update.json") as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_reset_tsl(client):
+def test_config_update_of_sl_trail(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
     user = "latham"
     strat = "BTC_L4"
-    new_reset_tsl = True  # was False
+    new_sl_trail = True  # was False
 
     client.post(
         "/",
@@ -676,12 +677,66 @@ def test_config_update_of_reset_tsl(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": 10,
-                "tp_trail": None,
                 "sl_pct": 10,
+                "sl_trail": new_sl_trail,
                 "leverage": 1,
+                "loss_limit_fraction": 0.4,
                 "units": 2,
-                "reset_tsl": new_reset_tsl,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
+                    ["0.15", "-0.1"],
+                    ["0.2", "-0.15"],
+                    ["0.3", "-0.19"],
+                    ["0.4", "-0.28"],
+                    ["0.5", "-0.37"],
+                    ["0.6", "-0.46"],
+                    ["0.7", "-0.55"],
+                    ["0.8", "-0.63"],
+                    ["0.9", "-0.72"],
+                    ["1", "-0.8"],
+                    ["2", "-1.7"],
+                    ["3", "-2.6"],
+                    ["4", "-3.5"],
+                    ["5", "-4.4"],
+                    ["6", "-5.3"],
+                    ["7", "-6.2"],
+                    ["8", "-7.1"],
+                    ["9", "-8"],
+                ]
+            }
+        )
+    )
+
+    actual = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/expected_strat_config_after_sl_trail_update.json") as _f:
+        expected = json.load(_f)[strat]
+    assert actual == expected
+
+
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_of_reset_sl(client):
+    coll = th.reset_test_coll("baseline_test_coll_1.json")
+
+    user = "latham"
+    strat = "BTC_L4"
+    new_reset_sl = True  # was False
+
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "15m Split TPs",
+                "tp_pct": 10,
+                "sl_pct": 10,
+                "sl_trail": False,
+                "leverage": 1,
+                "loss_limit_fraction": 0.4,
+                "units": 2,
+                "reset_sl": new_reset_sl,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -707,20 +762,19 @@ def test_config_update_of_reset_tsl(client):
 
     actual = coll.find_one({"_id": user})[strat]
     with open(
-        "test/test_files/expected_strat_config_after_reset_tsl_update.json"
+        "test/test_files/expected_strat_config_after_reset_sl_update.json"
     ) as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_tsl_reset_points(client):
+def test_config_update_of_sl_reset_points(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
     user = "latham"
     strat = "BTC_L4"
-    new_tsl_reset_points = [["0.5", "0.0"], ["1", "-0.25"]]
+    new_sl_reset_points = [["0.5", "0.0"], ["1", "-0.25"]]
 
     client.post(
         "/",
@@ -731,22 +785,22 @@ def test_config_update_of_tsl_reset_points(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": 10,
-                "tp_trail": None,
                 "sl_pct": 10,
+                "sl_trail": False,
                 "leverage": 1,
+                "loss_limit_fraction": 0.4,
                 "units": 2,
-                "reset_tsl": False,
-                "tsl_reset_points": new_tsl_reset_points,
+                "reset_sl": False,
+                "sl_reset_points": new_sl_reset_points,
             },
         ),
     )
 
     actual = coll.find_one({"_id": user})[strat]
     with open(
-        "test/test_files/expected_strat_config_after_tsl_reset_points_update.json"
+        "test/test_files/expected_strat_config_after_sl_reset_points_update.json"
     ) as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
@@ -767,12 +821,13 @@ def test_config_update_of_leverage(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": 10,
-                "tp_trail": None,
                 "sl_pct": 10,
+                "sl_trail": False,
                 "leverage": new_leverage,
+                "loss_limit_fraction": 0.4,
                 "units": 2,
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -799,7 +854,6 @@ def test_config_update_of_leverage(client):
     actual = coll.find_one({"_id": user})[strat]
     with open("test/test_files/expected_strat_config_after_leverage_update.json") as _f:
         expected = json.load(_f)[strat]
-
     assert actual == expected
 
 
@@ -820,12 +874,13 @@ def test_config_update_of_units(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": 10,
-                "tp_trail": None,
                 "sl_pct": 10,
+                "sl_trail": False,
                 "leverage": 1,
+                "loss_limit_fraction": 0.4,
                 "units": new_units,
-                "reset_tsl": False,
-                "tsl_reset_points": [
+                "reset_sl": False,
+                "sl_reset_points": [
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -852,7 +907,173 @@ def test_config_update_of_units(client):
     actual = coll.find_one({"_id": user})[strat]
     with open("test/test_files/expected_strat_config_after_units_update.json") as _f:
         expected = json.load(_f)[strat]
+    assert actual == expected
 
+
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_of_loss_limit_fraction(client):
+    coll = th.reset_test_coll("baseline_test_coll_2.json")
+
+    user = "malcolm"
+    strat = "ETH_M1"
+    new_loss_limit_fraction = 0.3
+
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "15m ETH Fo Shizzle on da A2A",
+                "tp_pct": 6,
+                "sl_pct": 0.5,
+                "sl_trail": False,
+                "leverage": 1,
+                "loss_limit_fraction": new_loss_limit_fraction,
+                "units": 2,
+                "reset_sl": True,
+                "sl_reset_points": [
+                    [
+                      0.25,
+                      0.5
+                    ],
+                    [
+                      0.35,
+                      0.5
+                    ],
+                    [
+                      0.5,
+                      0.5
+                    ],
+                    [
+                      0.75,
+                      0.5
+                    ],
+                    [
+                      0.1,
+                      0.5
+                    ],
+                    [
+                      1.5,
+                      -0.2
+                    ],
+                    [
+                      3,
+                      -2.6
+                    ]
+                ]
+            }
+        )
+    )
+
+    actual = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/expected_strat_config_after_loss_limit_fraction_update.json") as _f:
+        expected = json.load(_f)[strat]
+    assert actual == expected
+
+
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_of_pct_of_starting_assets(client):
+    coll = th.reset_test_coll("baseline_test_coll_1.json")
+
+    user = "latham"
+    strat = "BTC_L6"
+    new_pct_of_starting_assets = 125
+
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "15m SL",
+                "tp_pct": 10,
+                "sl_pct": 10,
+                "sl_trail": False,
+                "leverage": 1,
+                "loss_limit_fraction": 0,
+                "pct_of_starting_assets": new_pct_of_starting_assets,
+                "units": 1,
+                "reset_sl": True,
+                "sl_reset_points": [
+                    [
+                      0.25,
+                      -0.1
+                    ],
+                    [
+                      0.35,
+                      -0.19
+                    ],
+                    [
+                      0.45,
+                      -0.28
+                    ],
+                    [
+                      0.55,
+                      -0.37
+                    ],
+                    [
+                      0.65,
+                      -0.46
+                    ],
+                    [
+                      0.75,
+                      -0.55
+                    ],
+                    [
+                      0.85,
+                      -0.64
+                    ],
+                    [
+                      0.95,
+                      0.73
+                    ],
+                    [
+                      1,
+                      -0.75
+                    ],
+                    [
+                      2,
+                      -1.7
+                    ],
+                    [
+                      3,
+                      -2.6
+                    ],
+                    [
+                      4,
+                      -3.5
+                    ],
+                    [
+                      5,
+                      -4.4
+                    ],
+                    [
+                      6,
+                      -5.3
+                    ],
+                    [
+                      7,
+                      -6.2
+                    ],
+                    [
+                      8,
+                      -7.1
+                    ],
+                    [
+                      9,
+                      -8
+                    ]
+                  ]
+            }
+        )
+    )
+
+    actual = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/expected_strat_config_after_pct_of_starting_assets_update.json") as _f:
+        expected = json.load(_f)[strat]
     assert actual == expected
 
 
@@ -884,14 +1105,19 @@ def test_open_long_with_leverage(client, mock_open_long_with_leverage):
     user = "latham"
     strat = "BTC_L2"
 
-    #with open("test/test_files/BTC_L2_pre_open_long.json") as _f:
-    #    pre_open_state = json.load(_f)[strat]
+    with open("test/test_files/BTC_L2_pre_open_long.json") as _f:
+        pre_open_state = json.load(_f)[strat]
 
-    #coll.update_one({"_id": user}, {"$set"})
+    coll.update_one({"_id": user}, {"$set": {f"{strat}": pre_open_state}})
 
+    # leverage will be adjusted from 5 to 2 with this loss limit config
     client.post("/", json=dict(user=user, strat=strat, long=True, price=53001))
 
     post_state = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/BTC_L2_post_open_long.json") as _f:
+        expected_post_open_state = json.load(_f)[strat]
+
+    assert post_state == expected_post_open_state
 
 
 @patch("main.USER_ATTR", MOCK_USER_ATTR)
@@ -932,7 +1158,6 @@ def test_close_long(client, mock_main_py3c_close_long):
     post_state = coll.find_one({"_id": user})[strat]
     with open("test/test_files/BTC_L4_post_close_long.json") as _f:
         expected_post_close_state = json.load(_f)[strat]
-
     assert post_state == expected_post_close_state
 
 
@@ -953,7 +1178,6 @@ def test_close_short(client, mock_main_py3c_close_short):
     post_state = coll.find_one({"_id": user})[strat]
     with open("test/test_files/BTC_L4_post_close_short.json") as _f:
         expected_post_close_state = json.load(_f)[strat]
-
     assert post_state == expected_post_close_state
 
 
@@ -967,8 +1191,8 @@ def test_trade_checkup(client, mock_tc_py3c):
     #   update their expected json accordingly
     with open("test/test_files/expected_post_trade_checkup.json") as _f:
         expected_post_close_state = json.load(_f)
-        assert expected_post_close_state[0] == coll.find_one({"_id": "latham"})
-        assert expected_post_close_state[1] == coll.find_one({"_id": "malcolm"})
+        assert coll.find_one({"_id": "latham"}) == expected_post_close_state[0]
+        assert coll.find_one({"_id": "malcolm"}) == expected_post_close_state[1]
 
 
 @patch("main.USER_ATTR", MOCK_USER_ATTR)
@@ -987,7 +1211,7 @@ def test_opening_two_longs(
         trade_id="7876616",
         user=user,
         strat=strat,
-        description=f"{user} {strat} <1h TSL/TP>",
+        description=f"{user} {strat} <1h SL/TP>",
         logger=None,
     )
     mock_open_trade.assert_called_with(
@@ -1000,18 +1224,44 @@ def test_opening_two_longs(
         units=2,
         tp_pct=10,
         tp_pct_2=None,
-        tp_trail=None,
         sl_pct=3,
+        sl_trail=True,
         user=user,
         strat=strat,
-        description=f"{user} {strat} <1h TSL/TP>",
+        description=f"{user} {strat} <1h SL/TP>",
         logger=None,
         price=19010,
         coll=coll,
+        loss_limit_fraction=0.3,
+        pct_of_starting_assets=None
     )
 
 
+def test_get_adjusted_leverage():
+    loss_limit_fractions = [None, 0, 0.1, 0.2, 0.5, 15]
+    leverages = [1, 2, 5, 10]
+    stop_losses = [1, 2, 4, 5, 10]
+    pct_of_starting_assets = [None, 50, 100, 150, 200, 250, 300, 401, 499, 567, 600, 10099]
+    results = []
 
+    for llf in loss_limit_fractions:
+        for l in leverages:
+            for sl in stop_losses:
+                for psa in pct_of_starting_assets:
+                    adj_leverage, loss_limit = get_adjusted_leverage(
+                        stop_loss=sl, max_leverage=l, pct_of_starting_assets=psa,
+                        loss_limit_fraction=llf)
+                    results.append(
+                        {"psa": psa,
+                         "sl": sl,
+                         "l": l,
+                         "llf": llf,
+                         "adj_leverage": adj_leverage,
+                         "loss_limit": loss_limit,
+                         "potential_loss": round(sl / 100 * adj_leverage, 3)})
+    with open("test/test_files/expected_adjusted_leverages.json") as _f:
+        expected = json.load(_f)
+    assert results == expected
 
 
 def test_close_long_but_no_trade_is_open(client):

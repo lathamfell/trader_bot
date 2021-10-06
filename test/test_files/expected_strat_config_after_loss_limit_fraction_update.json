@@ -1,0 +1,78 @@
+{
+  "ETH_M1": {
+    "status": {
+      "config_change_time": "07-08 14:45 UTC",
+      "drawdown_std_dev": 0,
+      "drawdowns": [
+      ],
+      "full_profit_history": {
+      },
+      "median_drawdown": 0,
+      "median_potential_profit": 0,
+      "paper_assets": 10000,
+      "potential_paper_assets": 10000,
+      "potential_profits": [
+      ],
+      "profit_std_dev": 0,
+      "entry_time": "07-09 13:00 UTC",
+      "last_entry_direction": "long",
+      "last_sl_set": -0.2,
+      "max_drawdown_this_entry": -0.16,
+      "max_profit_this_entry": 2.01,
+      "most_recent_profit": 0.76,
+      "profit_logged": true,
+      "took_partial_profit": true,
+      "sl_reset_points_hit": [
+        0.25,
+        0.35,
+        0.5,
+        0.75,
+        0.1,
+        1.5
+      ],
+      "mean_potential_profit": 0,
+      "trade_id": null
+    },
+    "config": {
+      "description": "malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>",
+      "leverage": 1,
+      "loss_limit_fraction": 0.3,
+      "reset_sl": true,
+      "sl_pct": 0.5,
+      "sl_trail": false,
+      "tp_pct": 6,
+      "tp_pct_2": null,
+      "sl_reset_points": [
+        [
+          0.25,
+          0.5
+        ],
+        [
+          0.35,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.75,
+          0.5
+        ],
+        [
+          0.1,
+          0.5
+        ],
+        [
+          1.5,
+          -0.2
+        ],
+        [
+          3,
+          -2.6
+        ]
+      ],
+      "units": 2
+    }
+  }
+}

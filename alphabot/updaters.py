@@ -57,14 +57,6 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing tp_pct_2 from {old_tp_pct_2} to {new_tp_pct_2}")
 
-    new_tp_trail = new_config.get("tp_trail")
-    old_tp_trail = current_config.get("tp_trail")
-    if new_tp_trail:
-        new_tp_trail = float(new_tp_trail)
-    if new_tp_trail != old_tp_trail:
-        reset_profits = True
-        print(f"Changing tp_trail from {old_tp_trail} to {new_tp_trail}")
-
     new_sl_pct = new_config.get("sl_pct")
     old_sl_pct = current_config.get("sl_pct")
     if new_sl_pct:
@@ -73,22 +65,28 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing sl_pct from {old_sl_pct} to {new_sl_pct}")
 
-    new_reset_tsl = h.screen_for_str_bools(new_config.get("reset_tsl"))
-    old_reset_tsl = current_config.get("reset_tsl")
-    if new_reset_tsl != old_reset_tsl:
+    new_sl_trail = h.screen_for_str_bools(new_config.get("sl_trail"))
+    old_sl_trail = current_config.get("sl_trail")
+    if new_sl_trail != old_sl_trail:
         reset_profits = True
-        print(f"Changing reset_tsl from {old_reset_tsl} to {new_reset_tsl}")
+        print(f"Changing sl_trail from {old_sl_trail} to {new_sl_trail}")
 
-    new_tsl_reset_points = new_config.get("tsl_reset_points")
-    old_tsl_reset_points = current_config.get("tsl_reset_points")
-    if new_tsl_reset_points:
-        for tsl_reset_point in new_tsl_reset_points:
-            tsl_reset_point[0] = float(tsl_reset_point[0])
-            tsl_reset_point[1] = float(tsl_reset_point[1])
-    if new_tsl_reset_points != old_tsl_reset_points:
+    new_reset_sl = h.screen_for_str_bools(new_config.get("reset_sl"))
+    old_reset_sl = current_config.get("reset_sl")
+    if new_reset_sl != old_reset_sl:
+        reset_profits = True
+        print(f"Changing reset_sl from {old_reset_sl} to {new_reset_sl}")
+
+    new_sl_reset_points = new_config.get("sl_reset_points")
+    old_sl_reset_points = current_config.get("sl_reset_points")
+    if new_sl_reset_points:
+        for sl_reset_point in new_sl_reset_points:
+            sl_reset_point[0] = float(sl_reset_point[0])
+            sl_reset_point[1] = float(sl_reset_point[1])
+    if new_sl_reset_points != old_sl_reset_points:
         reset_profits = True
         print(
-            f"Changing tsl_reset_points from {old_tsl_reset_points} to {new_tsl_reset_points}"
+            f"Changing sl_reset_points from {old_sl_reset_points} to {new_sl_reset_points}"
         )
 
     new_leverage = new_config.get("leverage")
@@ -98,6 +96,21 @@ def config_update(request, logger):
     if new_leverage != old_leverage:
         reset_profits = True
         print(f"Changing leverage from {old_leverage} to {new_leverage}")
+
+    new_loss_limit_fraction = new_config.get("loss_limit_fraction")
+    old_loss_limit_fraction = current_config.get("loss_limit_fraction")
+    if new_loss_limit_fraction:
+        new_loss_limit_fraction = float(new_loss_limit_fraction)
+    if new_loss_limit_fraction != old_loss_limit_fraction:
+        reset_profits = True
+        print(f"Changing loss_limit_fraction from {old_loss_limit_fraction} to {new_loss_limit_fraction}")
+
+    new_pct_of_starting_assets = new_config.get("pct_of_starting_assets")
+    old_pct_of_starting_assets = current_config.get("pct_of_starting_assets")
+    if new_pct_of_starting_assets:
+        new_pct_of_starting_assets = int(new_pct_of_starting_assets)
+    if new_pct_of_starting_assets != old_pct_of_starting_assets:
+        print(f"Changing pct_of_starting_assets from {old_pct_of_starting_assets} to {new_pct_of_starting_assets}")
 
     new_units = new_config.get("units")
     old_units = current_config.get("units")
@@ -124,27 +137,29 @@ def config_update(request, logger):
         set_command = {}
         reset_str = ""
         print(
-            f"Not resetting paper assets because no config changes were made to TP, SL or leverage."
+            f"Not resetting paper assets because no config changes were made to TP, SL, leverage or loss limiter."
         )
 
     if new_tp_pct or new_tp_pct == 0:
         set_command[f"{strat}.config.tp_pct"] = new_tp_pct
     if new_tp_pct_2 or new_tp_pct_2 == 0 or new_tp_pct_2 is None:
         set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
-    if new_tp_trail or (
-        not new_tp_trail and "tp_trail" in new_config
-    ):  # cover tp_trail = null scenario
-        set_command[f"{strat}.config.tp_trail"] = new_tp_trail
     if new_sl_pct or new_sl_pct == 0:
         set_command[f"{strat}.config.sl_pct"] = new_sl_pct
+    if (new_sl_trail is True) or (new_sl_trail is False):
+        set_command[f"{strat}.config.sl_trail"] = new_sl_trail
     if new_leverage:
         set_command[f"{strat}.config.leverage"] = new_leverage
+    if new_loss_limit_fraction:
+        set_command[f"{strat}.config.loss_limit_fraction"] = new_loss_limit_fraction
+    if new_pct_of_starting_assets:
+        set_command[f"{strat}.config.pct_of_starting_assets"] = new_pct_of_starting_assets
     if new_units:
         set_command[f"{strat}.config.units"] = new_units
-    if (new_reset_tsl is True) or (new_reset_tsl is False):
-        set_command[f"{strat}.config.reset_tsl"] = new_reset_tsl
-    if new_tsl_reset_points:
-        set_command[f"{strat}.config.tsl_reset_points"] = new_tsl_reset_points
+    if (new_reset_sl is True) or (new_reset_sl is False):
+        set_command[f"{strat}.config.reset_sl"] = new_reset_sl
+    if new_sl_reset_points:
+        set_command[f"{strat}.config.sl_reset_points"] = new_sl_reset_points
     if full_new_description:
         set_command[f"{strat}.config.description"] = full_new_description
 

@@ -1,0 +1,116 @@
+{
+   "BTC_L2":{
+      "config":{
+         "description":"latham BTC_L2 <1m Split TP>",
+         "leverage":5,
+         "loss_limit_fraction": 0.2,
+         "pct_of_starting_assets": 100,
+         "reset_sl":false,
+         "sl_pct":10,
+         "sl_reset_points":[
+            [
+               0.25,
+               -0.1
+            ],
+            [
+               0.35,
+               -0.19
+            ],
+            [
+               0.45,
+               -0.28
+            ],
+            [
+               0.55,
+               -0.37
+            ],
+            [
+               0.65,
+               -0.46
+            ],
+            [
+               0.75,
+               -0.55
+            ],
+            [
+               0.85,
+               -0.64
+            ],
+            [
+               0.95,
+               0.73
+            ],
+            [
+               1,
+               -0.75
+            ],
+            [
+               2,
+               -1.7
+            ],
+            [
+               3,
+               -2.6
+            ],
+            [
+               4,
+               -3.5
+            ],
+            [
+               5,
+               -4.4
+            ],
+            [
+               6,
+               -5.3
+            ],
+            [
+               7,
+               -6.2
+            ],
+            [
+               8,
+               -7.1
+            ],
+            [
+               9,
+               -8
+            ]
+         ],
+         "sl_trail":true,
+         "tp_pct":0.15,
+         "tp_pct_2":0.25,
+         "units":2
+      },
+      "status":{
+         "config_change_time":"07-06 05:23 UTC",
+         "drawdown_std_dev":0,
+         "drawdowns":[
+
+         ],
+         "entry_time":"07-08 14:45 UTC",
+         "full_profit_history":{
+
+         },
+         "last_entry_direction":"long",
+         "last_sl_set":10,
+         "max_drawdown_this_entry":0,
+         "max_profit_this_entry":-100000,
+         "median_drawdown":0,
+         "median_potential_profit":0,
+         "most_recent_profit":0,
+         "paper_assets":10000,
+         "potential_paper_assets":10000,
+         "potential_profits":[
+
+         ],
+         "profit_logged":false,
+         "profit_std_dev":0,
+         "sl_reset_points_hit":[
+
+         ],
+         "took_partial_profit":false,
+         "trade_id":"6762491"
+      }
+   }
+}

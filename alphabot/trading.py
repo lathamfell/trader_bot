@@ -69,8 +69,8 @@ def open_trade(
     leverage,
     units,
     tp_pct,
-    tp_trail,
     sl_pct,
+    sl_trail,
     logger,
     description,
     price,
@@ -79,6 +79,8 @@ def open_trade(
     simulate_leverage=False,
     tp_pct_2=None,
     coll=None,
+    loss_limit_fraction=None,
+    pct_of_starting_assets=None
 ):
     # logger.debug(
     #    f"{user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
@@ -99,11 +101,18 @@ def open_trade(
     else:
         direction = "short"
 
+    adj_leverage = get_adjusted_leverage(
+        stop_loss=sl_pct,
+        max_leverage=leverage,
+        pct_of_starting_assets=pct_of_starting_assets,
+        loss_limit_fraction=loss_limit_fraction
+    )[0]
+
     base_trade = get_base_trade(
         account_id=account_id,
         pair=pair,
         _type=_type,
-        leverage=leverage,
+        leverage=adj_leverage,
         units=units,
         user=user,
         strat=strat,
@@ -176,9 +185,9 @@ def open_trade(
         units=units,
         tp_price_1=tp_price,
         tp_price_2=tp_price_2,
-        tp_trail=tp_trail,
         sl_price=sl_price,
         sl_pct=sl_pct,
+        sl_trail=sl_trail,
         description=description,
         logger=logger,
     )
@@ -214,7 +223,7 @@ def open_trade(
                 strat=strat,
                 trade_id=trade_id,
                 direction=direction,
-                tsl=sl_pct,
+                sl=sl_pct
             )
         },
         upsert=True,
@@ -255,14 +264,14 @@ def get_update_trade(
     tp_price_1,
     sl_price,
     sl_pct,
+    sl_trail,
     description,
     logger,
-    tp_price_2=None,
-    tp_trail=None,
+    tp_price_2=None
 ):
     # logger.debug(
     #    f"{user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, "
-    #    f"sl_price {sl_price}, sl_pct {sl_pct}, tp_trail {tp_trail}"
+    #    f"sl_price {sl_price}, sl_pct {sl_pct}"
     # )
     update_trade = {
         "id": trade_id,
@@ -282,15 +291,10 @@ def get_update_trade(
             "order_type": "market",
             "conditional": {
                 "price": {"value": sl_price, "type": "last"},
-                "trailing": {"enabled": True, "percent": sl_pct},
+                "trailing": {"enabled": sl_trail, "percent": sl_pct},
             },
         },
     }
-    # if tp_trail:
-    #    update_trade["take_profit"]["steps"][0]["trailing"] = {
-    #        "enabled": True,
-    #        "percent": tp_trail,
-    #    }
     if tp_price_2 is not None:
         update_trade["take_profit"]["steps"] = [
             {
@@ -329,6 +333,7 @@ def take_partial_profit(
             py3c=py3c, trade_id=trade_id, description=description, logger=logger
         )
     current_sl = _trade_status["stop_loss"]["conditional"]["price"]["value"]
+    current_sl_trail = _trade_status["stop_loss"]["conditional"]["trailing"]["enabled"]
     current_tp = h.get_last_tp_price(_trade_status=_trade_status)
     _type = _trade_status["position"]["type"]
     units = _trade_status["position"]["units"]["value"]
@@ -347,6 +352,7 @@ def take_partial_profit(
         tp_price_2=tp_price_2,
         sl_price=current_sl,
         sl_pct=None,
+        sl_trail=current_sl_trail,
         description=description,
         logger=logger,
     )
@@ -384,3 +390,21 @@ def take_partial_profit(
         f"{update_trade_data}"
     )
     return _trade_status
+
+
+def get_adjusted_leverage(stop_loss, max_leverage, pct_of_starting_assets, loss_limit_fraction):
+    if not loss_limit_fraction:  # llf not configured, or disabled (set to 0)
+        print(f"Leverage not adjusted because loss limit fraction set to 0 or not configured")
+        return max_leverage, 0
+    if pct_of_starting_assets is None:
+        print(f"Leverage not adjusted because pct of starting assets not configured")
+        return max_leverage, 0
+    loss_limit = max(0.1, round(pct_of_starting_assets * loss_limit_fraction / 100, 3))
+    potential_loss = stop_loss / 100 * max_leverage
+    if (potential_loss <= loss_limit) or max_leverage == 1:
+        # there are no problems.  leverage is fine
+        return max_leverage, loss_limit
+    # max with 1 to avoid sub-1 lev. Multiple both by 100 to avoid float division imprecision
+    adj_leverage = max(1, (loss_limit * 100) // stop_loss)
+    adj_leverage = min(max_leverage, adj_leverage)  # make sure we don't exceed configured lev
+    return int(adj_leverage), loss_limit

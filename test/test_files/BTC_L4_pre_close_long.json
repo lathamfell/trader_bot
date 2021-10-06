@@ -2,12 +2,13 @@
   "BTC_L4": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.4,
       "sl_pct": 10,
+      "sl_trail": false,
       "tp_pct": 10,
-      "tp_trail": null,
       "units": 2,
-      "reset_tsl": false,
-      "tsl_reset_points": [
+      "reset_sl": false,
+      "sl_reset_points": [
         [
           0.15,
           -0.1
@@ -212,10 +213,10 @@
       "profit_std_dev": 0.37,
       "entry_time": "07-09 21:20 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": 0,
       "max_profit_this_entry": 0.05,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": 0.05,
       "took_partial_profit": false,
       "profit_logged": false,

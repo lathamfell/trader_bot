@@ -2,8 +2,8 @@ import logging
 
 DEFAULT_STRAT_CONFIG = {
     "tp_pct": 0.2,
-    "tp_trail": None,
     "sl_pct": 0.2,
+    "sl_trail": False,
     "leverage": 1,
     "units": 1,
 }

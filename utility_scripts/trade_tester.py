@@ -1,10 +1,7 @@
-from alphabot.py3cw.request import Py3CW
-from time import sleep
 import logging
 
 from alphabot.config import USER_ATTR
-import alphabot.helpers as h
-import alphabot.trading as trading
+from alphabot.py3cw.request import Py3CW
 
 USER = "latham"
 
@@ -21,7 +18,6 @@ def main():
     _type = "buy"
     units = 2
     tp_pct = 10
-    tp_trail = None
     sl_pct = 10
 
 

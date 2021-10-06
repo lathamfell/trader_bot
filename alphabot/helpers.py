@@ -79,16 +79,16 @@ def send_email(to, subject, body=None):
     yagmail.SMTP("lathamfell@gmail.com", "lrhnapmiegubspht").send(to, subject, body)
 
 
-def get_default_open_trade_mongo_set_command(strat, trade_id, direction, tsl):
+def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl):
     entry_time = get_readable_time()
     return {
         f"{strat}.status.trade_id": trade_id,
-        f"{strat}.status.tsl_reset_points_hit": [],
+        f"{strat}.status.sl_reset_points_hit": [],
         f"{strat}.status.profit_logged": False,
         f"{strat}.status.last_entry_direction": direction,
         f"{strat}.status.max_profit_this_entry": -100000,
         f"{strat}.status.max_drawdown_this_entry": 0,
-        f"{strat}.status.last_tsl_set": tsl,
+        f"{strat}.status.last_sl_set": sl,
         f"{strat}.status.entry_time": entry_time,
         f"{strat}.status.most_recent_profit": 0,
         f"{strat}.status.took_partial_profit": False,
@@ -101,8 +101,8 @@ def set_up_default_strat_config(coll, user, strat):
         {
             "$set": {
                 f"{strat}.config.tp_pct": DEFAULT_STRAT_CONFIG["tp_pct"],
-                f"{strat}.config.tp_trail": DEFAULT_STRAT_CONFIG["tp_trail"],
                 f"{strat}.config.sl_pct": DEFAULT_STRAT_CONFIG["sl_pct"],
+                f"{strat}.config.sl_trail": DEFAULT_STRAT_CONFIG["sl_trail"],
                 f"{strat}.config.leverage": DEFAULT_STRAT_CONFIG["leverage"],
                 f"{strat}.config.units": DEFAULT_STRAT_CONFIG["units"],
             }

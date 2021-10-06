@@ -128,7 +128,7 @@
          "title":"Trailing Activated"
       }
    },
-   "note":"latham BTC_M3 &lt;1h TSL/TP&gt; long",
+   "note":"latham BTC_M3 &lt;1h SL/TP&gt; long",
    "skip_enter_step":false,
    "data":{
       "editable":true,

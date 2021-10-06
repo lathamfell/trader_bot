@@ -2,13 +2,15 @@
   "BTC_L4": {
     "config": {
       "leverage": 1,
+      "loss_limit_fraction": 0.4,
+      "pct_of_starting_assets": 100,
       "sl_pct": 10,
+      "sl_trail": false,
       "tp_pct": 10,
       "tp_pct_2": null,
-      "tp_trail": null,
       "units": 2,
-      "reset_tsl": false,
-      "tsl_reset_points": [[0.5, 0.0], [1, -0.25]],
+      "reset_sl": false,
+      "sl_reset_points": [[0.5, 0.0], [1, -0.25]],
       "description": "latham BTC_L4 <15m Split TPs>"
     },
     "status": {
@@ -24,10 +26,10 @@
       "profit_std_dev": 0,
       "entry_time": "07-08 16:00 UTC",
       "last_entry_direction": "long",
-      "last_tsl_set": 10,
+      "last_sl_set": 10,
       "max_drawdown_this_entry": -0.34,
       "max_profit_this_entry": 0.2,
-      "tsl_reset_points_hit": [],
+      "sl_reset_points_hit": [],
       "most_recent_profit": -0.24,
       "took_partial_profit": false,
       "profit_logged": true,
