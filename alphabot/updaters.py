@@ -71,6 +71,12 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing sl_trail from {old_sl_trail} to {new_sl_trail}")
 
+    new_trail_delay = h.screen_for_str_bools(new_config.get("trail_delay"))
+    old_trail_delay = current_config.get("trail_delay")
+    if new_trail_delay != old_trail_delay:
+        reset_profits = True
+        print(f"Changing trail_delay from {old_trail_delay} to {new_trail_delay}")
+
     new_reset_sl = h.screen_for_str_bools(new_config.get("reset_sl"))
     old_reset_sl = current_config.get("reset_sl")
     if new_reset_sl != old_reset_sl:
@@ -148,6 +154,8 @@ def config_update(request, logger):
         set_command[f"{strat}.config.sl_pct"] = new_sl_pct
     if (new_sl_trail is True) or (new_sl_trail is False):
         set_command[f"{strat}.config.sl_trail"] = new_sl_trail
+    if (new_trail_delay is True) or (new_trail_delay is False):
+        set_command[f"{strat}.config.trail_delay"] = new_trail_delay
     if new_leverage:
         set_command[f"{strat}.config.leverage"] = new_leverage
     if new_loss_limit_fraction:

@@ -1,0 +1,56 @@
+{
+  "BTC_M1": {
+    "status": {
+      "config_change_time": "07-08 14:45 UTC",
+      "drawdown_std_dev": 0,
+      "drawdowns": [
+      ],
+      "full_profit_history": {
+      },
+      "median_drawdown": 0,
+      "median_potential_profit": 0,
+      "paper_assets": 10000,
+      "potential_paper_assets": 10000,
+      "potential_profits": [
+      ],
+      "profit_std_dev": 0,
+      "entry_time": "07-09 02:00 UTC",
+      "last_entry_direction": "long",
+      "last_sl_set": 0.5,
+      "max_drawdown_this_entry": -0.24,
+      "max_profit_this_entry": 0.73,
+      "profit_logged": true,
+      "sl_reset_points_hit": [],
+      "most_recent_profit": 0.28,
+      "took_partial_profit": true,
+      "mean_potential_profit": 0,
+      "trade_id": null
+    },
+    "config": {
+      "leverage": 1,
+      "loss_limit_fraction": 0.1,
+      "reset_sl": false,
+      "sl_pct": 0.5,
+      "sl_trail": true,
+      "trail_delay": true,
+      "tp_pct": 5.0,
+      "tp_pct_2": null,
+      "sl_reset_points": [
+        [
+          0.8,
+          0.0
+        ],
+        [
+          1.2,
+          -0.1
+        ],
+        [
+          2.0,
+          -1.1
+        ]
+      ],
+      "units": 2,
+      "description": "malcolm BTC_M1 <A2A 15m>"
+    }
+  }
+}

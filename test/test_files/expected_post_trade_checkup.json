@@ -1443,6 +1443,7 @@
       "reset_sl": false,
       "sl_pct": 0.5,
       "sl_trail": true,
+      "trail_delay": false,
       "tp_pct": 5,
       "tp_pct_2": null,
       "sl_reset_points": [

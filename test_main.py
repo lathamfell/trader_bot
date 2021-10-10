@@ -714,6 +714,54 @@ def test_config_update_of_sl_trail(client):
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_of_trail_delay(client):
+    coll = th.reset_test_coll("baseline_test_coll_2.json")
+
+    user = "malcolm"
+    strat = "BTC_M1"
+    new_trail_delay = True  # was False
+
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "A2A 15m",
+                "tp_pct": 5,
+                "sl_pct": .5,
+                "sl_trail": True,
+                "trail_delay": new_trail_delay,
+                "leverage": 1,
+                "loss_limit_fraction": 0.1,
+                "units": 2,
+                "reset_sl": False,
+                "sl_reset_points":[
+                    [
+                      0.8,
+                      0
+                    ],
+                    [
+                      1.2,
+                      -0.1
+                    ],
+                    [
+                      2,
+                      -1.1
+                    ]
+                ],
+            }
+        )
+    )
+
+    actual = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/expected_strat_config_after_trail_delay_update.json") as _f:
+        expected = json.load(_f)[strat]
+    assert actual == expected
+
+
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_reset_sl(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
