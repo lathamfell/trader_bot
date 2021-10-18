@@ -52,7 +52,7 @@ Direct condition update:
 { "route": "condition_update", "user": "latham", "strat": "eth5", "conditions": {"UULTF": "buy", "UHTF": "buy" } }
 
 Config update:
-{"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 0.4, "sl_pct": 0.4, "sl_trail": true, "leverage": 2, "units": 2 }}
+{"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 40, "sl_pct": 40, "sl_trail": true, "leverage": 2, "units": 2 }}
 
 
 Tests:

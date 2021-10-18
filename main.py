@@ -175,6 +175,9 @@ class AlertHandler:
         if self.logic == "gamma":
             self.run_logic_gamma(alert, logger)
             return
+        if self.logic == "omega":
+            self.run_logic_omega(alert, logger)
+            return
         elif self.logic == "":
             print(
                 f"{self.user} {self.strat} No logic configured, skipping trade decision."
@@ -271,6 +274,81 @@ class AlertHandler:
             loss_limit_fraction=self.loss_limit_fraction,
             pct_of_starting_assets=self.pct_of_starting_assets
         )
+
+    def run_logic_omega(self, alert, logger):
+        direction = h.get_current_trade_direction(
+            _trade_status=self.trade_status,
+            user=self.user,
+            strat=self.strat,
+            logger=logger
+        )
+        htf_shadow = self.state["status"]["htf_shadow"]
+        new_htf_shadow = None
+        _type = None
+
+        # does current trade need to be closed
+        if (alert.get("open_short_htf") and direction == "long") or \
+                (alert.get("open_long_htf") and direction == "short"):
+            trade_id = self.state["status"]["trade_id"]
+            trading.close_trade(
+                py3c=self.py3c,
+                trade_id=trade_id,
+                user=self.user,
+                strat=self.strat,
+                description=self.description,
+                logger=logger,
+            )
+            direction = None
+
+        if direction:
+            # if we are still in a trade there is no need to enter another
+            return
+
+        # check for HTF entry criteria
+        if alert.get("open_short_htf"):
+            new_htf_shadow = htf_shadow = "short"
+            _type = "sell"
+        elif alert.get("open_long_htf"):
+            new_htf_shadow = htf_shadow = "long"
+            _type = "buy"
+
+        # check for LTF entry criteria
+        if alert.get("open_short_ltf") and htf_shadow == "short":
+            _type = "sell"
+        elif alert.get("open_long_ltf") and htf_shadow == "long":
+            _type = "buy"
+
+        # update HTF shadow if needed
+        if new_htf_shadow:
+            self.coll.update_one(
+                {"_id": self.user},
+                {"$set": {
+                    f"{self.strat}.status.htf_shadow": new_htf_shadow
+                }}
+            )
+
+        if _type:
+            trading.open_trade(
+                py3c=self.py3c,
+                account_id=self.account_id,
+                pair=self.pair,
+                _type=_type,
+                leverage=self.leverage,
+                simulate_leverage=self.simulate_leverage,
+                units=self.units,
+                tp_pct=self.tp_pct,
+                tp_pct_2=self.tp_pct_2,
+                sl_pct=self.sl_pct,
+                sl_trail=self.sl_trail,
+                user=self.user,
+                strat=self.strat,
+                description=self.description,
+                logger=logger,
+                price=self.price,
+                coll=self.coll,
+                loss_limit_fraction=self.loss_limit_fraction,
+                pct_of_starting_assets=self.pct_of_starting_assets
+            )
 
 
 if __name__ == "__main__":

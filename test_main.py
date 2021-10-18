@@ -520,7 +520,7 @@ def test_config_update_of_tp_pct(client):
                 "sl_pct": "10",
                 "sl_trail": False,
                 "leverage": "1",
-                "loss_limit_fraction": 0.4,
+                "loss_limit_fraction": 40,
                 "units": "2",
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -1312,6 +1312,14 @@ def test_get_adjusted_leverage_and_units():
     with open("test/test_files/expected_adjusted_leverages.json") as _f:
         expected = json.load(_f)
     assert results == expected
+
+
+def test_double_arrow_logic():
+    pass
+
+
+def try_and_test_when_omega_receives_ltf_and_htf_on_same_candle():
+    pass
 
 
 def test_close_long_but_no_trade_is_open(client):

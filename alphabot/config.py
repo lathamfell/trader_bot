@@ -55,7 +55,7 @@ USER_ATTR = {
                 # exchange at 1x
                 "simulate_leverage": False,
             },
-            "BTC_L2": {  # T3
+            "BTC_L2": {  # 4h laguerre
                 "logic": "gamma",
                 "coin": "btc",
                 "account_id": 29834950,  # trendking2021@gmail.com - Brave
