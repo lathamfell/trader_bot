@@ -32,7 +32,7 @@ USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_M1": {
-                "logic": "gamma",
+                "logic": "omega",
                 "coin": "btc",
                 "account_id": 30841543,
                 "pair": "BTC_BTCUSD",
@@ -56,7 +56,7 @@ USER_ATTR = {
                 "simulate_leverage": False,
             },
             "BTC_L2": {  # 4h laguerre
-                "logic": "gamma",
+                "logic": "omega",
                 "coin": "btc",
                 "account_id": 29834950,  # trendking2021@gmail.com - Brave
                 "pair": "BTC_BTCUSD",

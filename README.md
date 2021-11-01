@@ -1,6 +1,6 @@
 Deploy:
 
-* Ensure requirements.txt is up to date: `pip3 freeze > requirements.txt`.
+* Ensure requirements.txt is up to date: `pip3 freeze > requirements.txt`.  DO NOT DO THIS!!!
 * Ensure gcloud CLI and Google App Engine SDK are installed on host.
 * Open a terminal (like GitBash) that can run gcloud.
 * Ensure `gcloud init` has been run, with proper google account and project configured.
@@ -52,7 +52,7 @@ Direct condition update:
 { "route": "condition_update", "user": "latham", "strat": "eth5", "conditions": {"UULTF": "buy", "UHTF": "buy" } }
 
 Config update:
-{"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 40, "sl_pct": 40, "sl_trail": true, "leverage": 2, "units": 2 }}
+{"route": "config_update", "user": "latham", "strat": "eth5", "config": {"tp_pct": 0.4, "sl_pct": 0.4, "sl_trail": true, "leverage": 2, "units": 2 }}
 
 
 Tests:

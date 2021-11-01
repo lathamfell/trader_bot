@@ -3,7 +3,6 @@ from google.cloud.logging.handlers import CloudLoggingHandler
 
 import logging
 from flask import Flask, request
-import pymongo
 import datetime as dt
 from alphabot.py3cw.request import Py3CW
 import traceback
@@ -178,6 +177,7 @@ class AlertHandler:
         if self.logic == "omega":
             self.run_logic_omega(alert, logger)
             return
+
         elif self.logic == "":
             print(
                 f"{self.user} {self.strat} No logic configured, skipping trade decision."
@@ -236,9 +236,10 @@ class AlertHandler:
         elif alert.get("close_long") or alert.get("close_short"):
             return
 
+        _type = None
         if alert.get("long"):
             _type = "buy"
-        else:
+        elif alert.get("short"):
             _type = "sell"
 
         if direction:
@@ -282,7 +283,8 @@ class AlertHandler:
             strat=self.strat,
             logger=logger
         )
-        htf_shadow = self.state["status"]["htf_shadow"]
+        htf_shadow = self.state["status"].get("htf_shadow")
+        print(f"{self.strat} current HTF shadow: {htf_shadow}")
         new_htf_shadow = None
         _type = None
 
@@ -299,6 +301,7 @@ class AlertHandler:
                 logger=logger,
             )
             direction = None
+            print(f"{self.strat} HTF signal against current trade: closing")
 
         if direction:
             # if we are still in a trade there is no need to enter another
@@ -308,14 +311,18 @@ class AlertHandler:
         if alert.get("open_short_htf"):
             new_htf_shadow = htf_shadow = "short"
             _type = "sell"
+            print(f"{self.strat} HTF signal: opening short")
         elif alert.get("open_long_htf"):
             new_htf_shadow = htf_shadow = "long"
             _type = "buy"
+            print(f"{self.strat} HTF signal: opening long")
 
         # check for LTF entry criteria
         if alert.get("open_short_ltf") and htf_shadow == "short":
+            print(f"{self.strat} LTF in shadow, opening short")
             _type = "sell"
         elif alert.get("open_long_ltf") and htf_shadow == "long":
+            print(f"{self.strat} LTF in shadow, opening long")
             _type = "buy"
 
         # update HTF shadow if needed
@@ -326,6 +333,7 @@ class AlertHandler:
                     f"{self.strat}.status.htf_shadow": new_htf_shadow
                 }}
             )
+            print(f"{self.strat} HTF shadow updated to {new_htf_shadow}")
 
         if _type:
             trading.open_trade(

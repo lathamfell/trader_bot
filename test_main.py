@@ -520,7 +520,7 @@ def test_config_update_of_tp_pct(client):
                 "sl_pct": "10",
                 "sl_trail": False,
                 "leverage": "1",
-                "loss_limit_fraction": 40,
+                "loss_limit_fraction": 0.4,
                 "units": "2",
                 "reset_sl": False,
                 "sl_reset_points": [
