@@ -71,6 +71,7 @@ def trade_checkup(logger):
     return "Trade checkup complete"
 
 
+"""
 def check_take_profits(
     _trade_status, strat_states, user, strat, trade_id, py3c, description, logger
 ):
@@ -104,6 +105,7 @@ def check_take_profits(
         return _trade_status
 
     return _trade_status
+"""
 
 
 def check_sl(
@@ -164,7 +166,7 @@ def check_sl(
     )
     if update_trade_error.get("error"):
         print(f"{description} error resetting SL, {update_trade_error['msg']}")
-        print(f"{description} closing trade {trade_id} since we couldn't reset SL")
+        print(f"{description} closing trade {trade_id} by market since we couldn't reset SL")
         sleep(1)
         trading.close_trade(
             py3c=py3c,

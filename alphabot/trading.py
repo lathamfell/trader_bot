@@ -2,7 +2,6 @@ from time import sleep
 
 import alphabot.trade_checkup as tc
 import alphabot.helpers as h
-from alphabot.config import TP_ORDER_TYPE
 
 
 def trade_status(py3c, trade_id, description, logger):
@@ -74,6 +73,9 @@ def open_trade(
     logger,
     description,
     price,
+    entry_order_type,
+    tp_order_type,
+    sl_order_type,
     user=None,
     strat=None,
     simulate_leverage=False,
@@ -115,6 +117,7 @@ def open_trade(
         _type=_type,
         leverage=adj_leverage,
         units=adj_units,
+        entry_order_type=entry_order_type,
         user=user,
         strat=strat,
         note=f"{description} {direction}",
@@ -189,6 +192,9 @@ def open_trade(
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
+        entry_order_type=entry_order_type,
+        tp_order_type=tp_order_type,
+        sl_order_type=sl_order_type,
         description=description,
         logger=logger,
     )
@@ -206,7 +212,7 @@ def open_trade(
         print(
             f"{description} Error updating trade while opening, {update_trade_error['msg']}"
         )
-        print(f"{description} Closing trade {trade_id} since we couldn't apply TP/SL")
+        print(f"{description} Closing trade {trade_id} by market since we couldn't apply TP/SL")
         close_trade(
             py3c=py3c,
             trade_id=trade_id,
@@ -237,7 +243,7 @@ def open_trade(
     return trade_id
 
 
-def get_base_trade(account_id, pair, _type, leverage, units, user, strat, note, logger):
+def get_base_trade(account_id, pair, _type, leverage, units, user, strat, entry_order_type, note, logger):
     # logger.debug(
     #    f"{user} {strat} get_base_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
     #    f"{leverage}, units {units}, note {note}"
@@ -250,7 +256,7 @@ def get_base_trade(account_id, pair, _type, leverage, units, user, strat, note, 
         "position": {
             "type": _type,  # 'buy' / 'sell'
             "units": {"value": units},
-            "order_type": "market",
+            "order_type": entry_order_type,
         },
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
@@ -266,6 +272,9 @@ def get_update_trade(
     sl_price,
     sl_pct,
     sl_trail,
+    entry_order_type,
+    tp_order_type,
+    sl_order_type,
     description,
     logger,
     tp_price_2=None
@@ -276,12 +285,12 @@ def get_update_trade(
     # )
     update_trade = {
         "id": trade_id,
-        "position": {"type": _type, "units": {"value": units}, "order_type": "market"},
+        "position": {"type": _type, "units": {"value": units}, "order_type": entry_order_type},
         "take_profit": {
             "enabled": True,
             "steps": [
                 {
-                    "order_type": TP_ORDER_TYPE,
+                    "order_type": tp_order_type,
                     "price": {"value": tp_price_1, "type": "last"},
                     "volume": 100,
                 }
@@ -289,7 +298,7 @@ def get_update_trade(
         },
         "stop_loss": {
             "enabled": True,
-            "order_type": "market",
+            "order_type": sl_order_type,
             "conditional": {
                 "price": {"value": sl_price, "type": "last"},
                 "trailing": {"enabled": sl_trail, "percent": sl_pct},
@@ -299,12 +308,12 @@ def get_update_trade(
     if tp_price_2 is not None:
         update_trade["take_profit"]["steps"] = [
             {
-                "order_type": TP_ORDER_TYPE,
+                "order_type": tp_order_type,
                 "price": {"value": tp_price_1, "type": "last"},
                 "volume": 50,
             },
             {
-                "order_type": TP_ORDER_TYPE,
+                "order_type": tp_order_type,
                 "price": {"value": tp_price_2, "type": "last"},
                 "volume": 50,
             },
@@ -369,7 +378,7 @@ def take_partial_profit(
             f"{description} Error updating trade while taking partial profit, {update_trade_error['msg']}"
         )
         print(
-            f"{description} Closing trade {trade_id} since we couldn't take partial profit"
+            f"{description} Closing trade {trade_id} by market since we couldn't take partial profit"
         )
         close_trade(
             py3c=py3c,

@@ -22,7 +22,6 @@ TRADE_TYPES = {
 
 LOG_LEVEL = logging.DEBUG
 STARTING_PAPER = 10000
-TP_ORDER_TYPE = "market"
 
 USER_ATTR = {
     "malcolm": {
@@ -37,6 +36,9 @@ USER_ATTR = {
                 "account_id": 30841543,
                 "pair": "BTC_BTCUSD",
                 "simulate_leverage": False,
+                "entry_order_type": "market",
+                "tp_order_type": "market",
+                "sl_order_type": "market",
             }
         },
     },
@@ -54,6 +56,9 @@ USER_ATTR = {
                 # configured leverage will be used to calculate paper profits, but trades will be made on the
                 # exchange at 1x
                 "simulate_leverage": False,
+                "entry_order_type": "market",
+                "tp_order_type": "market",
+                "sl_order_type": "market",
             },
             "BTC_L2": {  # 4h laguerre
                 "logic": "omega",
@@ -61,6 +66,9 @@ USER_ATTR = {
                 "account_id": 29834950,  # trendking2021@gmail.com - Brave
                 "pair": "BTC_BTCUSD",
                 "simulate_leverage": False,
+                "entry_order_type": "market",
+                "tp_order_type": "market",
+                "sl_order_type": "market",
             },
         },
     },

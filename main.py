@@ -100,6 +100,11 @@ class AlertHandler:
         self.simulate_leverage = USER_ATTR[self.user]["strats"][self.strat].get(
             "simulate_leverage"
         )
+        self.entry_order_type = USER_ATTR[self.user]["strats"][self.strat]["entry_order_type"]
+        self.tp_order_type = USER_ATTR[self.user]["strats"][self.strat]["tp_order_type"]
+        self.sl_order_type = USER_ATTR[self.user]["strats"][self.strat]["sl_order_type"]
+
+        # API helper
         self.py3c = Py3CW(key=self.api_key, secret=self.secret)
 
         # pull state
@@ -202,7 +207,7 @@ class AlertHandler:
             trade_id = self.state["status"]["trade_id"]
             if (not alert.get("partial")) or self.state["status"][
                 "took_partial_profit"
-            ]:  # regular full close
+            ]:  # signal close, must close by market
                 print(
                     f"{self.description} {direction} {trade_id} closing full position due to exit signal"
                 )
@@ -243,7 +248,7 @@ class AlertHandler:
             _type = "sell"
 
         if direction:
-            # close current trade first
+            # close current trade first: signal close, so must close by market
             trade_id = self.state["status"]["trade_id"]
             trading.close_trade(
                 py3c=self.py3c,
@@ -266,6 +271,9 @@ class AlertHandler:
             tp_pct_2=self.tp_pct_2,
             sl_pct=self.sl_pct,
             sl_trail=self.sl_trail,
+            entry_order_type=self.entry_order_type,
+            tp_order_type=self.tp_order_type,
+            sl_order_type=self.sl_order_type,
             user=self.user,
             strat=self.strat,
             description=self.description,
@@ -288,7 +296,7 @@ class AlertHandler:
         new_htf_shadow = None
         _type = None
 
-        # does current trade need to be closed
+        # does current trade need to be closed.  If so, close by market because this is signal close
         if (alert.get("open_short_htf") and direction == "long") or \
                 (alert.get("open_long_htf") and direction == "short"):
             trade_id = self.state["status"]["trade_id"]

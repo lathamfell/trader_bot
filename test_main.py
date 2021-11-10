@@ -1274,6 +1274,9 @@ def test_opening_two_longs(
         tp_pct_2=None,
         sl_pct=3,
         sl_trail=True,
+        entry_order_type='market',
+        tp_order_type='market',
+        sl_order_type='market',
         user=user,
         strat=strat,
         description=f"{user} {strat} <1h SL/TP>",
@@ -1312,6 +1315,18 @@ def test_get_adjusted_leverage_and_units():
     with open("test/test_files/expected_adjusted_leverages.json") as _f:
         expected = json.load(_f)
     assert results == expected
+
+
+def test_limit_take_profit():
+    pass
+
+
+def test_limit_stop_loss():
+    pass
+
+
+def test_limit_entry():
+    pass
 
 
 def test_double_arrow_logic():

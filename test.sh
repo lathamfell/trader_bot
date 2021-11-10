@@ -1,1 +1,1 @@
-pytest --disable-pytest-warnings --cov=alphabot --cov-report term-missing test_main.py -vv
+python3 -m pytest --disable-pytest-warnings --cov=alphabot --cov-report term-missing test_main.py -vv
