@@ -229,6 +229,9 @@ class AlertHandler:
                     trade_id=trade_id,
                     description=self.description,
                     user=self.user,
+                    entry_order_type=self.entry_order_type,
+                    tp_order_type=self.tp_order_type,
+                    sl_order_type=self.sl_order_type,
                     strat=self.strat,
                     logger=logger,
                 )

@@ -46,11 +46,17 @@ def trade_checkup(logger):
             #    description=description, logger=logger, trade_id=trade_id, user=user
             # )
 
+            entry_order_type = USER_ATTR[user]["strats"][strat]["entry_order_type"]
+            tp_order_type = USER_ATTR[user]["strats"][strat]["tp_order_type"]
+            sl_order_type = USER_ATTR[user]["strats"][strat]["sl_order_type"]
             new_sl = check_sl(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
                 strat=strat,
                 user=user,
+                entry_order_type=entry_order_type,
+                tp_order_type=tp_order_type,
+                sl_order_type=sl_order_type,
                 trade_id=trade_id,
                 py3c=py3c,
                 coll=coll,
@@ -109,7 +115,7 @@ def check_take_profits(
 
 
 def check_sl(
-    _trade_status, description, strat_states, strat, user, trade_id, py3c, coll, logger
+    _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id, py3c, coll, logger
 ):
     if not h.is_trade_open(_trade_status=_trade_status):
         # logger.debug(f"{description} not in a trade, not checking SL resets")
@@ -154,6 +160,9 @@ def check_sl(
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
+        entry_order_type=entry_order_type,
+        tp_order_type=tp_order_type,
+        sl_order_type=sl_order_type,
         description=description,
         logger=logger,
     )
