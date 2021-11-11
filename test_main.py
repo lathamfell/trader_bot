@@ -1329,6 +1329,10 @@ def test_limit_entry():
     pass
 
 
+def test_logic_omega():
+    pass
+
+
 def test_that_actually_covers_all_of_trade_checkup_module():
     pass  # perhaps just extend the current trade checkup module test
 
