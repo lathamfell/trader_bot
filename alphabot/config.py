@@ -63,7 +63,7 @@ USER_ATTR = {
             "BTC_L2": {  # 4h laguerre
                 "logic": "omega",
                 "coin": "btc",
-                "account_id": 29834950,  # trendking2021@gmail.com - Brave
+                "account_id": 31212864,  # trendking2021@gmail.com - Brave
                 "pair": "BTC_BTCUSD",
                 "simulate_leverage": False,
                 "entry_order_type": "market",
