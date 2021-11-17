@@ -37,7 +37,7 @@ USER_ATTR = {
                 "pair": "BTC_BTCUSD",
                 "simulate_leverage": False,
                 "entry_order_type": "market",
-                "tp_order_type": "market",
+                "tp_order_type": "limit",
                 "sl_order_type": "market",
             }
         },
@@ -48,7 +48,7 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "BTC_L1": {  # lambda
+            "BTC_L1": {  # test
                 "logic": "gamma",
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com - Chrome
@@ -57,7 +57,7 @@ USER_ATTR = {
                 # exchange at 1x
                 "simulate_leverage": False,
                 "entry_order_type": "market",
-                "tp_order_type": "market",
+                "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
             "BTC_L2": {  # 4h laguerre
@@ -67,7 +67,7 @@ USER_ATTR = {
                 "pair": "BTC_BTCUSD",
                 "simulate_leverage": False,
                 "entry_order_type": "market",
-                "tp_order_type": "market",
+                "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
         },

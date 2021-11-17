@@ -72,7 +72,7 @@ def open_trade(
     sl_trail,
     logger,
     description,
-    price,
+    alert_price,
     entry_order_type,
     tp_order_type,
     sl_order_type,
@@ -116,6 +116,7 @@ def open_trade(
         pair=pair,
         _type=_type,
         leverage=adj_leverage,
+        alert_price=alert_price,
         units=adj_units,
         entry_order_type=entry_order_type,
         user=user,
@@ -156,13 +157,14 @@ def open_trade(
 
     trade_entry = h.get_trade_entry(_trade_status=_trade_status)
 
-    if price:
+    if alert_price:
         if _type == "buy":
-            slippage = (price - trade_entry) / trade_entry
+            slippage = (alert_price - trade_entry) / trade_entry
         else:
-            slippage = (trade_entry - price) / price
+            slippage = (trade_entry - alert_price) / alert_price
+        # this slippage is nonsense if the alert price from a Heiken Ashi indicator
         print(
-            f"{description} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {price}. "
+            f"{description} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {alert_price}. "
             f"Slippage: {round(slippage * 100, 2)}%"
         )
 
@@ -173,7 +175,7 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 - sl_pct / 100)
-
+        sl_trigger = trade_entry - ((trade_entry - sl_price) / 4)  # 25% of the way to SL
         direction = "long"
     else:  # sell
         tp_price = trade_entry * (1 - tp_pct / 100)
@@ -182,6 +184,7 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 + sl_pct / 100)
+        sl_trigger = trade_entry + ((sl_price - trade_entry) / 4)  # 25% of the way to SL
         direction = "short"
     update_trade = get_update_trade(
         trade_id=trade_id,
@@ -189,6 +192,7 @@ def open_trade(
         units=units,
         tp_price_1=tp_price,
         tp_price_2=tp_price_2,
+        sl_trigger=sl_trigger,
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
@@ -211,6 +215,9 @@ def open_trade(
     if update_trade_error.get("error"):
         print(
             f"{description} Error updating trade while opening, {update_trade_error['msg']}"
+        )
+        print(
+            f"full update trade config: {update_trade}"
         )
         print(f"{description} Closing trade {trade_id} by market since we couldn't apply TP/SL")
         close_trade(
@@ -243,7 +250,7 @@ def open_trade(
     return trade_id
 
 
-def get_base_trade(account_id, pair, _type, leverage, units, user, strat, entry_order_type, note, logger):
+def get_base_trade(account_id, pair, _type, leverage, alert_price, units, user, strat, entry_order_type, note, logger):
     # logger.debug(
     #    f"{user} {strat} get_base_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
     #    f"{leverage}, units {units}, note {note}"
@@ -261,6 +268,8 @@ def get_base_trade(account_id, pair, _type, leverage, units, user, strat, entry_
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
     }
+    if entry_order_type == "limit":
+        base_trade["position"]["price"] = {"value": alert_price}
     return base_trade
 
 
@@ -270,6 +279,7 @@ def get_update_trade(
     units,
     tp_price_1,
     sl_price,
+    sl_trigger,
     sl_pct,
     sl_trail,
     entry_order_type,
@@ -305,6 +315,11 @@ def get_update_trade(
             },
         },
     }
+
+    if sl_order_type == "limit":
+        update_trade["stop_loss"]["price"] = {"value": sl_price}
+        update_trade["stop_loss"]["conditional"]["price"]["value"] = sl_trigger
+
     if tp_price_2 is not None:
         update_trade["take_profit"]["steps"] = [
             {
@@ -322,6 +337,7 @@ def get_update_trade(
     return update_trade
 
 
+"""
 def take_partial_profit(
     py3c,
     trade_id,
@@ -384,6 +400,9 @@ def take_partial_profit(
             f"{description} Error updating trade while taking partial profit, {update_trade_error['msg']}"
         )
         print(
+            f"full update trade config: {update_trade}"
+        )
+        print(
             f"{description} Closing trade {trade_id} by market since we couldn't take partial profit"
         )
         close_trade(
@@ -406,6 +425,7 @@ def take_partial_profit(
         f"{update_trade_data}"
     )
     return _trade_status
+"""
 
 
 def get_adjusted_leverage_and_units(stop_loss, max_leverage, pct_of_starting_assets, loss_limit_fraction, max_units):

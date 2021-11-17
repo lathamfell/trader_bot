@@ -75,7 +75,7 @@ class AlertHandler:
         self.strat = self.alert.get("strat")
         self.condition = self.alert.get("condition")
         self.value = self.alert.get("value")
-        self.price = self.alert.get("price")
+        self.alert_price = self.alert.get("price")
         exp_length = self.alert.get("expiration")
         if not exp_length:
             exp_time = dt.datetime.now() + dt.timedelta(weeks=52)
@@ -221,6 +221,8 @@ class AlertHandler:
                 )
                 return
             else:  # only close half
+                pass
+                """
                 print(
                     f"{self.description} {direction} {trade_id} closing partial position due to partial exit signal"
                 )
@@ -241,6 +243,7 @@ class AlertHandler:
                     {"$set": {f"{self.strat}.status.took_partial_profit": True}},
                 )
                 return
+                """
         elif alert.get("close_long") or alert.get("close_short"):
             return
 
@@ -281,7 +284,7 @@ class AlertHandler:
             strat=self.strat,
             description=self.description,
             logger=logger,
-            price=self.price,
+            alert_price=self.alert_price,
             coll=self.coll,
             loss_limit_fraction=self.loss_limit_fraction,
             pct_of_starting_assets=self.pct_of_starting_assets
@@ -366,7 +369,7 @@ class AlertHandler:
                 strat=self.strat,
                 description=self.description,
                 logger=logger,
-                price=self.price,
+                alert_price=self.alert_price,
                 coll=self.coll,
                 loss_limit_fraction=self.loss_limit_fraction,
                 pct_of_starting_assets=self.pct_of_starting_assets
