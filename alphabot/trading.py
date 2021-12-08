@@ -279,7 +279,6 @@ def get_update_trade(
     units,
     tp_price_1,
     sl_price,
-    sl_trigger,
     sl_pct,
     sl_trail,
     entry_order_type,
@@ -287,6 +286,7 @@ def get_update_trade(
     sl_order_type,
     description,
     logger,
+    sl_trigger=None,
     tp_price_2=None
 ):
     # logger.debug(

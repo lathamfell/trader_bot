@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/trader_bot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/trader_bot.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trading.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.yaml_old" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,8 +55,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="restartRequiresConfirmation" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../backtester2" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -644,7 +639,7 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="82af37ed-6d0c-40ea-849c-4c10133d49b4" name="Default Changelist" comment="" />
+      <changelist id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="" />
       <created>1621120797866</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -681,6 +676,8 @@
       <workItem from="1635222902116" duration="603000" />
       <workItem from="1635294766284" duration="1215000" />
       <workItem from="1635361785187" duration="3129000" />
+      <workItem from="1637187082375" duration="2390000" />
+      <workItem from="1637794583742" duration="1195000" />
     </task>
     <servers />
   </component>
