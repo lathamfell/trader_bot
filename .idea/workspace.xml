@@ -5,30 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_update_of_dca.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trading.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/updaters.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/updaters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_description_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_description_update.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_pct_of_starting_assets_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_pct_of_starting_assets_update.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_units_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_units_update.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -720,7 +698,7 @@
       <workItem from="1637794583742" duration="1248000" />
       <workItem from="1638992476442" duration="599000" />
       <workItem from="1639001779249" duration="4930000" />
-      <workItem from="1639087950824" duration="8034000" />
+      <workItem from="1639087950824" duration="9203000" />
     </task>
     <servers />
   </component>
