@@ -35,7 +35,6 @@ USER_ATTR = {
                 "coin": "btc",
                 "account_id": 30841543,
                 "pair": "BTC_BTCUSD",
-                "simulate_leverage": False,
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
@@ -49,13 +48,12 @@ USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_L1": {  # test
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com - Chrome
                 "pair": "BTC_BTCUSD",
                 # configured leverage will be used to calculate paper profits, but trades will be made on the
                 # exchange at 1x
-                "simulate_leverage": False,
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
@@ -65,7 +63,6 @@ USER_ATTR = {
                 "coin": "btc",
                 "account_id": 31212864,  # trendking2021@gmail.com - Brave
                 "pair": "BTC_BTCUSD",
-                "simulate_leverage": False,
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market",

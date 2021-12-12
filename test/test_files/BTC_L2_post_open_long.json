@@ -110,7 +110,8 @@
 
          ],
          "took_partial_profit":false,
-         "trade_id":"6762491"
+         "trade_id":"6762491",
+         "entry_signal": null
       }
    }
 }

@@ -107,7 +107,8 @@
 			"took_partial_profit": false,
 			"profit_logged": false,
 			"trade_id": "7873502",
-			"mean_potential_profit": 0
+			"mean_potential_profit": 0,
+			 "entry_signal": null
 		}
 	}
 }

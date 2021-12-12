@@ -78,11 +78,11 @@ def open_trade(
     sl_order_type,
     user=None,
     strat=None,
-    simulate_leverage=False,
     tp_pct_2=None,
     coll=None,
     loss_limit_fraction=None,
-    pct_of_starting_assets=None
+    pct_of_starting_assets=None,
+    entry_signal=None
 ):
     # logger.debug(
     #    f"{user} {strat} open_trade called with account_id {account_id}, pair {pair}, _type {_type}, leverage "
@@ -94,9 +94,6 @@ def open_trade(
     if tp_pct_2 is not None and units < 2:
         print(f"Partial TP configured, but units are only 1. Rejecting trade")
         raise Exception
-    if simulate_leverage:
-        # use 1x for the actual trade. Configured leverage will still be used to calculate paper profits
-        leverage = 1
 
     if _type == "buy":
         direction = "long"
@@ -121,7 +118,7 @@ def open_trade(
         entry_order_type=entry_order_type,
         user=user,
         strat=strat,
-        note=f"{description} {direction}",
+        note=f"{description} {direction} {entry_signal}",
         logger=logger,
     )
     # logger.debug(f"{user} {strat} Sending base trade: {base_trade}")
@@ -145,13 +142,13 @@ def open_trade(
         if h.is_trade_open(_trade_status):
             break
         print(
-            f"{description} trade {trade_id} waiting for base open. Status: {_trade_status['status']['type']}. "
+            f"{description} {entry_signal} trade {trade_id} waiting for base open. Status: {_trade_status['status']['type']}. "
             f"Full status: {_trade_status}"
         )
         sleep(1)
 
     print(
-        f"{description} {direction} {trade_id} base order in, status: {_trade_status['status']['type']}. "
+        f"{description} {entry_signal} {direction} {trade_id} base order in, status: {_trade_status['status']['type']}. "
         f"Full response: {_trade_status}"
     )
 
@@ -164,8 +161,8 @@ def open_trade(
             slippage = (trade_entry - alert_price) / alert_price
         # this slippage is nonsense if the alert price from a Heiken Ashi indicator
         print(
-            f"{description} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {alert_price}. "
-            f"Slippage: {round(slippage * 100, 2)}%"
+            f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {alert_price}. "
+            #f"Slippage: {round(slippage * 100, 2)}%"  # slippage is meaningless when using Heiken Ashi price signals
         )
 
     if _type == "buy":
@@ -237,14 +234,15 @@ def open_trade(
                 strat=strat,
                 trade_id=trade_id,
                 direction=direction,
-                sl=sl_pct
+                sl=sl_pct,
+                entry_signal=entry_signal
             )
         },
         upsert=True,
     )
 
     print(
-        f"{description} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
+        f"{description} {entry_signal} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
     )
 
     return trade_id

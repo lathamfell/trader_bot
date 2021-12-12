@@ -277,6 +277,7 @@ def log_profit_and_roe(
         last_sl_set = strat_states[strat]["status"].get("last_sl_set")
     direction = strat_states[strat]["status"].get("last_entry_direction")
     description = strat_states[strat]["config"].get("description")
+    entry_signal = strat_states[strat]["status"].get("entry_signal")
 
     set_command = {}
 
@@ -363,6 +364,7 @@ def log_profit_and_roe(
         "exit_time": exit_time,
         "close_dump": close_dump,
         "trade_id": trade_id,
+        "entry_signal": entry_signal
     }
     full_profit_history[entry_time] = new_history_entry
     print(f"Added entry to full profit history: {new_history_entry}")

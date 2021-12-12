@@ -93,7 +93,7 @@ def mock_py3c_request_side_effect_open_long(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> long",
+        "note": "latham BTC_L4 <15m Split TPs> long None",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
@@ -168,7 +168,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30391847,
-        "note": "latham BTC_L2 <1m Split TP> long",
+        "note": "latham BTC_L2 <1m Split TP> long None",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 2},
         "position": {"type": "buy", "units": {"value": 1}, "order_type": "market"},
@@ -248,7 +248,7 @@ def mock_py3c_request_side_effect_open_short(
     global waiting_for_base_open_short_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> short",
+        "note": "latham BTC_L4 <15m Split TPs> short None",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "sell", "units": {"value": 2}, "order_type": "market"},
@@ -1125,6 +1125,113 @@ def test_config_update_of_pct_of_starting_assets(client):
     assert actual == expected
 
 
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_of_dca(client):
+    """    coll = th.reset_test_coll("baseline_test_coll_1.json")
+
+    user = "latham"
+    strat = "BTC_L6"
+    new_dca = 5
+
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "15m SL",
+                "tp_pct": 10,
+                "sl_pct": 10,
+                "dca_pct": new_dca,
+                "sl_trail": False,
+                "leverage": 1,
+                "loss_limit_fraction": 0,
+                "pct_of_starting_assets": 100,
+                "units": 1,
+                "reset_sl": True,
+                "sl_reset_points": [
+                    [
+                      0.25,
+                      -0.1
+                    ],
+                    [
+                      0.35,
+                      -0.19
+                    ],
+                    [
+                      0.45,
+                      -0.28
+                    ],
+                    [
+                      0.55,
+                      -0.37
+                    ],
+                    [
+                      0.65,
+                      -0.46
+                    ],
+                    [
+                      0.75,
+                      -0.55
+                    ],
+                    [
+                      0.85,
+                      -0.64
+                    ],
+                    [
+                      0.95,
+                      0.73
+                    ],
+                    [
+                      1,
+                      -0.75
+                    ],
+                    [
+                      2,
+                      -1.7
+                    ],
+                    [
+                      3,
+                      -2.6
+                    ],
+                    [
+                      4,
+                      -3.5
+                    ],
+                    [
+                      5,
+                      -4.4
+                    ],
+                    [
+                      6,
+                      -5.3
+                    ],
+                    [
+                      7,
+                      -6.2
+                    ],
+                    [
+                      8,
+                      -7.1
+                    ],
+                    [
+                      9,
+                      -8
+                    ]
+                  ]
+            }
+        )
+    )
+
+    actual = coll.find_one({"_id": user})[strat]
+    with open("test/test_files/expected_strat_config_update_of_dca.json") as _f:
+        expected = json.load(_f)[strat]
+    assert actual == expected
+    """
+    pass
+
+
 @patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_open_long(client, mock_main_py3c_open_long):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
@@ -1268,7 +1375,6 @@ def test_opening_two_longs(
         pair="BTC_BTCUSD_PERP",
         _type="buy",
         leverage=1,
-        simulate_leverage=1,
         units=2,
         tp_pct=10,
         tp_pct_2=None,
@@ -1281,7 +1387,7 @@ def test_opening_two_longs(
         strat=strat,
         description=f"{user} {strat} <1h SL/TP>",
         logger=None,
-        price=19010,
+        alert_price=19010,
         coll=coll,
         loss_limit_fraction=0.3,
         pct_of_starting_assets=None

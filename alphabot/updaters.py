@@ -65,6 +65,14 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing sl_pct from {old_sl_pct} to {new_sl_pct}")
 
+    new_dca_pct = new_config.get("dca_pct")
+    old_dca_pct = current_config.get("dca_pct")
+    if new_dca_pct:
+        new_dca_pct = float(new_dca_pct)
+    if new_dca_pct != old_dca_pct:
+        reset_profits = True
+        print(f"Changing dca_pct from {old_dca_pct} to {new_dca_pct}")
+
     new_sl_trail = h.screen_for_str_bools(new_config.get("sl_trail"))
     old_sl_trail = current_config.get("sl_trail")
     if new_sl_trail != old_sl_trail:
@@ -152,6 +160,8 @@ def config_update(request, logger):
         set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
     if new_sl_pct or new_sl_pct == 0:
         set_command[f"{strat}.config.sl_pct"] = new_sl_pct
+    if new_dca_pct or new_dca_pct == 0:
+        set_command[f"{strat}.config.dca_pct"] = new_dca_pct
     if (new_sl_trail is True) or (new_sl_trail is False):
         set_command[f"{strat}.config.sl_trail"] = new_sl_trail
     if (new_trail_delay is True) or (new_trail_delay is False):

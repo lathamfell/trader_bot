@@ -24,7 +24,8 @@
           "potential_assets": 10023,
           "exit_time": "07-06 09:36 UTC",
           "close_dump": 0,
-          "trade_id": "7824985"
+          "trade_id": "7824985",
+          "entry_signal": null
         },
         "07-06 13:45 UTC": {
           "direction": "short",
@@ -36,7 +37,8 @@
           "potential_assets": 10102,
           "exit_time": "07-06 13:50 UTC",
           "close_dump": 0.2,
-          "trade_id": "7828433"
+          "trade_id": "7828433",
+          "entry_signal": null
         },
         "07-07 14:45 UTC": {
           "direction": "long",
@@ -48,7 +50,8 @@
           "potential_assets": 10121,
           "exit_time": "07-07 15:55 UTC",
           "close_dump": 0.01,
-          "trade_id": "7847688"
+          "trade_id": "7847688",
+          "entry_signal": null
         },
         "07-07 18:15 UTC": {
           "direction": "short",
@@ -60,7 +63,8 @@
           "potential_assets": 10009,
           "exit_time": "07-07 20:15 UTC",
           "close_dump": -0.55,
-          "trade_id": "7851271"
+          "trade_id": "7851271",
+          "entry_signal": null
         },
         "07-08 16:00 UTC": {
           "direction": "long",
@@ -72,7 +76,8 @@
           "potential_assets": 10025,
           "exit_time": "07-08 16:03 UTC",
           "close_dump": -0.11,
-          "trade_id": "7869191"
+          "trade_id": "7869191",
+          "entry_signal": null
         }
       },
       "median_drawdown": -0.15,

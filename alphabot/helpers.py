@@ -79,7 +79,7 @@ def send_email(to, subject, body=None):
     yagmail.SMTP("lathamfell@gmail.com", "lrhnapmiegubspht").send(to, subject, body)
 
 
-def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl):
+def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl, entry_signal):
     entry_time = get_readable_time()
     return {
         f"{strat}.status.trade_id": trade_id,
@@ -92,6 +92,7 @@ def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl):
         f"{strat}.status.entry_time": entry_time,
         f"{strat}.status.most_recent_profit": 0,
         f"{strat}.status.took_partial_profit": False,
+        f"{strat}.status.entry_signal": entry_signal
     }
 
 
