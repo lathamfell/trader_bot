@@ -2,8 +2,6 @@
   "BTC_L2": {
     "config": {
       "leverage": 5,
-      "loss_limit_fraction": 0.2,
-      "pct_of_starting_assets": 100,
       "sl_pct": 10,
       "sl_trail": true,
       "tp_pct": 0.15,

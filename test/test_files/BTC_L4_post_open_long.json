@@ -2,8 +2,6 @@
 	"BTC_L4": {
 		"config": {
 			"leverage": 1,
-      "loss_limit_fraction": 0.4,
-			"pct_of_starting_assets": 100,
 			"sl_pct": 10,
       		"sl_trail": false,
 			"tp_pct": 10,
@@ -87,6 +85,7 @@
 			"tp_pct_2": null
 		},
 		"status": {
+			"dca_set": null,
 			"config_change_time": "07-08 19:43 UTC",
 			"drawdown_std_dev": 0,
 			"drawdowns": [],

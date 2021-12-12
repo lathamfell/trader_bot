@@ -36,7 +36,6 @@
     "config": {
       "description": "malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>",
       "leverage": 1,
-      "loss_limit_fraction": 0.3,
       "reset_sl": true,
       "sl_pct": 0.5,
       "sl_trail": false,

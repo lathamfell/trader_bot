@@ -8,7 +8,6 @@ from freezegun import freeze_time
 import alphabot.helpers as h
 import test.helpers as th
 from test.helpers import MOCK_USER_ATTR
-from alphabot.trading import get_adjusted_leverage_and_units
 
 waiting_for_base_open_long_call_count = 0
 waiting_for_base_open_short_call_count = 0
@@ -170,8 +169,8 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
         "account_id": 30391847,
         "note": "latham BTC_L2 <1m Split TP> long None",
         "pair": "BTC_BTCUSD_PERP",
-        "leverage": {"enabled": True, "type": "isolated", "value": 2},
-        "position": {"type": "buy", "units": {"value": 1}, "order_type": "market"},
+        "leverage": {"enabled": True, "type": "isolated", "value": 5},
+        "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
         "take_profit": {"enabled": False},
         "stop_loss": {"enabled": False},
     }
@@ -464,7 +463,6 @@ def test_config_update_of_description(client):
                 "sl_pct": "10",
                 "sl_trail": False,
                 "leverage": "1",
-                "loss_limit_fraction": 0.4,
                 "units": "2",
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -520,7 +518,6 @@ def test_config_update_of_tp_pct(client):
                 "sl_pct": "10",
                 "sl_trail": False,
                 "leverage": "1",
-                "loss_limit_fraction": 0.4,
                 "units": "2",
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -574,7 +571,6 @@ def test_config_update_of_tp_pct_2(client):
                 "sl_pct": 10,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -627,7 +623,6 @@ def test_config_update_of_sl_pct(client):
                 "sl_pct": new_sl_pct,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -680,7 +675,6 @@ def test_config_update_of_sl_trail(client):
                 "sl_pct": 10,
                 "sl_trail": new_sl_trail,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -734,7 +728,6 @@ def test_config_update_of_trail_delay(client):
                 "sl_trail": True,
                 "trail_delay": new_trail_delay,
                 "leverage": 1,
-                "loss_limit_fraction": 0.1,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points":[
@@ -781,7 +774,6 @@ def test_config_update_of_reset_sl(client):
                 "sl_pct": 10,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": new_reset_sl,
                 "sl_reset_points": [
@@ -836,7 +828,6 @@ def test_config_update_of_sl_reset_points(client):
                 "sl_pct": 10,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points": new_sl_reset_points,
@@ -872,7 +863,6 @@ def test_config_update_of_leverage(client):
                 "sl_pct": 10,
                 "sl_trail": False,
                 "leverage": new_leverage,
-                "loss_limit_fraction": 0.4,
                 "units": 2,
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -925,7 +915,6 @@ def test_config_update_of_units(client):
                 "sl_pct": 10,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0.4,
                 "units": new_units,
                 "reset_sl": False,
                 "sl_reset_points": [
@@ -959,173 +948,6 @@ def test_config_update_of_units(client):
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_loss_limit_fraction(client):
-    coll = th.reset_test_coll("baseline_test_coll_2.json")
-
-    user = "malcolm"
-    strat = "ETH_M1"
-    new_loss_limit_fraction = 0.3
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m ETH Fo Shizzle on da A2A",
-                "tp_pct": 6,
-                "sl_pct": 0.5,
-                "sl_trail": False,
-                "leverage": 1,
-                "loss_limit_fraction": new_loss_limit_fraction,
-                "units": 2,
-                "reset_sl": True,
-                "sl_reset_points": [
-                    [
-                      0.25,
-                      0.5
-                    ],
-                    [
-                      0.35,
-                      0.5
-                    ],
-                    [
-                      0.5,
-                      0.5
-                    ],
-                    [
-                      0.75,
-                      0.5
-                    ],
-                    [
-                      0.1,
-                      0.5
-                    ],
-                    [
-                      1.5,
-                      -0.2
-                    ],
-                    [
-                      3,
-                      -2.6
-                    ]
-                ]
-            }
-        )
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_loss_limit_fraction_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_pct_of_starting_assets(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L6"
-    new_pct_of_starting_assets = 125
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m SL",
-                "tp_pct": 10,
-                "sl_pct": 10,
-                "sl_trail": False,
-                "leverage": 1,
-                "loss_limit_fraction": 0,
-                "pct_of_starting_assets": new_pct_of_starting_assets,
-                "units": 1,
-                "reset_sl": True,
-                "sl_reset_points": [
-                    [
-                      0.25,
-                      -0.1
-                    ],
-                    [
-                      0.35,
-                      -0.19
-                    ],
-                    [
-                      0.45,
-                      -0.28
-                    ],
-                    [
-                      0.55,
-                      -0.37
-                    ],
-                    [
-                      0.65,
-                      -0.46
-                    ],
-                    [
-                      0.75,
-                      -0.55
-                    ],
-                    [
-                      0.85,
-                      -0.64
-                    ],
-                    [
-                      0.95,
-                      0.73
-                    ],
-                    [
-                      1,
-                      -0.75
-                    ],
-                    [
-                      2,
-                      -1.7
-                    ],
-                    [
-                      3,
-                      -2.6
-                    ],
-                    [
-                      4,
-                      -3.5
-                    ],
-                    [
-                      5,
-                      -4.4
-                    ],
-                    [
-                      6,
-                      -5.3
-                    ],
-                    [
-                      7,
-                      -6.2
-                    ],
-                    [
-                      8,
-                      -7.1
-                    ],
-                    [
-                      9,
-                      -8
-                    ]
-                  ]
-            }
-        )
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_pct_of_starting_assets_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_dca(client):
     """    coll = th.reset_test_coll("baseline_test_coll_1.json")
 
@@ -1146,8 +968,6 @@ def test_config_update_of_dca(client):
                 "dca_pct": new_dca,
                 "sl_trail": False,
                 "leverage": 1,
-                "loss_limit_fraction": 0,
-                "pct_of_starting_assets": 100,
                 "units": 1,
                 "reset_sl": True,
                 "sl_reset_points": [
@@ -1265,7 +1085,6 @@ def test_open_long_with_leverage(client, mock_open_long_with_leverage):
 
     coll.update_one({"_id": user}, {"$set": {f"{strat}": pre_open_state}})
 
-    # leverage will be adjusted from 5 to 2 with this loss limit config
     client.post("/", json=dict(user=user, strat=strat, long=True, price=53001))
 
     post_state = coll.find_one({"_id": user})[strat]
@@ -1379,6 +1198,7 @@ def test_opening_two_longs(
         tp_pct=10,
         tp_pct_2=None,
         sl_pct=3,
+        dca_pct=None,
         sl_trail=True,
         entry_order_type='market',
         tp_order_type='market',
@@ -1388,39 +1208,8 @@ def test_opening_two_longs(
         description=f"{user} {strat} <1h SL/TP>",
         logger=None,
         alert_price=19010,
-        coll=coll,
-        loss_limit_fraction=0.3,
-        pct_of_starting_assets=None
+        coll=coll
     )
-
-
-def test_get_adjusted_leverage_and_units():
-    loss_limit_fractions = [None, 0, 0.1, 0.2, 0.5, 15]
-    leverages_and_units = [(1, 100), (2, 5000), (5, 40), (10, 1000000)]
-    stop_losses = [1, 2, 4, 5, 10]
-    pct_of_starting_assets = [None, 50, 100, 150, 200, 250, 300, 401, 499, 567, 600, 10099]
-    results = []
-
-    for llf in loss_limit_fractions:
-        for lu in leverages_and_units:
-            for sl in stop_losses:
-                for psa in pct_of_starting_assets:
-                    adj_leverage, adj_units, loss_limit = get_adjusted_leverage_and_units(
-                        stop_loss=sl, max_leverage=lu[0], pct_of_starting_assets=psa,
-                        loss_limit_fraction=llf, max_units=lu[1])
-                    results.append(
-                        {"psa": psa,
-                         "sl": sl,
-                         "l": lu[0],
-                         "u": lu[1],
-                         "llf": llf,
-                         "adj_leverage": adj_leverage,
-                         "adj_units": adj_units,
-                         "loss_limit": loss_limit,
-                         "potential_loss": round(sl / 100 * adj_leverage, 3)})
-    with open("test/test_files/expected_adjusted_leverages.json") as _f:
-        expected = json.load(_f)
-    assert results == expected
 
 
 def test_limit_take_profit():

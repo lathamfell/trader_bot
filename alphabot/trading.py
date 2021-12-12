@@ -76,12 +76,11 @@ def open_trade(
     entry_order_type,
     tp_order_type,
     sl_order_type,
+    dca_pct=None,
     user=None,
     strat=None,
     tp_pct_2=None,
     coll=None,
-    loss_limit_fraction=None,
-    pct_of_starting_assets=None,
     entry_signal=None
 ):
     # logger.debug(
@@ -100,21 +99,17 @@ def open_trade(
     else:
         direction = "short"
 
-    adj_leverage, adj_units, _ = get_adjusted_leverage_and_units(
-        stop_loss=sl_pct,
-        max_leverage=leverage,
-        pct_of_starting_assets=pct_of_starting_assets,
-        loss_limit_fraction=loss_limit_fraction,
-        max_units=units
-    )
+    dca_price = None
+    if dca_pct:
+        units = units // 2
 
     base_trade = get_base_trade(
         account_id=account_id,
         pair=pair,
         _type=_type,
-        leverage=adj_leverage,
+        leverage=leverage,
         alert_price=alert_price,
-        units=adj_units,
+        units=units,
         entry_order_type=entry_order_type,
         user=user,
         strat=strat,
@@ -161,7 +156,7 @@ def open_trade(
             slippage = (trade_entry - alert_price) / alert_price
         # this slippage is nonsense if the alert price from a Heiken Ashi indicator
         print(
-            f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}, alert price was {alert_price}. "
+            f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}"
             #f"Slippage: {round(slippage * 100, 2)}%"  # slippage is meaningless when using Heiken Ashi price signals
         )
 
@@ -172,6 +167,8 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 - sl_pct / 100)
+        if dca_pct:
+            dca_price = trade_entry * (1 - dca_pct / 100)
         sl_trigger = trade_entry - ((trade_entry - sl_price) / 4)  # 25% of the way to SL
         direction = "long"
     else:  # sell
@@ -181,9 +178,11 @@ def open_trade(
         else:
             tp_price_2 = None
         sl_price = trade_entry * (1 + sl_pct / 100)
+        if dca_pct:
+            dca_price = trade_entry * (1 + dca_pct / 100)
         sl_trigger = trade_entry + ((sl_price - trade_entry) / 4)  # 25% of the way to SL
         direction = "short"
-    update_trade = get_update_trade(
+    update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
         _type=_type,
         units=units,
@@ -203,18 +202,21 @@ def open_trade(
     #    f"{user} {strat} Sending update trade while opening trade: {update_trade}"
     # )
 
+    # separate API call to add TP and SL. This is because we needed the exact entry price from the base trade call in
+    #   order to calculate them.
+    print(f"Updating trade {trade_id} with payload: {update_trade_payload}")
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
         action="update",
         action_id=trade_id,
-        payload=update_trade,
+        payload=update_trade_payload,
     )
     if update_trade_error.get("error"):
         print(
             f"{description} Error updating trade while opening, {update_trade_error['msg']}"
         )
         print(
-            f"full update trade config: {update_trade}"
+            f"full update trade config: {update_trade_payload}"
         )
         print(f"{description} Closing trade {trade_id} by market since we couldn't apply TP/SL")
         close_trade(
@@ -226,6 +228,40 @@ def open_trade(
             logger=logger,
         )
         raise Exception
+    print(f"Trade {trade_id} updated with TP/SL")
+
+    if dca_pct:
+        # per 3C API docs, separate API call required to add the DCA limit order
+        add_funds_payload = get_add_funds_payload(
+            units=units,
+            price=dca_price,
+            trade_id=trade_id
+        )
+        print(f"Adding funds to trade {trade_id} with payload {add_funds_payload}")
+        add_funds_error, add_funds_data = py3c.request(
+            entity="smart_trades_v2",
+            action="add_funds",
+            action_id=trade_id,
+            payload=add_funds_payload
+        )
+        if add_funds_error.get("error"):
+            print(
+                f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
+            )
+            print(
+                f"full DCA (add_funds) config: {add_funds_payload}"
+            )
+            print(f"{description} Closing trade {trade_id} by market since we couldn't apply DCA")
+            close_trade(
+                py3c=py3c,
+                trade_id=trade_id,
+                user=user,
+                strat=strat,
+                description=description,
+                logger=logger,
+            )
+            raise Exception
+        print(f"{description} trade {trade_id} updated with DCA order")
 
     coll.update_one(
         {"_id": user},
@@ -235,6 +271,7 @@ def open_trade(
                 trade_id=trade_id,
                 direction=direction,
                 sl=sl_pct,
+                dca=dca_pct,
                 entry_signal=entry_signal
             )
         },
@@ -271,7 +308,7 @@ def get_base_trade(account_id, pair, _type, leverage, alert_price, units, user, 
     return base_trade
 
 
-def get_update_trade(
+def get_update_trade_payload(
     trade_id,
     _type,
     units,
@@ -291,7 +328,7 @@ def get_update_trade(
     #    f"{user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, "
     #    f"sl_price {sl_price}, sl_pct {sl_pct}"
     # )
-    update_trade = {
+    update_trade_payload = {
         "id": trade_id,
         "position": {"type": _type, "units": {"value": units}, "order_type": entry_order_type},
         "take_profit": {
@@ -315,11 +352,11 @@ def get_update_trade(
     }
 
     if sl_order_type == "limit":
-        update_trade["stop_loss"]["price"] = {"value": sl_price}
-        update_trade["stop_loss"]["conditional"]["price"]["value"] = sl_trigger
+        update_trade_payload["stop_loss"]["price"] = {"value": sl_price}
+        update_trade_payload["stop_loss"]["conditional"]["price"]["value"] = sl_trigger
 
     if tp_price_2 is not None:
-        update_trade["take_profit"]["steps"] = [
+        update_trade_payload["take_profit"]["steps"] = [
             {
                 "order_type": tp_order_type,
                 "price": {"value": tp_price_1, "type": "last"},
@@ -332,7 +369,21 @@ def get_update_trade(
             },
         ]
 
-    return update_trade
+    return update_trade_payload
+
+
+def get_add_funds_payload(units, price, trade_id):
+    add_funds_payload = {
+        "order_type": "limit",
+        "units": {
+            "value": units
+        },
+        "price": {
+            "value": price
+        },
+        "id": trade_id,
+    }
+    return add_funds_payload
 
 
 """
@@ -424,24 +475,3 @@ def take_partial_profit(
     )
     return _trade_status
 """
-
-
-def get_adjusted_leverage_and_units(stop_loss, max_leverage, pct_of_starting_assets, loss_limit_fraction, max_units):
-    if not loss_limit_fraction:  # llf not configured, or disabled (set to 0)
-        print(f"Leverage not adjusted because loss limit fraction set to 0 or not configured")
-        return max_leverage, max_units, 0
-    if pct_of_starting_assets is None:
-        print(f"Leverage not adjusted because pct of starting assets not configured")
-        return max_leverage, max_units, 0
-    loss_limit = max(0.1, round(pct_of_starting_assets * loss_limit_fraction / 100, 3))
-    potential_loss = stop_loss / 100 * max_leverage
-    if (potential_loss <= loss_limit) or max_leverage == 1:
-        # there are no problems.  leverage is fine
-        print(f"Leverage not adjusted because potential loss is within limits, or configured leverage is 1")
-        return max_leverage, max_units, loss_limit
-    # max with 1 to avoid sub-1 lev. Multiple both by 100 to avoid float division imprecision
-    adj_leverage = max(1, (loss_limit * 100) // stop_loss)
-    adj_leverage = int(min(max_leverage, adj_leverage))  # make sure we don't exceed configured lev
-    adj_units = int(max(1, max_units * (adj_leverage / max_leverage)))
-    print(f"Leverage adjusted from {max_leverage} to {adj_leverage}, units adjusted from {max_units} to {adj_units}")
-    return adj_leverage, adj_units, loss_limit

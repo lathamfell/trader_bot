@@ -3,8 +3,6 @@
       "config":{
          "description":"latham BTC_L2 <1m Split TP>",
          "leverage":5,
-         "loss_limit_fraction": 0.2,
-         "pct_of_starting_assets": 100,
          "reset_sl":false,
          "sl_pct":10,
          "sl_reset_points":[
@@ -84,6 +82,7 @@
       },
       "status":{
          "config_change_time":"07-06 05:23 UTC",
+         "dca_set": null,
          "drawdown_std_dev":0,
          "drawdowns":[
 

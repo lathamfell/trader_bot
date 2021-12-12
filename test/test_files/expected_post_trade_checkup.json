@@ -3,7 +3,6 @@
   "BTC_L1": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.1,
       "sl_pct": 10,
       "sl_trail": true,
       "tp_pct": 10,
@@ -110,7 +109,6 @@
   "BTC_L2": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.2,
       "sl_pct": 10,
       "sl_trail": true,
       "tp_pct": 0.15,
@@ -214,7 +212,6 @@
   "BTC_L3": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.3,
       "sl_pct": 10,
       "sl_trail": false,
       "tp_pct": 10,
@@ -493,7 +490,6 @@
   "BTC_L4": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.4,
       "sl_pct": 10,
       "sl_trail": false,
       "tp_pct": 10,
@@ -756,7 +752,6 @@
   "BTC_L5": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.5,
       "sl_pct": 0.5,
       "sl_trail": false,
       "tp_pct": 10,
@@ -1028,7 +1023,6 @@
     },
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.3,
       "reset_sl": true,
       "sl_pct": 3,
       "sl_trail": true,
@@ -1096,7 +1090,6 @@
     },
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.4,
       "reset_sl": true,
       "sl_pct": 1,
       "sl_trail": true,
@@ -1146,7 +1139,6 @@
     },
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.5,
       "reset_sl": true,
       "sl_pct": 2,
       "sl_trail": false,
@@ -1343,7 +1335,6 @@
     "config": {
       "description": "latham BTC_L6 <15m SL>",
       "leverage": 1,
-      "loss_limit_fraction": 0,
       "reset_sl": true,
       "sl_pct": 10,
       "sl_trail": false,
@@ -1482,7 +1473,6 @@
     },
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.1,
       "reset_sl": false,
       "sl_pct": 0.5,
       "sl_trail": true,
@@ -1559,7 +1549,6 @@
     "config": {
       "description": "malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>",
       "leverage": 1,
-      "loss_limit_fraction": 0.2,
       "reset_sl": true,
       "sl_pct": 0.5,
       "sl_trail": false,
@@ -1626,7 +1615,6 @@
     },
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.2,
       "reset_sl": true,
       "sl_pct": 1,
       "sl_trail": false,

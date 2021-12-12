@@ -112,8 +112,6 @@
     "config": {
       "description": "latham BTC_L6 <15m SL>",
       "leverage": 1,
-      "loss_limit_fraction": 0,
-      "pct_of_starting_assets": 125,
       "reset_sl": true,
       "sl_pct": 10,
       "sl_trail": false,

@@ -111,21 +111,6 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing leverage from {old_leverage} to {new_leverage}")
 
-    new_loss_limit_fraction = new_config.get("loss_limit_fraction")
-    old_loss_limit_fraction = current_config.get("loss_limit_fraction")
-    if new_loss_limit_fraction:
-        new_loss_limit_fraction = float(new_loss_limit_fraction)
-    if new_loss_limit_fraction != old_loss_limit_fraction:
-        reset_profits = True
-        print(f"Changing loss_limit_fraction from {old_loss_limit_fraction} to {new_loss_limit_fraction}")
-
-    new_pct_of_starting_assets = new_config.get("pct_of_starting_assets")
-    old_pct_of_starting_assets = current_config.get("pct_of_starting_assets")
-    if new_pct_of_starting_assets:
-        new_pct_of_starting_assets = int(new_pct_of_starting_assets)
-    if new_pct_of_starting_assets != old_pct_of_starting_assets:
-        print(f"Changing pct_of_starting_assets from {old_pct_of_starting_assets} to {new_pct_of_starting_assets}")
-
     new_units = new_config.get("units")
     old_units = current_config.get("units")
     if new_units:
@@ -151,7 +136,7 @@ def config_update(request, logger):
         set_command = {}
         reset_str = ""
         print(
-            f"Not resetting paper assets because no config changes were made to TP, SL, leverage or loss limiter."
+            f"Not resetting paper assets because no config changes were made to TP, SL, DCA, or leverage."
         )
 
     if new_tp_pct or new_tp_pct == 0:
@@ -168,10 +153,6 @@ def config_update(request, logger):
         set_command[f"{strat}.config.trail_delay"] = new_trail_delay
     if new_leverage:
         set_command[f"{strat}.config.leverage"] = new_leverage
-    if new_loss_limit_fraction:
-        set_command[f"{strat}.config.loss_limit_fraction"] = new_loss_limit_fraction
-    if new_pct_of_starting_assets:
-        set_command[f"{strat}.config.pct_of_starting_assets"] = new_pct_of_starting_assets
     if new_units:
         set_command[f"{strat}.config.units"] = new_units
     if (new_reset_sl is True) or (new_reset_sl is False):
@@ -202,6 +183,6 @@ def get_reset_set_command(strat):
         f"{strat}.status.profit_std_dev": 0,
         f"{strat}.status.drawdown_std_dev": 0,
     }
-    reset_str = f" Reset paper assets to ${STARTING_PAPER:,} because a change was made to TP, SL or leverage"
+    reset_str = f" Reset paper assets to ${STARTING_PAPER:,} because a change was made to TP, SL, DCA or leverage"
 
     return set_command, reset_str

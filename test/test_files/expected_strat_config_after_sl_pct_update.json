@@ -2,8 +2,6 @@
   "BTC_L4": {
     "config": {
       "leverage": 1,
-      "loss_limit_fraction": 0.4,
-      "pct_of_starting_assets": 100,
       "sl_pct": 5,
       "sl_trail": false,
       "tp_pct": 10,
