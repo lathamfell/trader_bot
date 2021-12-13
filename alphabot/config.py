@@ -31,7 +31,7 @@ USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_M1": {
-                "logic": "omega",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30841543,
                 "pair": "BTC_BTCUSD",
