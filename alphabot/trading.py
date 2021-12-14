@@ -113,7 +113,7 @@ def open_trade(
         entry_order_type=entry_order_type,
         user=user,
         strat=strat,
-        note=f"{description} {direction} {entry_signal}",
+        note=f"{description} {entry_signal} {direction}",
         logger=logger,
     )
     # logger.debug(f"{user} {strat} Sending base trade: {base_trade}")

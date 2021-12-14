@@ -211,21 +211,22 @@ def get_sl_reset(
     _trade_status, description, strat_states, strat, user, trade_id, logger
 ):
     tf_idx = h.get_tf_idx(strat_states[strat]["status"]["entry_signal"])
-    print(f"tf_idx is {tf_idx}")
-    print(f"strat is {strat}")
-    print(f"this strat state is {strat_states[strat]}")
     try:
         reset_sl = strat_states[strat]["config"]["reset_sl"][tf_idx]
-        sl_reset_points = strat_states[strat]["config"]["sl_reset_points"][tf_idx]
+        sl_reset_points = strat_states[strat]["config"]["sl_reset_points"]
+        if not reset_sl or sl_reset_points == [[[]]]:
+            # logger.debug(f"{user} {strat} has SL reset disabled or has no reset points, skipping")
+            return None, None, None
     except KeyError:
         print(
             f"{description} skipping SL reset check because missing a SL reset config item. "
             f"Strat state is {strat_states[strat]}"
         )
         return None, None, None
-    if not reset_sl:
-        # logger.debug(f"{user} {strat} has SL reset disabled, skipping")
-        return None, None, None
+
+    # get the reset points for this TF
+    sl_reset_points = sl_reset_points[tf_idx]
+
     profit, roe = h.get_profit_and_roe(_trade_status)
     direction = strat_states[strat]["status"].get("last_entry_direction")
     sl_reset_points_hit = strat_states[strat]["status"]["sl_reset_points_hit"]
@@ -314,7 +315,7 @@ def log_profit_and_roe(
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
         print(
-            f"{description} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
+            f"{description} {entry_signal} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
             f"Entry time: {entry_time}"
