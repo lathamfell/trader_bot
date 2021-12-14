@@ -6,9 +6,36 @@
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/old/old_code.py" beforeDir="false" afterPath="$PROJECT_DIR$/old/old_code.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L2_pre_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L2_pre_open_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_long.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_description_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_description_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_leverage_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_leverage_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_reset_sl_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_reset_sl_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_pct_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_pct_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_reset_points_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_reset_points_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_trail_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_trail_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_2_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_2_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_trail_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_trail_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_trail_delay_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_trail_delay_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_units_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_units_update.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_update_of_dca.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_update_of_dca.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +84,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python&#10;TEXT" />
+    <property name="com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File" value="Python" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -73,7 +101,7 @@
       <recent name="C:\Users\Latham\Documents\PycharmProjects\trader_bot\old" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_main.test_config_update_of_description">
+  <component name="RunManager" selected="Python tests.pytest for test_main.test_opening_two_longs">
     <configuration name="account_printer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="trader_bot" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -718,7 +746,7 @@
       <workItem from="1637794583742" duration="1248000" />
       <workItem from="1638992476442" duration="599000" />
       <workItem from="1639001779249" duration="4930000" />
-      <workItem from="1639087950824" duration="30166000" />
+      <workItem from="1639087950824" duration="36491000" />
     </task>
     <servers />
   </component>
@@ -857,7 +885,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>212</line>
+          <line>213</line>
           <option name="timeStamp" value="172" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -935,25 +963,72 @@
           <line>443</line>
           <option name="timeStamp" value="191" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_main.py</url>
+          <line>1054</line>
+          <option name="timeStamp" value="192" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>283</line>
+          <option name="timeStamp" value="193" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_main.py</url>
+          <line>1160</line>
+          <option name="timeStamp" value="194" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_main.py</url>
+          <line>1167</line>
+          <option name="timeStamp" value="195" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_main.py</url>
+          <line>1191</line>
+          <option name="timeStamp" value="196" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test_main.py</url>
+          <line>1183</line>
+          <option name="timeStamp" value="197" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>238</line>
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>174</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/main.py</url>
+          <line>190</line>
+          <option name="timeStamp" value="200" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long.coverage" NAME="pytest for test_main.test_open_long Coverage Results" MODIFIED="1639297126842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long.coverage" NAME="pytest for test_main.test_open_long Coverage Results" MODIFIED="1639470221790" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_sl_reset_points.coverage" NAME="pytest for test_main.test_config_update_of_sl_reset_points Coverage Results" MODIFIED="1639446505692" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_description.coverage" NAME="pytest for test_main.test_config_update_of_description Coverage Results" MODIFIED="1639468982797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_trade_checkup.coverage" NAME="pytest for test_main.test_trade_checkup Coverage Results" MODIFIED="1639507890587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_leverage.coverage" NAME="pytest for test_main.test_config_update_of_leverage Coverage Results" MODIFIED="1639446525241" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_tp_pct_2.coverage" NAME="pytest for test_main.test_config_update_of_tp_pct_2 Coverage Results" MODIFIED="1639446401192" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_sl_pct.coverage" NAME="pytest for test_main.test_config_update_of_sl_pct Coverage Results" MODIFIED="1639446462370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_units.coverage" NAME="pytest for test_main.test_config_update_of_units Coverage Results" MODIFIED="1639446536125" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_dca.coverage" NAME="pytest for test_main.test_config_update_of_dca Coverage Results" MODIFIED="1639446738100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_in_test_main_test_config_update_of_sl_trail.coverage" NAME="pytest for test_main.test_config_update_of_sl_trail Coverage Results" MODIFIED="1639446473138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_opening_two_longs.coverage" NAME="pytest for test_main.test_opening_two_longs Coverage Results" MODIFIED="1639297493119" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_opening_two_longs.coverage" NAME="pytest for test_main.test_opening_two_longs Coverage Results" MODIFIED="1639508034463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_in_test_main_test_config_update_of_trail_delay.coverage" NAME="pytest in test_main.test_config_update_of_trail_delay Coverage Results" MODIFIED="1639446484317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_short.coverage" NAME="pytest for test_main.test_open_short Coverage Results" MODIFIED="1639297432355" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_short.coverage" NAME="pytest for test_main.test_open_short Coverage Results" MODIFIED="1639470289482" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_in_test_main_test_opening_two_longs.coverage" NAME="pytest in test_main.test_opening_two_longs Coverage Results" MODIFIED="1639179529974" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long_with_leverage.coverage" NAME="pytest for test_main.test_open_long_with_leverage Coverage Results" MODIFIED="1639297399083" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_tp_pct.coverage" NAME="pytest for test_main.test_config_update_of_tp_pct Coverage Results" MODIFIED="1639446444154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_reset_sl.coverage" NAME="pytest for test_main.test_config_update_of_reset_sl Coverage Results" MODIFIED="1639446495138" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_report.coverage" NAME="pytest for test_main.test_report Coverage Results" MODIFIED="1639468296331" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_report.coverage" NAME="pytest for test_main.test_report Coverage Results" MODIFIED="1639468632857" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long_with_leverage.coverage" NAME="pytest for test_main.test_open_long_with_leverage Coverage Results" MODIFIED="1639470404891" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

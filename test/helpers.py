@@ -11,7 +11,7 @@ MOCK_USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_M1": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 29896590,
                 "pair": "BTC_BTCUSD_PERP",
@@ -21,7 +21,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "ETH_M1": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "eth",
                 "account_id": 29896590,
                 "pair": "ETH_ETHUSD_PERP",
@@ -31,7 +31,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_M2": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30571928,
                 "pair": "BTC_BTCUSD_PERP",
@@ -49,7 +49,7 @@ MOCK_USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_L1": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30034871,
                 "pair": "BTC_BTCUSD_PERP",
@@ -58,7 +58,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_L2": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30391847,
                 "pair": "BTC_BTCUSD_PERP",
@@ -67,7 +67,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_M3": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30549010,
                 "pair": "BTC_BTCUSD_PERP",
@@ -76,7 +76,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_M4": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30572521,
                 "pair": "BTC_BTCUSD_PERP",
@@ -85,7 +85,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_L3": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30398341,
                 "pair": "BTC_BTCUSD_PERP",
@@ -94,7 +94,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_L4": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30491505,
                 "pair": "BTC_BTCUSD_PERP",
@@ -103,7 +103,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_M5": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30572479,
                 "pair": "BTC_BTCUSD_PERP",
@@ -112,7 +112,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_L5": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 29799999,
                 "pair": "BTC_BTCUSD_PERP",
@@ -121,7 +121,7 @@ MOCK_USER_ATTR = {
                 "sl_order_type": "market",
             },
             "BTC_L6": {
-                "logic": "gamma",
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30577995,
                 "pair": "BTC_BTCUSD_PERP",

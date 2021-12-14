@@ -125,3 +125,12 @@ def get_mongo_coll():
     if os.environ["MONGO_DB"] == "PROD":
         db = client.indicators_db
         return db.indicators_coll
+
+
+def get_tf_idx(tf):
+    if tf == "HTF":
+        return 0
+    elif tf == "LTF":
+        return 1
+    elif tf == "LLTF":
+        return 2

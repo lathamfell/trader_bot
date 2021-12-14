@@ -1,13 +1,13 @@
 {
 	"BTC_L4": {
 		"config": {
-			"leverage": 1,
-			"sl_pct": 10,
-      		"sl_trail": false,
-			"tp_pct": 10,
-			"units": 2,
-			"reset_sl": false,
-			"sl_reset_points": [
+			"leverage": [1],
+			"sl_pct": [10],
+      		"sl_trail": [false],
+			"tp_pct": [10],
+			"units": [2],
+			"reset_sl": [false],
+			"sl_reset_points": [[
 				[
 					0.15,
 					-0.1
@@ -80,9 +80,9 @@
 					9,
 					-8
 				]
-			],
+			]],
 			"description": "latham BTC_L4 <15m Split TPs>",
-			"tp_pct_2": null
+			"tp_pct_2": [null]
 		},
 		"status": {
 			"dca_set": null,
@@ -97,6 +97,7 @@
 			"potential_profits": [],
 			"profit_std_dev": 0,
 			"entry_time": "07-08 14:45 UTC",
+			"entry_signal": "HTF",
 			"last_entry_direction": "long",
 			"last_sl_set": 10,
 			"max_drawdown_this_entry": 0,
@@ -107,7 +108,7 @@
 			"profit_logged": false,
 			"trade_id": "7873502",
 			"mean_potential_profit": 0,
-			 "entry_signal": null
+			"htf_shadow": "long"
 		}
 	}
 }

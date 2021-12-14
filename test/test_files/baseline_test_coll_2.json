@@ -96,6 +96,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-01 13:38",
+      "entry_signal": "HTF",
       "last_entry_direction": "short",
       "last_sl_set": 10,
       "max_drawdown_this_entry": 0,
@@ -199,6 +200,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-06 05:19 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 10,
       "max_drawdown_this_entry": -0.09,
@@ -322,7 +324,7 @@
           "exit_time": "07-06 05:20 UTC",
           "close_dump": 0.65,
           "trade_id": "7820571",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 13:15 UTC": {
           "direction": "short",
@@ -335,7 +337,7 @@
           "exit_time": "07-06 13:45 UTC",
           "close_dump": -0.040000000000000036,
           "trade_id": "7827987",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 13:45 UTC": {
           "direction": "long",
@@ -348,7 +350,7 @@
           "exit_time": "07-06 13:48 UTC",
           "close_dump": -0.11,
           "trade_id": "7828437",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 23:15 UTC": {
           "direction": "short",
@@ -361,7 +363,7 @@
           "exit_time": "07-06 23:19 UTC",
           "close_dump": -0.04000000000000001,
           "trade_id": "7835336",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 14:45 UTC": {
           "direction": "long",
@@ -374,7 +376,7 @@
           "exit_time": "07-07 15:32 UTC",
           "close_dump": -0.09,
           "trade_id": "7847689",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 18:15 UTC": {
           "direction": "short",
@@ -387,7 +389,7 @@
           "exit_time": "07-07 20:15 UTC",
           "close_dump": -0.55,
           "trade_id": "7851273",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-08 16:00 UTC": {
           "direction": "long",
@@ -400,7 +402,7 @@
           "exit_time": "07-08 16:16 UTC",
           "close_dump": -0.08000000000000002,
           "trade_id": "7869198",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 00:45 UTC": {
           "direction": "short",
@@ -413,7 +415,7 @@
           "exit_time": "07-09 01:01 UTC",
           "close_dump": -0.11000000000000001,
           "trade_id": "7874367",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 02:30 UTC": {
           "direction": "long",
@@ -426,7 +428,7 @@
           "exit_time": "07-09 02:50 UTC",
           "close_dump": -0.07,
           "trade_id": "7875291",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 11:30 UTC": {
           "direction": "short",
@@ -439,7 +441,7 @@
           "exit_time": "07-09 13:00 UTC",
           "close_dump": -0.06000000000000005,
           "trade_id": "7879810",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 13:00 UTC": {
           "direction": "long",
@@ -452,7 +454,7 @@
           "exit_time": "07-09 13:04 UTC",
           "close_dump": -0.03,
           "trade_id": "7880603",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.24,
@@ -475,6 +477,7 @@
       ],
       "profit_std_dev": 0.27,
       "entry_time": "07-09 13:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 10,
       "max_drawdown_this_entry": -0.11,
@@ -599,7 +602,7 @@
           "exit_time": "07-08 23:57 UTC",
           "close_dump": -0.09,
           "trade_id": "7873502",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 00:45 UTC": {
           "direction": "long",
@@ -612,7 +615,7 @@
           "exit_time": "07-09 01:08 UTC",
           "close_dump": -0.04000000000000001,
           "trade_id": "7874365",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 02:30 UTC": {
           "direction": "short",
@@ -625,7 +628,7 @@
           "exit_time": "07-09 04:18 UTC",
           "close_dump": -0.040000000000000036,
           "trade_id": "7875290",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 04:19 UTC": {
           "direction": "long",
@@ -638,7 +641,7 @@
           "exit_time": "07-09 04:20 UTC",
           "close_dump": -0.07,
           "trade_id": "7876207",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 04:29 UTC": {
           "direction": "short",
@@ -651,7 +654,7 @@
           "exit_time": "07-09 11:30 UTC",
           "close_dump": -0.09000000000000008,
           "trade_id": "7876280",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 11:30 UTC": {
           "direction": "long",
@@ -664,7 +667,7 @@
           "exit_time": "07-09 13:00 UTC",
           "close_dump": -0.19000000000000006,
           "trade_id": "7879813",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 13:00 UTC": {
           "direction": "short",
@@ -677,7 +680,7 @@
           "exit_time": "07-09 13:07 UTC",
           "close_dump": -0.06999999999999998,
           "trade_id": "7880598",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 21:04 UTC": {
           "direction": "long",
@@ -690,7 +693,7 @@
           "exit_time": "07-09 21:08 UTC",
           "close_dump": -0.07999999999999999,
           "trade_id": "7886193",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 21:20 UTC": {
           "direction": "short",
@@ -703,7 +706,7 @@
           "exit_time": "07-09 21:22 UTC",
           "close_dump": -0.08,
           "trade_id": "7886336",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 21:58 UTC": {
           "direction": "long",
@@ -716,7 +719,7 @@
           "exit_time": "07-09 22:00 UTC",
           "close_dump": -0.08,
           "trade_id": "7886809",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.18,
@@ -737,6 +740,7 @@
       ],
       "profit_std_dev": 0.35,
       "entry_time": "07-09 21:58 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "short",
       "last_sl_set": 10,
       "max_drawdown_this_entry": -0.05,
@@ -839,7 +843,7 @@
           "exit_time": "07-06 04:22 UTC",
           "close_dump": -0.05,
           "trade_id": "7820563",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 13:15 UTC": {
           "direction": "short",
@@ -852,7 +856,7 @@
           "exit_time": "07-06 13:31 UTC",
           "close_dump": -0.66,
           "trade_id": "7827990",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 23:15 UTC": {
           "direction": "long",
@@ -865,7 +869,7 @@
           "exit_time": "07-06 23:27 UTC",
           "close_dump": -0.04999999999999999,
           "trade_id": "7835335",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 14:45 UTC": {
           "direction": "short",
@@ -878,7 +882,7 @@
           "exit_time": "07-07 15:35 UTC",
           "close_dump": 0.06,
           "trade_id": "7847687",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 20:15 UTC": {
           "direction": "long",
@@ -891,7 +895,7 @@
           "exit_time": "07-07 20:48 UTC",
           "close_dump": -0.04000000000000001,
           "trade_id": "7853259",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-08 16:00 UTC": {
           "direction": "short",
@@ -904,7 +908,7 @@
           "exit_time": "07-08 16:05 UTC",
           "close_dump": -0.08000000000000002,
           "trade_id": "7869196",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 00:45 UTC": {
           "direction": "long",
@@ -917,7 +921,7 @@
           "exit_time": "07-09 01:02 UTC",
           "close_dump": -0.07999999999999999,
           "trade_id": "7874368",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 02:30 UTC": {
           "direction": "short",
@@ -930,7 +934,7 @@
           "exit_time": "07-09 03:46 UTC",
           "close_dump": -0.15000000000000002,
           "trade_id": "7875293",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 11:30 UTC": {
           "direction": "long",
@@ -943,7 +947,7 @@
           "exit_time": "07-09 12:30 UTC",
           "close_dump": -0.13,
           "trade_id": "7879808",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 13:00 UTC": {
           "direction": "short",
@@ -956,7 +960,7 @@
           "exit_time": "07-09 13:07 UTC",
           "close_dump": -0.06,
           "trade_id": "7880596",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.21,
@@ -979,6 +983,7 @@
       ],
       "profit_std_dev": 0.28,
       "entry_time": "07-09 13:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 0,
       "max_drawdown_this_entry": -0.22,
@@ -1006,6 +1011,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-09 05:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 0,
       "max_drawdown_this_entry": -1.22,
@@ -1065,7 +1071,7 @@
           "exit_time": "07-09 18:15 UTC",
           "close_dump": -0.16,
           "trade_id": "7881030",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.11,
@@ -1077,6 +1083,7 @@
       ],
       "profit_std_dev": 0,
       "entry_time": "07-09 13:30 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 1,
       "max_drawdown_this_entry": -0.11,
@@ -1126,6 +1133,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-09 13:30 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 2,
       "max_drawdown_this_entry": 0,
@@ -1188,7 +1196,7 @@
           "exit_time": "07-06 09:36 UTC",
           "close_dump": 0,
           "trade_id": "7824985",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-06 13:45 UTC": {
           "direction": "short",
@@ -1201,7 +1209,7 @@
           "exit_time": "07-06 13:50 UTC",
           "close_dump": 0.2,
           "trade_id": "7828433",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 14:45 UTC": {
           "direction": "long",
@@ -1214,7 +1222,7 @@
           "exit_time": "07-07 15:55 UTC",
           "close_dump": 0.01,
           "trade_id": "7847688",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-07 18:15 UTC": {
           "direction": "short",
@@ -1227,7 +1235,7 @@
           "exit_time": "07-07 20:15 UTC",
           "close_dump": -0.55,
           "trade_id": "7851271",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-08 16:00 UTC": {
           "direction": "long",
@@ -1240,7 +1248,7 @@
           "exit_time": "07-08 16:03 UTC",
           "close_dump": -0.11,
           "trade_id": "7869191",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 00:45 UTC": {
           "direction": "short",
@@ -1253,7 +1261,7 @@
           "exit_time": "07-09 01:02 UTC",
           "close_dump": -0.13999999999999999,
           "trade_id": "7874369",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 02:30 UTC": {
           "direction": "long",
@@ -1266,7 +1274,7 @@
           "exit_time": "07-09 02:52 UTC",
           "close_dump": -0.1,
           "trade_id": "7875292",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 11:30 UTC": {
           "direction": "short",
@@ -1279,7 +1287,7 @@
           "exit_time": "07-09 13:00 UTC",
           "close_dump": -0.07000000000000006,
           "trade_id": "7879809",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 13:00 UTC": {
           "direction": "long",
@@ -1292,7 +1300,7 @@
           "exit_time": "07-09 13:15 UTC",
           "close_dump": -0.12,
           "trade_id": "7880599",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.2,
@@ -1315,6 +1323,7 @@
       ],
       "profit_std_dev": 0.3,
       "entry_time": "07-09 13:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": -0.46,
       "max_drawdown_this_entry": -0.16,
@@ -1434,7 +1443,7 @@
           "exit_time": "07-09 01:19 UTC",
           "close_dump": -0.18,
           "trade_id": "7874562",
-          "entry_signal": null
+          "entry_signal": "HTF"
         },
         "07-09 02:00 UTC": {
           "direction": "short",
@@ -1447,7 +1456,7 @@
           "exit_time": "07-09 02:34 UTC",
           "close_dump": -0.040000000000000036,
           "trade_id": "7875082",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.2,
@@ -1460,6 +1469,7 @@
       ],
       "profit_std_dev": 0.14,
       "entry_time": "07-09 02:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 0.5,
       "max_drawdown_this_entry": -0.24,
@@ -1516,7 +1526,7 @@
           "exit_time": "07-09 18:13 UTC",
           "close_dump": -0.030000000000000027,
           "trade_id": "7880594",
-          "entry_signal": null
+          "entry_signal": "HTF"
         }
       },
       "median_drawdown": -0.16,
@@ -1528,6 +1538,7 @@
       ],
       "profit_std_dev": 0,
       "entry_time": "07-09 13:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": -0.2,
       "max_drawdown_this_entry": -0.16,
@@ -1600,6 +1611,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-09 13:30 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 1,
       "max_drawdown_this_entry": 0,

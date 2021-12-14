@@ -210,9 +210,10 @@ def check_sl(
 def get_sl_reset(
     _trade_status, description, strat_states, strat, user, trade_id, logger
 ):
+    tf_idx = h.get_tf_idx(strat_states[strat]["status"]["entry_signal"])
     try:
-        reset_sl = strat_states[strat]["config"]["reset_sl"]
-        sl_reset_points = strat_states[strat]["config"]["sl_reset_points"]
+        reset_sl = strat_states[strat]["config"]["reset_sl"][tf_idx]
+        sl_reset_points = strat_states[strat]["config"]["sl_reset_points"][tf_idx]
     except KeyError:
         print(
             f"{description} skipping SL reset check because missing a SL reset config item. "
@@ -260,6 +261,7 @@ def log_profit_and_roe(
         coll = h.get_mongo_coll()
 
     strat_states = coll.find_one({"_id": user})
+    tf_idx = h.get_tf_idx(strat_states[strat]["status"]["entry_signal"])
     profit_logged = strat_states[strat]["status"].get("profit_logged")
     if profit_logged:
         print(f"{description} already logged profit for trade {trade_id}")
@@ -269,7 +271,7 @@ def log_profit_and_roe(
     potential_paper_assets = strat_states[strat]["status"].get(
         "potential_paper_assets", STARTING_PAPER
     )
-    leverage = strat_states[strat]["config"].get("leverage", 1)
+    leverage = strat_states[strat]["config"].get("leverage", [1])[tf_idx]
     profit, roe = h.get_profit_and_roe(_trade_status=_trade_status)
     if new_sl:
         last_sl_set = new_sl

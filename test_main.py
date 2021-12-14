@@ -71,13 +71,6 @@ def mock_tc_py3c():
 
 
 @pytest.fixture
-def mock_main_py3c_two_longs():
-    with patch("main.Py3CW") as mock_main_py3c:
-        mock_main_py3c().request.side_effect = mock_py3c_request_side_effect_two_longs
-        yield mock_main_py3c
-
-
-@pytest.fixture
 def mock_main_py3c_partial_close_long():
     with patch("main.Py3CW") as mock_main_py3c:
         mock_main_py3c().request.side_effect = (
@@ -92,7 +85,7 @@ def mock_py3c_request_side_effect_open_long(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> long None",
+        "note": "latham BTC_L4 <15m Split TPs> long HTF",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
@@ -167,7 +160,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30391847,
-        "note": "latham BTC_L2 <1m Split TP> long None",
+        "note": "latham BTC_L2 <1m Split TP> long HTF",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 5},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
@@ -247,7 +240,7 @@ def mock_py3c_request_side_effect_open_short(
     global waiting_for_base_open_short_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> short None",
+        "note": "latham BTC_L4 <15m Split TPs> short HTF",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "sell", "units": {"value": 2}, "order_type": "market"},
@@ -392,11 +385,6 @@ def mock_py3c_request_side_effect_trade_checkup(entity, action, action_id=None):
             return {}, mock_616_response
 
     raise Exception("side effect called but no conditions were fulfilled")
-
-
-def mock_py3c_request_side_effect_two_longs(entity, action, action_id):
-    with open("test/test_files/two_longs_status.json") as _f:
-        return {}, json.load(_f)
 
 
 def mock_py3c_request_side_effect_partial_close_long(entity, action, action_id):
@@ -1062,7 +1050,7 @@ def test_open_long(client, mock_main_py3c_open_long):
 
     coll.update_one({"_id": user}, {"$set": {f"{strat}": pre_open_state}})
 
-    client.post("/", json=dict(user=user, strat=strat, long=True, price=35001))
+    client.post("/", json=dict(user=user, strat=strat, open_long_htf=True, price=35001))
 
     post_state = coll.find_one({"_id": user})[strat]
     with open("test/test_files/BTC_L4_post_open_long.json") as _f:
@@ -1083,7 +1071,7 @@ def test_open_long_with_leverage(client, mock_open_long_with_leverage):
 
     coll.update_one({"_id": user}, {"$set": {f"{strat}": pre_open_state}})
 
-    client.post("/", json=dict(user=user, strat=strat, long=True, price=53001))
+    client.post("/", json=dict(user=user, strat=strat, open_long_htf=True, price=53001))
 
     post_state = coll.find_one({"_id": user})[strat]
     with open("test/test_files/BTC_L2_post_open_long.json") as _f:
@@ -1104,7 +1092,7 @@ def test_open_short(client, mock_main_py3c_open_short):
 
     coll.update_one({"_id": user}, {"$set": {f"{strat}": pre_open_state}})
 
-    client.post("/", json=dict(user=user, strat=strat, short=True, price=34002))
+    client.post("/", json=dict(user=user, strat=strat, open_short_htf=True, price=34002))
 
     post_state = coll.find_one({"_id": user})[strat]
     with open("test/test_files/BTC_L4_post_open_short.json") as _f:
@@ -1113,6 +1101,8 @@ def test_open_short(client, mock_main_py3c_open_short):
     assert post_state == expected_post_open_state
 
 
+# alpha logic doesn't use any standalone close alerts; it only closes on HTF switch
+"""  
 @patch("main.USER_ATTR", MOCK_USER_ATTR)
 def test_close_long(client, mock_main_py3c_close_long):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
@@ -1151,6 +1141,7 @@ def test_close_short(client, mock_main_py3c_close_short):
     with open("test/test_files/BTC_L4_post_close_short.json") as _f:
         expected_post_close_state = json.load(_f)[strat]
     assert post_state == expected_post_close_state
+"""
 
 
 @patch("alphabot.trade_checkup.USER_ATTR", MOCK_USER_ATTR)
@@ -1167,49 +1158,6 @@ def test_trade_checkup(client, mock_tc_py3c):
         assert coll.find_one({"_id": "malcolm"}) == expected_post_close_state[1]
 
 
-@patch("main.USER_ATTR", MOCK_USER_ATTR)
-@patch("alphabot.trading.close_trade")
-@patch("alphabot.trading.open_trade", return_value="7876616")
-def test_opening_two_longs(
-    mock_open_trade, mock_close_trade, client, mock_main_py3c_two_longs
-):
-    coll = th.reset_test_coll("baseline_test_coll_2.json")
-    user = "latham"
-    strat = "BTC_M3"
-    client.post("/", json=dict(user=user, strat=strat, long=True, price=19010))
-
-    mock_close_trade.assert_called_with(
-        py3c=mock_main_py3c_two_longs(),
-        trade_id="7876616",
-        user=user,
-        strat=strat,
-        description=f"{user} {strat} <1h SL/TP>",
-        logger=None,
-    )
-    mock_open_trade.assert_called_with(
-        py3c=mock_main_py3c_two_longs(),
-        account_id=30549010,
-        pair="BTC_BTCUSD_PERP",
-        _type="buy",
-        leverage=1,
-        units=2,
-        tp_pct=10,
-        tp_pct_2=None,
-        sl_pct=3,
-        dca_pct=None,
-        sl_trail=True,
-        entry_order_type='market',
-        tp_order_type='market',
-        sl_order_type='market',
-        user=user,
-        strat=strat,
-        description=f"{user} {strat} <1h SL/TP>",
-        logger=None,
-        alert_price=19010,
-        coll=coll
-    )
-
-
 def test_limit_take_profit():
     pass
 
@@ -1222,7 +1170,7 @@ def test_limit_entry():
     pass
 
 
-def test_logic_omega():
+def test_logic_alpha():
     pass
 
 

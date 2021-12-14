@@ -14,6 +14,7 @@
       ],
       "profit_std_dev": 0,
       "entry_time": "07-08 16:00 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": -0.1,
       "max_drawdown_this_entry": -0.08,

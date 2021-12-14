@@ -202,7 +202,7 @@ class AlertHandler:
         print(f"{self.strat} current LTF shadow: {ltf_shadow}")
         new_ltf_shadow = None
 
-        _type = entry_signal = idx = None
+        _type = entry_signal = None
 
         # check for shadow update regardless of whether trades are opened/closed
         if alert.get("open_short_htf"):
@@ -254,46 +254,47 @@ class AlertHandler:
         # check for HTF entry criteria
         if alert.get("open_short_htf"):
             print(f"{self.strat} HTF signal: opening short")
-            entry_signal, idx = "HTF", 0
+            entry_signal = "HTF"
             _type = "sell"
         elif alert.get("open_long_htf"):
             print(f"{self.strat} HTF signal: opening long")
-            entry_signal, idx = "HTF", 0
+            entry_signal = "HTF"
             _type = "buy"
 
         # check for LTF entry criteria
         if alert.get("open_short_ltf") and htf_shadow == "short":
             print(f"{self.strat} LTF in shadow, opening short")
-            entry_signal, idx = "LTF", 1
+            entry_signal = "LTF"
             _type = "sell"
         elif alert.get("open_long_ltf") and htf_shadow == "long":
             print(f"{self.strat} LTF in shadow, opening long")
-            entry_signal, idx = "LTF", 1
+            entry_signal = "LTF"
             _type = "buy"
 
         # check for LLTF entry criteria
         if alert.get("open_short_lltf") and htf_shadow == "short" and ltf_shadow == "short":
             print(f"{self.strat} LLTF in double shadow, opening short")
-            entry_signal, idx = "LLTF", 2
+            entry_signal = "LLTF"
             _type = "sell"
         elif alert.get("open_long_lltf") and htf_shadow == "long" and ltf_shadow == "long":
             print(f"{self.strat} LLTF in double shadow, opening long")
-            entry_signal, idx = "LLTF", 2
+            entry_signal = "LLTF"
             _type = "buy"
 
-        if _type and idx is not None:
+        if _type:
+            tf_idx = h.get_tf_idx(tf=entry_signal)
             trading.open_trade(
                 py3c=self.py3c,
                 account_id=self.account_id,
                 pair=self.pair,
                 _type=_type,
-                leverage=self.leverage[idx],
-                units=self.units[idx],
-                tp_pct=self.tp_pct[idx],
-                tp_pct_2=self.tp_pct_2[idx],
-                sl_pct=self.sl_pct[idx],
-                dca_pct=self.dca_pct[idx],
-                sl_trail=self.sl_trail[idx],
+                leverage=self.leverage[tf_idx],
+                units=self.units[tf_idx],
+                tp_pct=self.tp_pct[tf_idx],
+                tp_pct_2=self.tp_pct_2[tf_idx],
+                sl_pct=self.sl_pct[tf_idx],
+                dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
+                sl_trail=self.sl_trail[tf_idx],
                 entry_order_type=self.entry_order_type,
                 tp_order_type=self.tp_order_type,
                 sl_order_type=self.sl_order_type,

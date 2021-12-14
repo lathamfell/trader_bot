@@ -1,14 +1,14 @@
 {
   "BTC_L2": {
     "config": {
-      "leverage": 5,
-      "sl_pct": 10,
-      "sl_trail": true,
-      "tp_pct": 0.15,
-      "units": 2,
-      "reset_sl": false,
-      "tp_pct_2": 0.25,
-      "sl_reset_points": [
+      "leverage": [5],
+      "sl_pct": [10],
+      "sl_trail": [true],
+      "tp_pct": [0.15],
+      "units": [2],
+      "reset_sl": [false],
+      "tp_pct_2": [0.25],
+      "sl_reset_points": [[
         [
           0.25,
           -0.1
@@ -77,7 +77,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L2 <1m Split TP>"
     },
     "status": {
@@ -92,6 +92,7 @@
       "potential_profits": [],
       "profit_std_dev": 0,
       "entry_time": "07-06 05:19 UTC",
+      "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 10,
       "max_drawdown_this_entry": -0.09,
