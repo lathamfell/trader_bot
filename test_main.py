@@ -433,6 +433,42 @@ def test_report(client, mock_print):
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
+def test_config_update_from_pre_tri_a_and_with_empty_sl_reset_points(client):
+    coll = th.reset_test_coll("baseline_test_coll_3.json")  # pre triA config
+
+    user = "latham"
+    strat = "BTC_L1"
+    client.post(
+        "/",
+        json=dict(
+            route="config_update",
+            user=user,
+            strat=strat,
+            config={
+                "description": "Test",
+                "tp_pct": [1, 0.5, 0.3],
+                "tp_pct_2": [None, None, None],
+                "sl_pct": [10, 5, 1],
+                "dca_pct": [2, 1, 0.5],
+                "sl_trail": [False, True, True],
+                "leverage": [5, 2, 1],
+                "units": [100, 50, 20],
+                "reset_sl": [True, False, False],
+                "sl_reset_points": [[[]]],
+            },
+        ),
+    )
+
+    # check that config was properly updated
+    actual = coll.find_one({"_id": user})[strat]
+    with open(
+        "test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json"
+    ) as _f:
+        expected = json.load(_f)[strat]
+    assert actual == expected
+
+
+@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_description(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 

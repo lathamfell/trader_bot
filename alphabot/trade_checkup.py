@@ -211,6 +211,9 @@ def get_sl_reset(
     _trade_status, description, strat_states, strat, user, trade_id, logger
 ):
     tf_idx = h.get_tf_idx(strat_states[strat]["status"]["entry_signal"])
+    print(f"tf_idx is {tf_idx}")
+    print(f"strat is {strat}")
+    print(f"this strat state is {strat_states[strat]}")
     try:
         reset_sl = strat_states[strat]["config"]["reset_sl"][tf_idx]
         sl_reset_points = strat_states[strat]["config"]["sl_reset_points"][tf_idx]

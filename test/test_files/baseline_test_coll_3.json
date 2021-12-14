@@ -1,0 +1,116 @@
+[
+  {
+    "_id": "latham",
+    "BTC_L1": {
+      "config": {
+        "leverage": 1,
+        "sl_pct": 0.2,
+        "tp_pct": 0.2,
+        "units": 2,
+        "description": "latham BTC_L1 <Test>",
+        "tp_pct_2": null,
+        "reset_sl": false,
+        "sl_reset_points": [
+          [
+            0.03,
+            0.03
+          ]
+        ],
+        "sl_trail": false,
+        "dca_pct": 0.1
+      },
+      "status": {
+        "config_change_time": "12-12 09:12 UTC",
+        "drawdown_std_dev": 0.09,
+        "drawdowns": [
+          -0.25,
+          -0.02,
+          -0.22,
+          -0.14
+        ],
+        "full_profit_history": {
+          "12-12 09:06 UTC": {
+            "direction": "long",
+            "profit": -0.25,
+            "roe": -0.25,
+            "potential_profit": 0.03,
+            "max_drawdown": -0.25,
+            "assets": 9975,
+            "potential_assets": 9985,
+            "exit_time": "12-12 09:12 UTC",
+            "close_dump": -0.18,
+            "trade_id": "12061061",
+            "entry_signal": "HTF"
+          },
+          "12-12 09:12 UTC": {
+            "direction": "short",
+            "profit": 0.1,
+            "roe": 0.1,
+            "potential_profit": 0.22,
+            "max_drawdown": -0.02,
+            "assets": 9984,
+            "potential_assets": 9999,
+            "exit_time": "12-12 09:18 UTC",
+            "close_dump": -0.07,
+            "trade_id": "12061124",
+            "entry_signal": "HTF"
+          },
+          "12-12 09:21 UTC": {
+            "direction": "short",
+            "profit": 0.25,
+            "roe": 0.25,
+            "potential_profit": 0.3,
+            "max_drawdown": -0.22,
+            "assets": 10008,
+            "potential_assets": 10023,
+            "exit_time": "12-12 09:42 UTC",
+            "close_dump": -0.04999999999999999,
+            "trade_id": "12061188",
+            "entry_signal": "HTF"
+          },
+          "12-14 18:11 UTC": {
+            "direction": "short",
+            "profit": -0.14,
+            "roe": -0.14,
+            "potential_profit": 0.03,
+            "max_drawdown": -0.14,
+            "assets": 9993,
+            "potential_assets": 10008,
+            "exit_time": "12-14 18:12 UTC",
+            "close_dump": -0.17,
+            "trade_id": "12107386",
+            "entry_signal": "LLTF"
+          }
+        },
+        "median_drawdown": -0.18,
+        "median_potential_profit": 0.12,
+        "paper_assets": 9993,
+        "potential_paper_assets": 10008,
+        "potential_profits": [
+          0.03,
+          0.22,
+          0.3,
+          0.03
+        ],
+        "profit_std_dev": 0.12,
+        "entry_time": "12-14 18:11 UTC",
+        "last_entry_direction": "short",
+        "last_tsl_set": 4,
+        "max_drawdown_this_entry": -0.07,
+        "max_profit_this_entry": 0.03,
+        "profit_logged": true,
+        "tsl_reset_points_hit": [],
+        "most_recent_profit": 0.03,
+        "took_partial_profit": false,
+        "mean_potential_profit": 0.14,
+        "trade_id": null,
+        "last_sl_set": 0.2,
+        "sl_reset_points_hit": [],
+        "htf_shadow": "short",
+        "ltf_shadow": "short",
+        "entry_signal": "LLTF",
+        "dca_set": 0.1
+      }
+    }
+  }
+]

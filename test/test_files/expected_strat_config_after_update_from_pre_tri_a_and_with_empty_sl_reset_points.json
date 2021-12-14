@@ -1,0 +1,48 @@
+{
+  "BTC_L1": {
+    "config": {
+      "leverage": [5, 2, 1],
+      "sl_pct": [10, 5, 1],
+      "tp_pct": [1, 0.5, 0.3],
+      "units": [100, 50, 20],
+      "description": "latham BTC_L1 <Test>",
+      "tp_pct_2": [null, null, null],
+      "reset_sl": [true, false, false],
+      "sl_reset_points": [[[]]],
+      "sl_trail": [false, true, true],
+      "dca_pct": [2, 1, 0.5]
+    },
+    "status": {
+      "config_change_time": "07-08 14:45 UTC",
+      "drawdown_std_dev": 0,
+      "drawdowns": [
+      ],
+      "full_profit_history": {
+      },
+      "median_drawdown": 0,
+      "median_potential_profit": 0,
+      "paper_assets": 10000,
+      "potential_paper_assets": 10000,
+      "potential_profits": [
+      ],
+      "profit_std_dev": 0,
+      "entry_time": "12-14 18:11 UTC",
+      "last_entry_direction": "short",
+      "last_tsl_set": 4,
+      "max_drawdown_this_entry": -0.07,
+      "max_profit_this_entry": 0.03,
+      "profit_logged": true,
+      "tsl_reset_points_hit": [],
+      "most_recent_profit": 0.03,
+      "took_partial_profit": false,
+      "mean_potential_profit": 0,
+      "trade_id": null,
+      "last_sl_set": 0.2,
+      "sl_reset_points_hit": [],
+      "htf_shadow": "short",
+      "ltf_shadow": "short",
+      "entry_signal": "LLTF",
+      "dca_set": 0.1
+    }
+  }
+}

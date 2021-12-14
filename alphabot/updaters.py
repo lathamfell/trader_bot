@@ -177,9 +177,14 @@ def get_reset_set_command(strat):
 def normalized(config_list):
     if not config_list:
         return config_list
+    if config_list == [[[]]]:
+        # special case: no resets at all
+        return config_list
     normalized_l = []
     for element in config_list:
-        if isinstance(element, bool) or isinstance(element, int) or isinstance(element, float):
+        if element is None:
+            normalized_l.append(element)
+        elif isinstance(element, bool) or isinstance(element, int) or isinstance(element, float):
             normalized_l.append(element)
         elif isinstance(element, list):  # must be sl reset points
             for i, reset_point in enumerate(element):
