@@ -172,12 +172,6 @@ class AlertHandler:
         self.run_logic(self.alert, logger)
 
     def run_logic(self, alert, logger):
-        if self.logic == "gamma":
-            self.run_logic_gamma(alert, logger)
-            return
-        if self.logic == "omega":
-            self.run_logic_omega(alert, logger)
-            return
         if self.logic == "alpha":
             self.run_logic_alpha(alert, logger)
             return
@@ -192,197 +186,8 @@ class AlertHandler:
         )
         raise Exception
 
-    def run_logic_gamma(self, alert, logger):
-        # obsolete
-        direction = h.get_current_trade_direction(
-            _trade_status=self.trade_status,
-            user=self.user,
-            strat=self.strat,
-            logger=logger,
-        )
-        if (alert.get("close_long") and direction == "long") or (
-            alert.get("close_short") and direction == "short"
-        ):
-            # exit criteria met
-            trade_id = self.state["status"]["trade_id"]
-            if (not alert.get("partial")) or self.state["status"][
-                "took_partial_profit"
-            ]:  # signal close, must close by market
-                print(
-                    f"{self.description} {direction} {trade_id} closing full position due to exit signal"
-                )
-                trading.close_trade(
-                    py3c=self.py3c,
-                    trade_id=trade_id,
-                    user=self.user,
-                    strat=self.strat,
-                    description=self.description,
-                    logger=logger,
-                )
-                return
-            else:  # only close half
-                pass
-                """
-                print(
-                    f"{self.description} {direction} {trade_id} closing partial position due to partial exit signal"
-                )
-                trading.take_partial_profit(
-                    py3c=self.py3c,
-                    trade_id=trade_id,
-                    description=self.description,
-                    user=self.user,
-                    entry_order_type=self.entry_order_type,
-                    tp_order_type=self.tp_order_type,
-                    sl_order_type=self.sl_order_type,
-                    strat=self.strat,
-                    logger=logger,
-                )
-                # update status so we don't do another partial close
-                self.coll.update_one(
-                    {"_id": self.user},
-                    {"$set": {f"{self.strat}.status.took_partial_profit": True}},
-                )
-                return
-                """
-        elif alert.get("close_long") or alert.get("close_short"):
-            return
-
-        _type = None
-        if alert.get("long"):
-            _type = "buy"
-        elif alert.get("short"):
-            _type = "sell"
-
-        if direction:
-            # close current trade first: signal close, so must close by market
-            trade_id = self.state["status"]["trade_id"]
-            trading.close_trade(
-                py3c=self.py3c,
-                trade_id=trade_id,
-                user=self.user,
-                strat=self.strat,
-                description=self.description,
-                logger=logger,
-            )
-
-        trading.open_trade(
-            py3c=self.py3c,
-            account_id=self.account_id,
-            pair=self.pair,
-            _type=_type,
-            leverage=self.leverage,
-            units=self.units,
-            tp_pct=self.tp_pct,
-            tp_pct_2=self.tp_pct_2,
-            sl_pct=self.sl_pct,
-            dca_pct=self.dca_pct,
-            sl_trail=self.sl_trail,
-            entry_order_type=self.entry_order_type,
-            tp_order_type=self.tp_order_type,
-            sl_order_type=self.sl_order_type,
-            user=self.user,
-            strat=self.strat,
-            description=self.description,
-            logger=logger,
-            alert_price=self.alert_price,
-            coll=self.coll
-        )
-
-    def run_logic_omega(self, alert, logger):
-        # dub A with signal exit
-        direction = h.get_current_trade_direction(
-            _trade_status=self.trade_status,
-            user=self.user,
-            strat=self.strat,
-            logger=logger
-        )
-        htf_shadow = self.state["status"].get("htf_shadow")
-        print(f"{self.strat} current HTF shadow: {htf_shadow}")
-        new_htf_shadow = None
-        _type = entry_signal = None
-
-        # check for shadow update regardless of whether trades are opened/closed
-        if alert.get("open_short_htf"):
-            new_htf_shadow = htf_shadow = "short"
-        elif alert.get("open_long_htf"):
-            new_htf_shadow = htf_shadow = "long"
-
-        # update HTF shadow in db if needed
-        if new_htf_shadow:
-            self.coll.update_one(
-                {"_id": self.user},
-                {"$set": {
-                    f"{self.strat}.status.htf_shadow": new_htf_shadow
-                }}
-            )
-            print(f"{self.strat} HTF shadow updated to {new_htf_shadow}")
-
-        # does current trade need to be closed.  If so, close by market because this is signal close
-        if (alert.get("open_short_htf") and direction == "long") or \
-                (alert.get("open_long_htf") and direction == "short"):
-            trade_id = self.state["status"]["trade_id"]
-            trading.close_trade(
-                py3c=self.py3c,
-                trade_id=trade_id,
-                user=self.user,
-                strat=self.strat,
-                description=self.description,
-                logger=logger,
-            )
-            direction = None
-            print(f"{self.strat} HTF signal against current trade: closing")
-
-        if direction:
-            # if we are still in a trade there is no need to enter another
-            return
-
-        # check for HTF entry criteria
-        if alert.get("open_short_htf"):
-            print(f"{self.strat} HTF signal: opening short")
-            entry_signal = "HTF"
-            _type = "sell"
-        elif alert.get("open_long_htf"):
-            print(f"{self.strat} HTF signal: opening long")
-            entry_signal = "HTF"
-            _type = "buy"
-
-        # check for LTF entry criteria
-        if alert.get("open_short_ltf") and htf_shadow == "short":
-            print(f"{self.strat} LTF in shadow, opening short")
-            entry_signal = "LTF"
-            _type = "sell"
-        elif alert.get("open_long_ltf") and htf_shadow == "long":
-            print(f"{self.strat} LTF in shadow, opening long")
-            entry_signal = "LTF"
-            _type = "buy"
-
-        if _type:
-            trading.open_trade(
-                py3c=self.py3c,
-                account_id=self.account_id,
-                pair=self.pair,
-                _type=_type,
-                leverage=self.leverage,
-                units=self.units,
-                tp_pct=self.tp_pct,
-                tp_pct_2=self.tp_pct_2,
-                sl_pct=self.sl_pct,
-                dca_pct=self.dca_pct,
-                sl_trail=self.sl_trail,
-                entry_order_type=self.entry_order_type,
-                tp_order_type=self.tp_order_type,
-                sl_order_type=self.sl_order_type,
-                user=self.user,
-                strat=self.strat,
-                description=self.description,
-                logger=logger,
-                alert_price=self.alert_price,
-                coll=self.coll,
-                entry_signal=entry_signal
-            )
-
     def run_logic_alpha(self, alert, logger):
-        # tri A with signal exit
+        # tri A / dub A with signal exit
         direction = h.get_current_trade_direction(
             _trade_status=self.trade_status,
             user=self.user,
@@ -397,7 +202,7 @@ class AlertHandler:
         print(f"{self.strat} current LTF shadow: {ltf_shadow}")
         new_ltf_shadow = None
 
-        _type = entry_signal = None
+        _type = entry_signal = idx = None
 
         # check for shadow update regardless of whether trades are opened/closed
         if alert.get("open_short_htf"):
@@ -449,46 +254,46 @@ class AlertHandler:
         # check for HTF entry criteria
         if alert.get("open_short_htf"):
             print(f"{self.strat} HTF signal: opening short")
-            entry_signal = "HTF"
+            entry_signal, idx = "HTF", 0
             _type = "sell"
         elif alert.get("open_long_htf"):
             print(f"{self.strat} HTF signal: opening long")
-            entry_signal = "HTF"
+            entry_signal, idx = "HTF", 0
             _type = "buy"
 
         # check for LTF entry criteria
         if alert.get("open_short_ltf") and htf_shadow == "short":
             print(f"{self.strat} LTF in shadow, opening short")
-            entry_signal = "LTF"
+            entry_signal, idx = "LTF", 1
             _type = "sell"
         elif alert.get("open_long_ltf") and htf_shadow == "long":
             print(f"{self.strat} LTF in shadow, opening long")
-            entry_signal = "LTF"
+            entry_signal, idx = "LTF", 1
             _type = "buy"
 
         # check for LLTF entry criteria
         if alert.get("open_short_lltf") and htf_shadow == "short" and ltf_shadow == "short":
             print(f"{self.strat} LLTF in double shadow, opening short")
-            entry_signal = "LLTF"
+            entry_signal, idx = "LLTF", 2
             _type = "sell"
         elif alert.get("open_long_lltf") and htf_shadow == "long" and ltf_shadow == "long":
             print(f"{self.strat} LLTF in double shadow, opening long")
-            entry_signal = "LLTF"
+            entry_signal, idx = "LLTF", 2
             _type = "buy"
 
-        if _type:
+        if _type and idx is not None:
             trading.open_trade(
                 py3c=self.py3c,
                 account_id=self.account_id,
                 pair=self.pair,
                 _type=_type,
-                leverage=self.leverage,
-                units=self.units,
-                tp_pct=self.tp_pct,
-                tp_pct_2=self.tp_pct_2,
-                sl_pct=self.sl_pct,
-                dca_pct=self.dca_pct,
-                sl_trail=self.sl_trail,
+                leverage=self.leverage[idx],
+                units=self.units[idx],
+                tp_pct=self.tp_pct[idx],
+                tp_pct_2=self.tp_pct_2[idx],
+                sl_pct=self.sl_pct[idx],
+                dca_pct=self.dca_pct[idx],
+                sl_trail=self.sl_trail[idx],
                 entry_order_type=self.entry_order_type,
                 tp_order_type=self.tp_order_type,
                 sl_order_type=self.sl_order_type,

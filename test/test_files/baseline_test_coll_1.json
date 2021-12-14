@@ -2,7 +2,7 @@
   "_id": "latham",
   "BTC_L1": {
     "config": {
-      "leverage": [3],
+      "leverage": [1],
       "sl_pct": [10],
       "sl_trail": [true],
       "tp_pct": [10],

@@ -459,13 +459,13 @@ def test_config_update_of_description(client):
             strat=strat,
             config={
                 "description": new_description,
-                "tp_pct": "10",
-                "sl_pct": "10",
-                "sl_trail": False,
-                "leverage": "1",
-                "units": "2",
-                "reset_sl": False,
-                "sl_reset_points": [
+                "tp_pct": ["10"],
+                "sl_pct": ["10"],
+                "sl_trail": [False],
+                "leverage": ["1"],
+                "units": ["2"],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -484,7 +484,7 @@ def test_config_update_of_description(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
