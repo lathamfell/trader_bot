@@ -68,9 +68,9 @@ def in_order(_dict):
 
 def screen_for_str_bools(value):
     if isinstance(value, str):
-        if value == "true":
+        if value.lower() == "true":
             return True
-        if value == "false":
+        if value.lower() == "false":
             return False
     return value
 

@@ -2,13 +2,13 @@
   "_id": "latham",
   "BTC_L1": {
     "config": {
-      "leverage": 1,
-      "sl_pct": 10,
-      "sl_trail": true,
-      "tp_pct": 10,
-      "units": 1,
-      "reset_sl": false,
-      "sl_reset_points": [
+      "leverage": [3],
+      "sl_pct": [10],
+      "sl_trail": [true],
+      "tp_pct": [10],
+      "units": [1],
+      "reset_sl": [false],
+      "sl_reset_points": [[
         [
           0.15,
           -0.1
@@ -81,7 +81,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L1 <1m Benchmark>"
     },
     "status": {
@@ -108,14 +108,14 @@
   },
   "BTC_L2": {
     "config": {
-      "leverage": 5,
-      "sl_pct": 10,
-      "sl_trail": true,
-      "tp_pct": 0.15,
-      "units": 2,
-      "reset_sl": false,
-      "tp_pct_2": 0.25,
-      "sl_reset_points": [
+      "leverage": [5],
+      "sl_pct": [10],
+      "sl_trail": [true],
+      "tp_pct": [0.15],
+      "units": [2],
+      "reset_sl": [false],
+      "tp_pct_2": [0.25],
+      "sl_reset_points": [[
         [
           0.25,
           -0.1
@@ -184,7 +184,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L2 <1m Split TP>"
     },
     "status": {
@@ -211,13 +211,13 @@
   },
   "BTC_L3": {
     "config": {
-      "leverage": 1,
-      "sl_pct": 10,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "units": 1,
-      "reset_sl": false,
-      "sl_reset_points": [
+      "leverage": [1],
+      "sl_pct": [10],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "units": [1],
+      "reset_sl": [false],
+      "sl_reset_points": [[
         [
           0.15,
           -0.1
@@ -290,7 +290,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L3 <15m Tiny TP>"
     },
     "status": {
@@ -429,13 +429,13 @@
   },
   "BTC_L4": {
     "config": {
-      "leverage": 1,
-      "sl_pct": 10,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "units": 2,
-      "reset_sl": false,
-      "sl_reset_points": [
+      "leverage": [1],
+      "sl_pct": [10],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "units": [2],
+      "reset_sl": [false],
+      "sl_reset_points": [[
         [
           0.15,
           -0.1
@@ -508,7 +508,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L4 <15m Split TPs>"
     },
     "status": {
@@ -647,13 +647,13 @@
   },
   "BTC_L5": {
     "config": {
-      "leverage": 1,
-      "sl_pct": 0.5,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "units": 2,
-      "reset_sl": true,
-      "sl_reset_points": [
+      "leverage": [1],
+      "sl_pct": [0.5],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "units": [2],
+      "reset_sl": [true],
+      "sl_reset_points": [[
         [
           0.2,
           0
@@ -702,9 +702,9 @@
           2,
           -1.9
         ]
-      ],
+      ]],
       "description": "latham BTC_L5 <15m TP and SL>",
-      "tp_pct_2": 2.5
+      "tp_pct_2": [2.5]
     },
     "status": {
       "config_change_time": "07-06 05:23 UTC",
@@ -855,13 +855,13 @@
       "mean_potential_profit": 0
     },
     "config": {
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 3,
-      "sl_trail": true,
-      "tp_pct": 10,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [3],
+      "sl_trail": [true],
+      "tp_pct": [10],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           2,
           0
@@ -874,8 +874,8 @@
           4,
           3
         ]
-      ],
-      "units": 2,
+      ]],
+      "units": [2],
       "description": "latham BTC_M3 <1h SL/TP>"
     }
   },
@@ -903,13 +903,13 @@
       "mean_potential_profit": 0
     },
     "config": {
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 1,
-      "sl_trail": true,
-      "tp_pct": 10,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [1],
+      "sl_trail": [true],
+      "tp_pct": [10],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           2,
           -0.1
@@ -922,8 +922,8 @@
           6,
           -5.25
         ]
-      ],
-      "units": 2,
+      ]],
+      "units": [2],
       "description": "latham BTC_M4 < 5/15 A2A HSL>"
     }
   },
@@ -953,13 +953,13 @@
       "mean_potential_profit": 0
     },
     "config": {
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 2,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [2],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           4,
           -2.75
@@ -968,8 +968,8 @@
           6,
           -5.25
         ]
-      ],
-      "units": 2,
+      ]],
+      "units": [2],
       "description": "latham BTC_M5 <15m A2A HSL>"
     }
   },
@@ -1085,12 +1085,12 @@
     },
     "config": {
       "description": "latham BTC_L6 <15m SL>",
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 10,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [10],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "sl_reset_points": [[
         [
           0.25,
           -0.1
@@ -1159,8 +1159,8 @@
           9,
           -8
         ]
-      ],
-      "units": 1
+      ]],
+      "units": [1]
     }
   }
 },{
@@ -1208,13 +1208,13 @@
       "trade_id": null
     },
     "config": {
-      "leverage": 1,
-      "reset_sl": false,
-      "sl_pct": 0.5,
-      "sl_trail": true,
-      "tp_pct": 5,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [false],
+      "sl_pct": [0.5],
+      "sl_trail": [true],
+      "tp_pct": [5],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           0.8,
           0
@@ -1227,8 +1227,8 @@
           2,
           -1.1
         ]
-      ],
-      "units": 2,
+      ]],
+      "units": [2],
       "description": "malcolm BTC_M1 <A2A 15m>"
     }
   },
@@ -1260,13 +1260,13 @@
     },
     "config": {
       "description": "malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>",
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 0.75,
-      "sl_trail": false,
-      "tp_pct": 6,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [0.75],
+      "sl_trail": [false],
+      "tp_pct": [6],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           0.5,
           0.5
@@ -1283,8 +1283,8 @@
           3,
           -2.6
         ]
-      ],
-      "units": 2
+      ]],
+      "units": [2]
     }
   },
   "BTC_M2": {
@@ -1312,13 +1312,13 @@
       "trade_id": "7870233"
     },
     "config": {
-      "leverage": 1,
-      "reset_sl": true,
-      "sl_pct": 1,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "tp_pct_2": null,
-      "sl_reset_points": [
+      "leverage": [1],
+      "reset_sl": [true],
+      "sl_pct": [1],
+      "sl_trail": [false],
+      "tp_pct": [10],
+      "tp_pct_2": [null],
+      "sl_reset_points": [[
         [
           1,
           1
@@ -1335,8 +1335,8 @@
           7.5,
           -7
         ]
-      ],
-      "units": 2,
+      ]],
+      "units": [2],
       "description": "malcolm BTC_M2 <30m A2A HSL>"
     }
   }

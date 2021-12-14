@@ -1,14 +1,13 @@
 {
   "BTC_L4": {
     "config": {
-      "leverage": 10,
-      "sl_pct": 10,
-      "sl_trail": false,
-      "tp_pct": 10,
-      "tp_pct_2": null,
-      "units": 2,
-      "reset_sl": false,
-      "sl_reset_points": [
+      "leverage": [10],
+      "sl_pct": [10],
+      "sl_trail": [false],
+      "tp_pct":[10],
+      "units": [2],
+      "reset_sl": [false],
+      "sl_reset_points": [[
         [
           0.15,
           -0.1
@@ -81,7 +80,7 @@
           9,
           -8
         ]
-      ],
+      ]],
       "description": "latham BTC_L4 <15m Split TPs>"
     },
     "status": {

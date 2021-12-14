@@ -52,8 +52,6 @@ USER_ATTR = {
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com - Chrome
                 "pair": "BTC_BTCUSD",
-                # configured leverage will be used to calculate paper profits, but trades will be made on the
-                # exchange at 1x
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market",

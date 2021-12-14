@@ -504,7 +504,7 @@ def test_config_update_of_tp_pct(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_tp_pct = "8"  # was 10
+    new_tp_pct = [8]  # was 10
 
     client.post(
         "/",
@@ -515,12 +515,12 @@ def test_config_update_of_tp_pct(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": new_tp_pct,
-                "sl_pct": "10",
-                "sl_trail": False,
-                "leverage": "1",
-                "units": "2",
-                "reset_sl": False,
-                "sl_reset_points": [
+                "sl_pct": ["10"],
+                "sl_trail": [False],
+                "leverage": ["1"],
+                "units": ["2"],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -539,7 +539,7 @@ def test_config_update_of_tp_pct(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -556,7 +556,7 @@ def test_config_update_of_tp_pct_2(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_tp_pct_2 = "2"  # was None
+    new_tp_pct_2 = ["2"]  # was None
 
     client.post(
         "/",
@@ -566,14 +566,14 @@ def test_config_update_of_tp_pct_2(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
+                "tp_pct": [10],
                 "tp_pct_2": new_tp_pct_2,
-                "sl_pct": 10,
-                "sl_trail": False,
-                "leverage": 1,
-                "units": 2,
-                "reset_sl": False,
-                "sl_reset_points": [
+                "sl_pct": [10],
+                "sl_trail": [False],
+                "leverage": [1],
+                "units": [2],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -592,7 +592,7 @@ def test_config_update_of_tp_pct_2(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -609,7 +609,7 @@ def test_config_update_of_sl_pct(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_sl_pct = "5"  # was 10
+    new_sl_pct = ["5"]  # was 10
 
     client.post(
         "/",
@@ -619,13 +619,13 @@ def test_config_update_of_sl_pct(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
+                "tp_pct": [10],
                 "sl_pct": new_sl_pct,
-                "sl_trail": False,
-                "leverage": 1,
-                "units": 2,
-                "reset_sl": False,
-                "sl_reset_points": [
+                "sl_trail": [False],
+                "leverage": [1],
+                "units": [2],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -644,7 +644,7 @@ def test_config_update_of_sl_pct(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -661,7 +661,7 @@ def test_config_update_of_sl_trail(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_sl_trail = True  # was False
+    new_sl_trail = [True]  # was False
 
     client.post(
         "/",
@@ -671,13 +671,13 @@ def test_config_update_of_sl_trail(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
-                "sl_pct": 10,
+                "tp_pct": [10],
+                "sl_pct": [10],
                 "sl_trail": new_sl_trail,
-                "leverage": 1,
-                "units": 2,
-                "reset_sl": False,
-                "sl_reset_points": [
+                "leverage": [1],
+                "units": [2],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -696,7 +696,7 @@ def test_config_update_of_sl_trail(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ]
+                ]]
             }
         )
     )
@@ -713,7 +713,7 @@ def test_config_update_of_trail_delay(client):
 
     user = "malcolm"
     strat = "BTC_M1"
-    new_trail_delay = True  # was False
+    new_trail_delay = [True]  # was False
 
     client.post(
         "/",
@@ -723,14 +723,14 @@ def test_config_update_of_trail_delay(client):
             strat=strat,
             config={
                 "description": "A2A 15m",
-                "tp_pct": 5,
-                "sl_pct": .5,
-                "sl_trail": True,
+                "tp_pct": [5],
+                "sl_pct": [.5],
+                "sl_trail": [True],
                 "trail_delay": new_trail_delay,
-                "leverage": 1,
-                "units": 2,
-                "reset_sl": False,
-                "sl_reset_points":[
+                "leverage": [1],
+                "units": [2],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     [
                       0.8,
                       0
@@ -743,7 +743,7 @@ def test_config_update_of_trail_delay(client):
                       2,
                       -1.1
                     ]
-                ],
+                ]],
             }
         )
     )
@@ -760,7 +760,7 @@ def test_config_update_of_reset_sl(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_reset_sl = True  # was False
+    new_reset_sl = [True]  # was False
 
     client.post(
         "/",
@@ -770,13 +770,13 @@ def test_config_update_of_reset_sl(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
-                "sl_pct": 10,
-                "sl_trail": False,
-                "leverage": 1,
-                "units": 2,
+                "tp_pct": [10],
+                "sl_pct": [10],
+                "sl_trail": [False],
+                "leverage": [1],
+                "units": [2],
                 "reset_sl": new_reset_sl,
-                "sl_reset_points": [
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -795,7 +795,7 @@ def test_config_update_of_reset_sl(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -814,7 +814,7 @@ def test_config_update_of_sl_reset_points(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_sl_reset_points = [["0.5", "0.0"], ["1", "-0.25"]]
+    new_sl_reset_points = [[["0.5", "0.0"], ["1", "-0.25"]]]
 
     client.post(
         "/",
@@ -824,12 +824,12 @@ def test_config_update_of_sl_reset_points(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
-                "sl_pct": 10,
-                "sl_trail": False,
-                "leverage": 1,
-                "units": 2,
-                "reset_sl": False,
+                "tp_pct": [10],
+                "sl_pct": [10],
+                "sl_trail": [False],
+                "leverage": [1],
+                "units": [2],
+                "reset_sl": [False],
                 "sl_reset_points": new_sl_reset_points,
             },
         ),
@@ -849,7 +849,7 @@ def test_config_update_of_leverage(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_leverage = 10
+    new_leverage = [10]
 
     client.post(
         "/",
@@ -859,13 +859,13 @@ def test_config_update_of_leverage(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
-                "sl_pct": 10,
-                "sl_trail": False,
+                "tp_pct": [10],
+                "sl_pct": [10],
+                "sl_trail": [False],
                 "leverage": new_leverage,
-                "units": 2,
-                "reset_sl": False,
-                "sl_reset_points": [
+                "units": [2],
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -884,7 +884,7 @@ def test_config_update_of_leverage(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -901,7 +901,7 @@ def test_config_update_of_units(client):
 
     user = "latham"
     strat = "BTC_L4"
-    new_units = 19
+    new_units = [19]
 
     client.post(
         "/",
@@ -911,13 +911,13 @@ def test_config_update_of_units(client):
             strat=strat,
             config={
                 "description": "15m Split TPs",
-                "tp_pct": 10,
-                "sl_pct": 10,
-                "sl_trail": False,
-                "leverage": 1,
+                "tp_pct": [10],
+                "sl_pct": [10],
+                "sl_trail": [False],
+                "leverage": [1],
                 "units": new_units,
-                "reset_sl": False,
-                "sl_reset_points": [
+                "reset_sl": [False],
+                "sl_reset_points": [[
                     ["0.15", "-0.1"],
                     ["0.2", "-0.15"],
                     ["0.3", "-0.19"],
@@ -936,7 +936,7 @@ def test_config_update_of_units(client):
                     ["7", "-6.2"],
                     ["8", "-7.1"],
                     ["9", "-8"],
-                ],
+                ]],
             },
         ),
     )
@@ -949,11 +949,11 @@ def test_config_update_of_units(client):
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_dca(client):
-    """    coll = th.reset_test_coll("baseline_test_coll_1.json")
+    coll = th.reset_test_coll("baseline_test_coll_1.json")
 
     user = "latham"
     strat = "BTC_L6"
-    new_dca = 5
+    new_dca = [5]
 
     client.post(
         "/",
@@ -963,14 +963,14 @@ def test_config_update_of_dca(client):
             strat=strat,
             config={
                 "description": "15m SL",
-                "tp_pct": 10,
-                "sl_pct": 10,
+                "tp_pct": [10],
+                "sl_pct": [10],
                 "dca_pct": new_dca,
-                "sl_trail": False,
-                "leverage": 1,
-                "units": 1,
-                "reset_sl": True,
-                "sl_reset_points": [
+                "sl_trail": [False],
+                "leverage": [1],
+                "units": [1],
+                "reset_sl": [True],
+                "sl_reset_points": [[
                     [
                       0.25,
                       -0.1
@@ -1039,7 +1039,7 @@ def test_config_update_of_dca(client):
                       9,
                       -8
                     ]
-                  ]
+                  ]]
             }
         )
     )
@@ -1048,8 +1048,6 @@ def test_config_update_of_dca(client):
     with open("test/test_files/expected_strat_config_update_of_dca.json") as _f:
         expected = json.load(_f)[strat]
     assert actual == expected
-    """
-    pass
 
 
 @patch("main.USER_ATTR", MOCK_USER_ATTR)
