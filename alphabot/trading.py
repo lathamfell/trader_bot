@@ -77,6 +77,7 @@ def open_trade(
     tp_order_type,
     sl_order_type,
     dca_pct=None,
+    dca_weights=None,
     user=None,
     strat=None,
     tp_pct_2=None,
@@ -100,8 +101,10 @@ def open_trade(
         direction = "short"
 
     dca_prices = []
-    if dca_pct:
-        units = units // (len(dca_pct) + 1)
+    base_units = units
+    print(f"dca_pct is {dca_pct}")
+    if dca_pct and dca_pct[0] > 0:
+        base_units = units * dca_weights[0] // 100
 
     base_trade = get_base_trade(
         account_id=account_id,
@@ -109,7 +112,7 @@ def open_trade(
         _type=_type,
         leverage=leverage,
         alert_price=alert_price,
-        units=units,
+        units=base_units,
         entry_order_type=entry_order_type,
         user=user,
         strat=strat,
@@ -227,11 +230,14 @@ def open_trade(
         raise Exception
     print(f"Trade {trade_id} updated with TP/SL")
 
-    if dca_pct:
+    if dca_pct and dca_pct[0] > 0:
         for i, dca in enumerate(dca_pct):
             # per 3C API docs, separate API call required to add the DCA limit order
+            print(f"Units is {units}")
+            dca_units = units * dca_weights[i + 1] // 100
+            print(f"Calculated new units at {units}, from dca weight of {dca_weights[i + 1]}")
             add_funds_payload = get_add_funds_payload(
-                units=units,
+                units=dca_units,
                 price=dca_prices[i],
                 trade_id=trade_id
             )
@@ -259,7 +265,7 @@ def open_trade(
                     logger=logger,
                 )
                 raise Exception
-            print(f"{description} trade {trade_id} updated with DCA order at {dca}%")
+            print(f"{description} trade {trade_id} updated with DCA order for {dca_units} units at -{dca}%")
 
     coll.update_one(
         {"_id": user},

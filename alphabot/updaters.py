@@ -62,8 +62,19 @@ def config_update(request, logger):
     new_dca_pct = normalized(new_config.get("dca_pct"))
     old_dca_pct = current_config.get("dca_pct")
     if new_dca_pct != old_dca_pct:
+        screen_dca_pct(new_dca_pct)
         reset_profits = True
         print(f"Changing dca_pct from {old_dca_pct} to {new_dca_pct}")
+
+    new_dca_weights = normalized(new_config.get("dca_weights"))
+    old_dca_weights = current_config.get("dca_weights")
+    if new_dca_weights != old_dca_weights:
+        screen_dca_weights(
+            dca_weights=new_dca_weights,
+            dca_pct=new_dca_pct if new_dca_pct else old_dca_pct
+        )
+        reset_profits = True
+        print(f"Changing dca_weights from {old_dca_weights} to {new_dca_weights}")
 
     new_sl_trail = normalized(new_config.get("sl_trail"))
     old_sl_trail = current_config.get("sl_trail")
@@ -133,6 +144,8 @@ def config_update(request, logger):
         set_command[f"{strat}.config.sl_pct"] = new_sl_pct
     if new_dca_pct:
         set_command[f"{strat}.config.dca_pct"] = new_dca_pct
+    if new_dca_weights:
+        set_command[f"{strat}.config.dca_weights"] = new_dca_weights
     if new_sl_trail:
         set_command[f"{strat}.config.sl_trail"] = new_sl_trail
     if new_trail_delay:
@@ -201,3 +214,20 @@ def normalize_list_of_lists(ll):
                     element[j] = float(element[j])
         else:
             ll[i] = float(ll[i])
+
+
+def screen_dca_pct(dca_pct):
+    for tf in dca_pct:
+        for i in range(1, len(tf)):
+            assert tf[i] >= tf[i - 1], f"tf {tf} in dca_pct {dca_pct} has pcts in wrong order"
+
+
+def screen_dca_weights(dca_weights, dca_pct):
+    for i, tf in enumerate(dca_weights):
+        # make sure they add up to 100
+        total_weight = 0
+        for weight in tf:
+            total_weight += weight
+        assert total_weight == 100, f"DCA weights {tf} do not add up to 100"
+        # make sure there is more one weight than pct for each timeframe
+        assert len(tf) == len(dca_pct[i]) + 1, f"DCA pct {dca_pct[i]} does not match DCA weight {tf}"

@@ -10,7 +10,8 @@
       "reset_sl": [true, false, false],
       "sl_reset_points": [[[]]],
       "sl_trail": [false, true, true],
-      "dca_pct": [2, 1, 0.5]
+      "dca_pct": [[2.0], [1.0], [0.5]],
+      "dca_weights": [[50.0, 50.0], [33.0, 67.0], [90.0, 10.0]]
     },
     "status": {
       "config_change_time": "07-08 14:45 UTC",

@@ -125,6 +125,7 @@ class AlertHandler:
         # logger.debug(f"got tp_pct {self.tp_pct} and tp_pct_2 {self.tp_pct_2} for alert {self.alert}")
         self.sl_pct = config["sl_pct"]
         self.dca_pct = config.get("dca_pct")
+        self.dca_weights = config.get("dca_weights")
         self.sl_trail = config["sl_trail"]
         self.leverage = config["leverage"]
         self.units = config["units"]
@@ -294,6 +295,7 @@ class AlertHandler:
                 tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
                 sl_pct=self.sl_pct[tf_idx],
                 dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
+                dca_weights=self.dca_weights[tf_idx] if self.dca_weights else None,
                 sl_trail=self.sl_trail[tf_idx],
                 entry_order_type=self.entry_order_type,
                 tp_order_type=self.tp_order_type,
