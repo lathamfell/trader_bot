@@ -291,7 +291,7 @@ class AlertHandler:
                 leverage=self.leverage[tf_idx],
                 units=self.units[tf_idx],
                 tp_pct=self.tp_pct[tf_idx],
-                tp_pct_2=self.tp_pct_2[tf_idx],
+                tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
                 sl_pct=self.sl_pct[tf_idx],
                 dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
                 sl_trail=self.sl_trail[tf_idx],
