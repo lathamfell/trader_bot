@@ -85,7 +85,7 @@ def mock_py3c_request_side_effect_open_long(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> long HTF",
+        "note": "latham BTC_L4 <15m Split TPs> HTF long",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
@@ -160,7 +160,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
     global waiting_for_base_open_long_call_count
     expected_base_payload = {
         "account_id": 30391847,
-        "note": "latham BTC_L2 <1m Split TP> long HTF",
+        "note": "latham BTC_L2 <1m Split TP> HTF long",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 5},
         "position": {"type": "buy", "units": {"value": 2}, "order_type": "market"},
@@ -240,7 +240,7 @@ def mock_py3c_request_side_effect_open_short(
     global waiting_for_base_open_short_call_count
     expected_base_payload = {
         "account_id": 30491505,
-        "note": "latham BTC_L4 <15m Split TPs> short HTF",
+        "note": "latham BTC_L4 <15m Split TPs> HTF short",
         "pair": "BTC_BTCUSD_PERP",
         "leverage": {"enabled": True, "type": "isolated", "value": 1},
         "position": {"type": "sell", "units": {"value": 2}, "order_type": "market"},
@@ -977,7 +977,7 @@ def test_config_update_of_dca(client):
 
     user = "latham"
     strat = "BTC_L6"
-    new_dca = [5]
+    new_dca = [[5, 2], [1], [0.5, 0.2]]
 
     client.post(
         "/",

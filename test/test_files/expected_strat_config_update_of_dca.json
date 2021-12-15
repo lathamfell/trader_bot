@@ -29,7 +29,7 @@
       "mean_potential_profit": 0
     },
     "config": {
-      "dca_pct": [5],
+      "dca_pct": [[5.0, 2.0], [1.0], [0.5, 0.2]],
       "description": "latham BTC_L6 <15m SL>",
       "leverage": [1],
       "reset_sl": [true],

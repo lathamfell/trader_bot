@@ -99,9 +99,9 @@ def open_trade(
     else:
         direction = "short"
 
-    dca_price = None
+    dca_prices = []
     if dca_pct:
-        units = units // 2
+        units = units // (len(dca_pct) + 1)
 
     base_trade = get_base_trade(
         account_id=account_id,
@@ -154,10 +154,8 @@ def open_trade(
             slippage = (alert_price - trade_entry) / trade_entry
         else:
             slippage = (trade_entry - alert_price) / alert_price
-        # this slippage is nonsense if the alert price from a Heiken Ashi indicator
         print(
             f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}"
-            #f"Slippage: {round(slippage * 100, 2)}%"  # slippage is meaningless when using Heiken Ashi price signals
         )
 
     if _type == "buy":
@@ -168,8 +166,8 @@ def open_trade(
             tp_price_2 = None
         sl_price = trade_entry * (1 - sl_pct / 100)
         if dca_pct:
-            dca_price = trade_entry * (1 - dca_pct / 100)
-        sl_trigger = trade_entry - ((trade_entry - sl_price) / 4)  # 25% of the way to SL
+            for dca in dca_pct:
+                dca_prices.append(trade_entry * (1 - dca / 100))
         direction = "long"
     else:  # sell
         tp_price = trade_entry * (1 - tp_pct / 100)
@@ -179,8 +177,8 @@ def open_trade(
             tp_price_2 = None
         sl_price = trade_entry * (1 + sl_pct / 100)
         if dca_pct:
-            dca_price = trade_entry * (1 + dca_pct / 100)
-        sl_trigger = trade_entry + ((sl_price - trade_entry) / 4)  # 25% of the way to SL
+            for dca in dca_pct:
+                dca_prices.append(trade_entry * (1 + dca / 100))
         direction = "short"
     update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
@@ -188,7 +186,6 @@ def open_trade(
         units=units,
         tp_price_1=tp_price,
         tp_price_2=tp_price_2,
-        sl_trigger=sl_trigger,
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
@@ -231,37 +228,38 @@ def open_trade(
     print(f"Trade {trade_id} updated with TP/SL")
 
     if dca_pct:
-        # per 3C API docs, separate API call required to add the DCA limit order
-        add_funds_payload = get_add_funds_payload(
-            units=units,
-            price=dca_price,
-            trade_id=trade_id
-        )
-        print(f"Adding funds to trade {trade_id} with payload {add_funds_payload}")
-        add_funds_error, add_funds_data = py3c.request(
-            entity="smart_trades_v2",
-            action="add_funds",
-            action_id=trade_id,
-            payload=add_funds_payload
-        )
-        if add_funds_error.get("error"):
-            print(
-                f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
+        for i, dca in enumerate(dca_pct):
+            # per 3C API docs, separate API call required to add the DCA limit order
+            add_funds_payload = get_add_funds_payload(
+                units=units,
+                price=dca_prices[i],
+                trade_id=trade_id
             )
-            print(
-                f"full DCA (add_funds) config: {add_funds_payload}"
+            print(f"Adding funds to trade {trade_id} with payload {add_funds_payload}")
+            add_funds_error, add_funds_data = py3c.request(
+                entity="smart_trades_v2",
+                action="add_funds",
+                action_id=trade_id,
+                payload=add_funds_payload
             )
-            print(f"{description} Closing trade {trade_id} by market since we couldn't apply DCA")
-            close_trade(
-                py3c=py3c,
-                trade_id=trade_id,
-                user=user,
-                strat=strat,
-                description=description,
-                logger=logger,
-            )
-            raise Exception
-        print(f"{description} trade {trade_id} updated with DCA order")
+            if add_funds_error.get("error"):
+                print(
+                    f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
+                )
+                print(
+                    f"full DCA (add_funds) config: {add_funds_payload}"
+                )
+                print(f"{description} Closing trade {trade_id} by market since we couldn't apply DCA {dca}%")
+                close_trade(
+                    py3c=py3c,
+                    trade_id=trade_id,
+                    user=user,
+                    strat=strat,
+                    description=description,
+                    logger=logger,
+                )
+                raise Exception
+            print(f"{description} trade {trade_id} updated with DCA order at {dca}%")
 
     coll.update_one(
         {"_id": user},
@@ -321,7 +319,6 @@ def get_update_trade_payload(
     sl_order_type,
     description,
     logger,
-    sl_trigger=None,
     tp_price_2=None
 ):
     # logger.debug(
@@ -350,10 +347,6 @@ def get_update_trade_payload(
             },
         },
     }
-
-    if sl_order_type == "limit":
-        update_trade_payload["stop_loss"]["price"] = {"value": sl_price}
-        update_trade_payload["stop_loss"]["conditional"]["price"]["value"] = sl_trigger
 
     if tp_price_2 is not None:
         update_trade_payload["take_profit"]["steps"] = [

@@ -175,24 +175,29 @@ def get_reset_set_command(strat):
 
 
 def normalized(config_list):
+    # edit list in place
     if not config_list:
         return config_list
-    if config_list == [[[]]]:
-        # special case: no resets at all
-        return config_list
-    normalized_l = []
-    for element in config_list:
-        if element is None:
-            normalized_l.append(element)
-        elif isinstance(element, bool) or isinstance(element, int) or isinstance(element, float):
-            normalized_l.append(element)
-        elif isinstance(element, list):  # must be sl reset points
-            for i, reset_point in enumerate(element):
-                element[i][0], element[i][1] = float(element[i][0]), float(element[i][1])
-            normalized_l.append(element)
-        else:  # must be str
+    for i, element in enumerate(config_list):
+        if isinstance(element, list):  # must be sl reset points or dca
+            normalize_list_of_lists(config_list)
+            return config_list
+        elif isinstance(element, str):  # must be str
             try:
-                normalized_l.append(float(element))
+                config_list[i] = float(element)
             except ValueError:
-                normalized_l.append(h.screen_for_str_bools(element))
-    return normalized_l
+                config_list[i] = h.screen_for_str_bools(element)
+    return config_list
+
+
+def normalize_list_of_lists(ll):
+    for i, element in enumerate(ll):
+        if isinstance(element, list):
+            for j, sub_element in enumerate(element):
+                if isinstance(sub_element, list):
+                    for k, sub_sub_element in enumerate(sub_element):
+                        sub_element[k] = float(sub_element[k])
+                else:
+                    element[j] = float(element[j])
+        else:
+            ll[i] = float(ll[i])
