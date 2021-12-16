@@ -108,8 +108,7 @@
         "sl_reset_points_hit": [],
         "htf_shadow": "short",
         "ltf_shadow": "short",
-        "entry_signal": "LLTF",
-        "dca_set": 0.1
+        "entry_signal": "LLTF"
       }
     }
   }

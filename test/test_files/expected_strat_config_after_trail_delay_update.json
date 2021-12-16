@@ -50,6 +50,7 @@
         ]
       ]],
       "units": [2],
+      "expected_cumulative_units": [2],
       "description": "malcolm BTC_M1 <A2A 15m>"
     }
   }

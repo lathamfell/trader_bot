@@ -37,7 +37,7 @@ def trade_checkup(logger):
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
-            print(f"{_trade_status} for trade {trade_id}")
+            print(f"full trade status: {_trade_status}")
             # logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
             # if a TP is triggered, this function will pass back an updated trade status
             #   otherwise it returns the original
@@ -62,6 +62,20 @@ def trade_checkup(logger):
                 coll=coll,
                 description=description,
                 logger=logger,
+            )
+            check_tp(
+                _trade_status=_trade_status,
+                strat_states=strat_states,
+                strat=strat,
+                user=user,
+                entry_order_type=entry_order_type,
+                tp_order_type=tp_order_type,
+                sl_order_type=sl_order_type,
+                trade_id=trade_id,
+                py3c=py3c,
+                coll=coll,
+                description=description,
+                logger=logger
             )
             log_profit_and_roe(
                 _trade_status=_trade_status,
@@ -151,7 +165,7 @@ def check_sl(
     sl_trail = strat_states[strat]["config"]["sl_trail"]
     description = strat_states[strat]["config"].get("description")
 
-    update_trade = trading.get_update_trade(
+    update_trade = trading.get_update_trade_payload(
         trade_id=trade_id,
         _type=_type,
         units=units,
@@ -256,6 +270,103 @@ def get_sl_reset(
             return sl_price, sl_trigger, new_sl
 
     return None, None, None
+
+
+def check_tp(
+        _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id,
+        py3c, coll, logger
+):
+    if not h.is_trade_open(_trade_status=_trade_status):
+        print(f"{description} not in a trade, not checking TP resets")
+        return
+
+    current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
+    new_tp_price, new_dca_stage = get_tp_reset(
+        _trade_status=_trade_status, strat_states=strat_states, strat=strat
+    )
+    if not new_tp_price:
+        return
+
+    print(f"{description} DCA stage {new_dca_stage} hit")
+
+    # most things are the same
+    _type = _trade_status["position"]["type"]
+    units = _trade_status["position"]["units"]["value"]
+    sl_pct = _trade_status["stop_loss"]["conditional"]["trailing"]["percent"]
+    sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
+    sl_trail = _trade_status["stop_loss"]["conditional"]["trailing"]["enabled"]
+    description = strat_states[strat]["config"].get("description")
+
+    update_trade = trading.get_update_trade_payload(
+        trade_id=trade_id,
+        _type=_type,
+        units=units,
+        tp_price_1=new_tp_price,
+        tp_price_2=None,
+        sl_price=sl_price,
+        sl_pct=sl_pct,
+        sl_trail=sl_trail,
+        entry_order_type=entry_order_type,
+        tp_order_type=tp_order_type,
+        sl_order_type=sl_order_type,
+        description=description,
+        logger=logger
+    )
+    print(
+        f"{description} sending update trade while resetting TP from {current_tp_price} to {new_tp_price} due to DCA "
+        f"hit: {update_trade}")
+    update_trade_error, update_trade_data = py3c.request(
+        entity="smart_trades_v2",
+        action="update",
+        action_id=trade_id,
+        payload=update_trade
+    )
+    if update_trade_error.get("error"):
+        print(f"{description} error resetting TP, {update_trade_error['msg']}")
+        print(f"{description} closing trade {trade_id} by market since we couldn't reset TP")
+        sleep(1)
+        trading.close_trade(
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger
+        )
+        raise Exception
+
+    # update trade status with new dca stage
+    set_command = {
+        f"{strat}.status.dca_stage": new_dca_stage
+    }
+    coll.update_one(
+        {"_id": user},
+        {"$set": set_command},
+        upsert=True
+    )
+    print(f"{description} updated DCA stage to {new_dca_stage}")
+
+
+def get_tp_reset(_trade_status, strat_states, strat):
+    state = strat_states[strat]
+    current_units = float(_trade_status["position"]["units"]["value"])
+    expected_cumulative_units = state["config"]["expected_cumulative_units"]
+    dca_stage = state["status"]["dca_stage"]
+    if current_units == expected_cumulative_units[dca_stage]:
+        # nothing to do
+        print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        return None, None
+    else:
+        # we reached the next dca stage
+        print(f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
+        new_dca_stage = dca_stage + 1
+        new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
+        new_tp_price = h.get_tp_price_from_pct(
+            tp_pct=new_tp_pct,
+            entry=state["config"]["dca_prices"][dca_stage],
+            direction=state["status"]["last_entry_direction"])
+        return new_tp_price, new_dca_stage
 
 
 def log_profit_and_roe(

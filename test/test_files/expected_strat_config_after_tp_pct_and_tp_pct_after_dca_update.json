@@ -4,7 +4,8 @@
       "leverage": [1.0],
       "sl_pct": [10.0],
       "sl_trail": [false],
-      "tp_pct": [8],
+      "tp_pct": [8, 4, 1],
+      "tp_pct_after_dca": [8, null, 0.5],
       "units": [2.0],
       "reset_sl": [false],
       "sl_reset_points": [[

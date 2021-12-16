@@ -79,7 +79,9 @@ def send_email(to, subject, body=None):
     yagmail.SMTP("lathamfell@gmail.com", "lrhnapmiegubspht").send(to, subject, body)
 
 
-def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl, dca, entry_signal):
+def get_default_open_trade_mongo_set_command(
+        strat, trade_id, direction, sl, entry_signal, entry_price, expected_cumulative_units, dca_prices
+):
     entry_time = get_readable_time()
     return {
         f"{strat}.status.trade_id": trade_id,
@@ -89,11 +91,15 @@ def get_default_open_trade_mongo_set_command(strat, trade_id, direction, sl, dca
         f"{strat}.status.max_profit_this_entry": -100000,
         f"{strat}.status.max_drawdown_this_entry": 0,
         f"{strat}.status.last_sl_set": sl,
-        f"{strat}.status.dca_set": dca,
+        f"{strat}.status.dca_stage": 0,
         f"{strat}.status.entry_time": entry_time,
+        f"{strat}.status.entry_price": entry_price,
         f"{strat}.status.most_recent_profit": 0,
         f"{strat}.status.took_partial_profit": False,
-        f"{strat}.status.entry_signal": entry_signal
+        f"{strat}.status.entry_signal": entry_signal,
+        # these are config items calculated during each trade open; they only change when config does
+        f"{strat}.config.expected_cumulative_units": expected_cumulative_units,
+        f"{strat}.config.dca_prices": dca_prices
     }
 
 
@@ -134,3 +140,13 @@ def get_tf_idx(tf):
         return 1
     elif tf == "LLTF":
         return 2
+
+
+def get_tp_price_from_pct(tp_pct, entry, direction):
+    sign = 1 if direction == "long" else -1
+    return entry * (1 + (sign * tp_pct) / 100)
+
+
+def get_sl_or_dca_price_from_pct(sl_or_dca_pct, entry, direction):
+    sign = -1 if direction == "long" else 1
+    return entry * (1 + (sign * sl_or_dca_pct) / 100)

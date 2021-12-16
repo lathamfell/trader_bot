@@ -78,15 +78,17 @@
          "sl_trail":[true],
          "tp_pct":[0.15],
          "tp_pct_2":[0.25],
-         "units":[2]
+         "units":[2],
+         "expected_cumulative_units": [2]
       },
       "status":{
          "config_change_time":"07-06 05:23 UTC",
-         "dca_set": null,
+         "dca_stage": 0,
          "drawdown_std_dev":0,
          "drawdowns":[
 
          ],
+         "entry_price": 32796.6,
          "entry_time":"07-08 14:45 UTC",
          "full_profit_history":{
 

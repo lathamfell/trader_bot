@@ -1078,6 +1078,7 @@
     "BTC_M3": {
       "status": {
         "config_change_time": "07-08 18:46 UTC",
+        "dca_stage": 0,
         "drawdown_std_dev": 0,
         "drawdowns": [],
         "full_profit_history": {},
@@ -1142,6 +1143,7 @@
         "units": [
           2
         ],
+        "expected_cumulative_units": [2],
         "description": "latham BTC_M3 <1h SL/TP>"
       }
     },
@@ -1232,6 +1234,7 @@
     "BTC_M5": {
       "status": {
         "config_change_time": "07-08 18:46 UTC",
+        "dca_stage": 0,
         "drawdown_std_dev": 0,
         "drawdowns": [],
         "full_profit_history": {},
@@ -1288,6 +1291,7 @@
         "units": [
           2
         ],
+        "expected_cumulative_units": [2],
         "description": "latham BTC_M5 <15m A2A HSL>"
       }
     },
@@ -1662,7 +1666,8 @@
         "units": [
           2
         ],
-        "description": "malcolm BTC_M1 <A2A 15m>"
+        "description": "malcolm BTC_M1 <A2A 15m>",
+        "expected_cumulative_units": [2]
       }
     },
     "ETH_M1": {
@@ -1775,6 +1780,7 @@
     "BTC_M2": {
       "status": {
         "config_change_time": "07-08 22:19 UTC",
+        "dca_stage": 0,
         "drawdown_std_dev": 0,
         "drawdowns": [],
         "full_profit_history": {},
@@ -1785,6 +1791,7 @@
         "potential_profits": [],
         "profit_std_dev": 0,
         "entry_time": "07-09 13:30 UTC",
+        "entry_price": 12044.4,
         "entry_signal": "HTF",
         "last_entry_direction": "long",
         "last_sl_set": 1,
@@ -1815,6 +1822,7 @@
         "tp_pct": [
           10
         ],
+        "tp_pct_after_dca": [10],
         "tp_pct_2": [
           null
         ],
@@ -1841,6 +1849,7 @@
         "units": [
           2
         ],
+        "expected_cumulative_units": [2],
         "description": "malcolm BTC_M2 <30m A2A HSL>"
       }
     }

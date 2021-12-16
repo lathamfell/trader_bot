@@ -6,6 +6,7 @@
       		"sl_trail": [false],
 			"tp_pct": [10],
 			"units": [2],
+			"expected_cumulative_units": [2],
 			"reset_sl": [false],
 			"sl_reset_points": [[
 				[
@@ -85,10 +86,11 @@
 			"tp_pct_2": [null]
 		},
 		"status": {
-			"dca_set": null,
 			"config_change_time": "07-08 19:43 UTC",
+			"dca_stage": 0,
 			"drawdown_std_dev": 0,
 			"drawdowns": [],
+			"entry_price": 32796.6,
 			"full_profit_history": {},
 			"median_drawdown": 0,
 			"median_potential_profit": 0,

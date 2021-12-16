@@ -102,9 +102,12 @@ def open_trade(
 
     dca_prices = []
     base_units = units
+    expected_cumulative_units = [base_units]
     print(f"dca_pct is {dca_pct}")
     if dca_pct and dca_pct[0] > 0:
         base_units = units * dca_weights[0] // 100
+        expected_cumulative_units = [0] * len(dca_weights)
+        expected_cumulative_units[0] = base_units
 
     base_trade = get_base_trade(
         account_id=account_id,
@@ -153,36 +156,20 @@ def open_trade(
     trade_entry = h.get_trade_entry(_trade_status=_trade_status)
 
     if alert_price:
-        if _type == "buy":
-            slippage = (alert_price - trade_entry) / trade_entry
-        else:
-            slippage = (trade_entry - alert_price) / alert_price
         print(
             f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}"
         )
 
-    if _type == "buy":
-        tp_price = trade_entry * (1 + tp_pct / 100)
-        if tp_pct_2 is not None:
-            tp_price_2 = trade_entry * (1 + tp_pct_2 / 100)
-        else:
-            tp_price_2 = None
-        sl_price = trade_entry * (1 - sl_pct / 100)
-        if dca_pct:
-            for dca in dca_pct:
-                dca_prices.append(trade_entry * (1 - dca / 100))
-        direction = "long"
-    else:  # sell
-        tp_price = trade_entry * (1 - tp_pct / 100)
-        if tp_pct_2 is not None:
-            tp_price_2 = trade_entry * (1 - tp_pct_2 / 100)
-        else:
-            tp_price_2 = None
-        sl_price = trade_entry * (1 + sl_pct / 100)
-        if dca_pct:
-            for dca in dca_pct:
-                dca_prices.append(trade_entry * (1 + dca / 100))
-        direction = "short"
+    tp_price_2 = None
+    direction = "long" if _type == "buy" else "short"
+    tp_price = h.get_tp_price_from_pct(tp_pct=tp_pct, entry=trade_entry, direction=direction)
+    if tp_pct_2 is not None:
+        tp_price_2 = h.get_tp_price_from_pct(tp_pct=tp_pct_2, entry=trade_entry, direction=direction)
+    sl_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=sl_pct, entry=trade_entry, direction=direction)
+    if dca_pct:
+        for dca in dca_pct:
+            dca_prices.append(h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=dca, entry=trade_entry, direction=direction))
+
     update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
         _type=_type,
@@ -228,14 +215,15 @@ def open_trade(
             logger=logger,
         )
         raise Exception
-    print(f"Trade {trade_id} updated with TP/SL")
+    print(f"Trade {trade_id} updated with TP {round(tp_price, 1)}, SL {round(sl_price, 1)}")
 
     if dca_pct and dca_pct[0] > 0:
         for i, dca in enumerate(dca_pct):
             # per 3C API docs, separate API call required to add the DCA limit order
             print(f"Units is {units}")
             dca_units = units * dca_weights[i + 1] // 100
-            print(f"Calculated new units at {units}, from dca weight of {dca_weights[i + 1]}")
+            expected_cumulative_units[i + 1] = dca_units + expected_cumulative_units[i]
+            print(f"Calculated new units at {dca_units}, from dca weight of {dca_weights[i + 1]}")
             add_funds_payload = get_add_funds_payload(
                 units=dca_units,
                 price=dca_prices[i],
@@ -275,8 +263,10 @@ def open_trade(
                 trade_id=trade_id,
                 direction=direction,
                 sl=sl_pct,
-                dca=dca_pct,
-                entry_signal=entry_signal
+                expected_cumulative_units=expected_cumulative_units,
+                entry_signal=entry_signal,
+                entry_price=trade_entry,
+                dca_prices=dca_prices
             )
         },
         upsert=True,

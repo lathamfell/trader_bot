@@ -47,6 +47,12 @@ def config_update(request, logger):
         reset_profits = True
         print(f"Changing tp_pct from {old_tp_pct} to {new_tp_pct}")
 
+    new_tp_pct_after_dca = normalized(new_config.get("tp_pct_after_dca"))
+    old_tp_pct_after_dca = current_config.get("tp_pct_after_dca")
+    if new_tp_pct_after_dca != old_tp_pct_after_dca:
+        reset_profits = True
+        print(f"Changing tp_pct_after_dca from {old_tp_pct_after_dca} to {new_tp_pct_after_dca}")
+
     new_tp_pct_2 = normalized(new_config.get("tp_pct_2"))
     old_tp_pct_2 = current_config.get("tp_pct_2")
     if new_tp_pct_2 != old_tp_pct_2:
@@ -138,6 +144,8 @@ def config_update(request, logger):
 
     if new_tp_pct:
         set_command[f"{strat}.config.tp_pct"] = new_tp_pct
+    if new_tp_pct_after_dca:
+        set_command[f"{strat}.config.tp_pct_after_dca"] = new_tp_pct_after_dca
     if new_tp_pct_2:
         set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
     if new_sl_pct:

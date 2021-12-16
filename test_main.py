@@ -524,12 +524,13 @@ def test_config_update_of_description(client):
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_tp_pct(client):
+def test_config_update_of_tp_pct_and_tp_pct_after_dca(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
     user = "latham"
     strat = "BTC_L4"
-    new_tp_pct = [8]  # was 10
+    new_tp_pct = [8, 4, 1]  # was [10]
+    new_tp_pct_after_dca = [8, None, 0.5]
 
     client.post(
         "/",
@@ -540,6 +541,7 @@ def test_config_update_of_tp_pct(client):
             config={
                 "description": "15m Split TPs",
                 "tp_pct": new_tp_pct,
+                "tp_pct_after_dca": new_tp_pct_after_dca,
                 "sl_pct": ["10"],
                 "sl_trail": [False],
                 "leverage": ["1"],
@@ -570,7 +572,7 @@ def test_config_update_of_tp_pct(client):
     )
 
     actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_tp_pct_update.json") as _f:
+    with open("test/test_files/expected_strat_config_after_tp_pct_and_tp_pct_after_dca_update.json") as _f:
         expected = json.load(_f)[strat]
     assert actual == expected
 
@@ -978,7 +980,7 @@ def test_config_update_of_dca(client):
 
     user = "latham"
     strat = "BTC_L6"
-    new_dca = [[5, 2], [1], [0.5, 0.2]]
+    new_dca = [[2, 5], [1], [0.2, 0.5]]
 
     client.post(
         "/",
