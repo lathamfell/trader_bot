@@ -354,7 +354,7 @@ def get_tp_reset(_trade_status, strat_states, strat):
     dca_stage = state["status"]["dca_stage"]
     if current_units == expected_cumulative_units[dca_stage]:
         # nothing to do
-        print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None
     else:
         # we reached the next dca stage
@@ -366,6 +366,9 @@ def get_tp_reset(_trade_status, strat_states, strat):
             tp_pct=new_tp_pct,
             entry=state["config"]["dca_prices"][dca_stage],
             direction=state["status"]["last_entry_direction"])
+        print(
+            f"New TP pct is {new_tp_pct}, starting from DCA price of {state['config']['dca_prices'][dca_stage]}, "
+            f"new TP price is {new_tp_price}")
         return new_tp_price, new_dca_stage
 
 
