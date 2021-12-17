@@ -49,7 +49,7 @@ def trade_checkup(logger):
             entry_order_type = USER_ATTR[user]["strats"][strat]["entry_order_type"]
             tp_order_type = USER_ATTR[user]["strats"][strat]["tp_order_type"]
             sl_order_type = USER_ATTR[user]["strats"][strat]["sl_order_type"]
-            new_sl = check_sl(
+            new_sl = check_sl_reset_due_to_reset_trigger_hit(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
                 strat=strat,
@@ -63,7 +63,7 @@ def trade_checkup(logger):
                 description=description,
                 logger=logger,
             )
-            check_tp(
+            check_tp_and_sl_reset_due_to_dca_hit(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
                 strat=strat,
@@ -128,7 +128,7 @@ def check_take_profits(
 """
 
 
-def check_sl(
+def check_sl_reset_due_to_reset_trigger_hit(
     _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id, py3c, coll, logger
 ):
     if not h.is_trade_open(_trade_status=_trade_status):
@@ -272,7 +272,7 @@ def get_sl_reset(
     return None, None, None
 
 
-def check_tp(
+def check_tp_and_sl_reset_due_to_dca_hit(
         _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id,
         py3c, coll, logger
 ):
@@ -281,10 +281,12 @@ def check_tp(
         return
 
     current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
-    new_tp_price, new_dca_stage = get_tp_reset(
+    current_sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
+    new_dca_stage, new_tp_price, new_sl_price = get_tp_sl_reset_due_to_dca(
         _trade_status=_trade_status, strat_states=strat_states, strat=strat
     )
-    if not new_tp_price:
+
+    if not new_dca_stage:
         return
 
     print(f"{description} DCA stage {new_dca_stage} hit")
@@ -293,7 +295,6 @@ def check_tp(
     _type = _trade_status["position"]["type"]
     units = _trade_status["position"]["units"]["value"]
     sl_pct = _trade_status["stop_loss"]["conditional"]["trailing"]["percent"]
-    sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
     sl_trail = _trade_status["stop_loss"]["conditional"]["trailing"]["enabled"]
     description = strat_states[strat]["config"].get("description")
 
@@ -303,8 +304,8 @@ def check_tp(
         units=units,
         tp_price_1=new_tp_price,
         tp_price_2=None,
-        sl_price=sl_price,
-        sl_pct=sl_pct,
+        sl_price=new_sl_price,
+        sl_pct=sl_pct,  # this is only used if trailing is enabled; not relevant for now
         sl_trail=sl_trail,
         entry_order_type=entry_order_type,
         tp_order_type=tp_order_type,
@@ -313,8 +314,9 @@ def check_tp(
         logger=logger
     )
     print(
-        f"{description} sending update trade while resetting TP from {current_tp_price} to {new_tp_price} due to DCA "
-        f"hit: {update_trade}")
+        f"{description} sending update trade to reset TP from {current_tp_price} to {new_tp_price} and SL "
+        f"from {current_sl_price} to {new_sl_price} due to DCA hit: {update_trade}"
+    )
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
         action="update",
@@ -322,8 +324,8 @@ def check_tp(
         payload=update_trade
     )
     if update_trade_error.get("error"):
-        print(f"{description} error resetting TP, {update_trade_error['msg']}")
-        print(f"{description} closing trade {trade_id} by market since we couldn't reset TP")
+        print(f"{description} error resetting TP/SL, {update_trade_error['msg']}")
+        print(f"{description} closing trade {trade_id} by market since we couldn't reset TP/SL")
         sleep(1)
         trading.close_trade(
             py3c=py3c,
@@ -344,33 +346,41 @@ def check_tp(
         {"$set": set_command},
         upsert=True
     )
-    print(f"{description} updated DCA stage to {new_dca_stage}")
+    print(f"{description} updated trade status DCA stage to {new_dca_stage}")
 
 
-def get_tp_reset(_trade_status, strat_states, strat):
+def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
     state = strat_states[strat]
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     dca_stage = state["status"]["dca_stage"]
     if current_units == expected_cumulative_units[dca_stage]:
         # nothing to do
-        # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
-        return None, None
+        print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        return None, None, None
     else:
         # we reached the next dca stage
-        print(f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        print(
+            f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
+            f"stage {dca_stage}")
         tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
         new_dca_stage = dca_stage + 1
         new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
+        sl_pct = state["config"]["sl_pct"][tf_idx]
         new_entry = h.get_trade_entry(_trade_status=_trade_status)
         new_tp_price = h.get_tp_price_from_pct(
             tp_pct=new_tp_pct,
             entry=new_entry,
             direction=state["status"]["last_entry_direction"])
+        new_sl_price = h.get_sl_or_dca_price_from_pct(
+            sl_or_dca_pct=sl_pct,
+            entry=new_entry,
+            direction=state["status"]["last_entry_direction"]
+        )
         print(
-            f"New TP pct is {new_tp_pct}. Starting from new average entry of {new_entry}, "
-            f"new TP price is {new_tp_price}")
-        return new_tp_price, new_dca_stage
+            f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
+            f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
+        return new_dca_stage, new_tp_price, new_sl_price
 
 
 def log_profit_and_roe(

@@ -7,7 +7,6 @@
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trading.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -738,7 +737,7 @@
       <workItem from="1638992476442" duration="599000" />
       <workItem from="1639001779249" duration="4930000" />
       <workItem from="1639087950824" duration="59914000" />
-      <workItem from="1639678042887" duration="19620000" />
+      <workItem from="1639678042887" duration="20706000" />
     </task>
     <servers />
   </component>
@@ -1016,17 +1015,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>352</line>
+          <line>354</line>
           <option name="timeStamp" value="206" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>317</line>
+          <line>319</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>354</line>
+          <line>356</line>
           <option name="timeStamp" value="208" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
