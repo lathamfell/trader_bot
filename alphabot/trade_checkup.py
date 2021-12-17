@@ -37,7 +37,6 @@ def trade_checkup(logger):
             _trade_status = trading.trade_status(
                 py3c=py3c, trade_id=trade_id, description=description, logger=logger
             )  # only one API call per checkup
-            print(f"full trade status: {_trade_status}")
             # logger.debug(f"Trade checkup on {description} got trade status {_trade_status}")
             # if a TP is triggered, this function will pass back an updated trade status
             #   otherwise it returns the original
@@ -356,7 +355,7 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
     dca_stage = state["status"]["dca_stage"]
     if current_units == expected_cumulative_units[dca_stage]:
         # nothing to do
-        print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
+        # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
     else:
         # we reached the next dca stage
@@ -443,7 +442,7 @@ def log_profit_and_roe(
             f"{description} {entry_signal} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
-            f"Entry time: {entry_time}"
+            f"Entry time: {entry_time}. Full trade status: {_trade_status}"
         )
         return
 
