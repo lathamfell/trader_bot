@@ -362,12 +362,13 @@ def get_tp_reset(_trade_status, strat_states, strat):
         tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
         new_dca_stage = dca_stage + 1
         new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
+        new_entry = h.get_trade_entry(_trade_status=_trade_status)
         new_tp_price = h.get_tp_price_from_pct(
             tp_pct=new_tp_pct,
-            entry=state["config"]["dca_prices"][dca_stage],
+            entry=new_entry,
             direction=state["status"]["last_entry_direction"])
         print(
-            f"New TP pct is {new_tp_pct}, starting from DCA price of {state['config']['dca_prices'][dca_stage]}, "
+            f"New TP pct is {new_tp_pct}. Starting from new average entry of {new_entry}, "
             f"new TP price is {new_tp_price}")
         return new_tp_price, new_dca_stage
 

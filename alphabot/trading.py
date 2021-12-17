@@ -168,7 +168,9 @@ def open_trade(
     sl_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=sl_pct, entry=trade_entry, direction=direction)
     if dca_pct:
         for dca in dca_pct:
-            dca_prices.append(h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=dca, entry=trade_entry, direction=direction))
+            dca_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=dca, entry=trade_entry, direction=direction)
+            print(f"Calculated DCA price of {dca_price} from DCA pct {dca} and entry {trade_entry}")
+            dca_prices.append(dca_price)
 
     update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
