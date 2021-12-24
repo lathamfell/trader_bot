@@ -72,7 +72,7 @@
       <recent name="C:\Users\Latham\Documents\PycharmProjects\trader_bot\old" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_main.test_trade_checkup">
+  <component name="RunManager" selected="Python tests.pytest for test_main.test_open_long">
     <configuration name="account_printer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="trader_bot" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -736,7 +736,7 @@
       <workItem from="1638992476442" duration="599000" />
       <workItem from="1639001779249" duration="4930000" />
       <workItem from="1639087950824" duration="59914000" />
-      <workItem from="1639678042887" duration="24584000" />
+      <workItem from="1639678042887" duration="25225000" />
     </task>
     <servers />
   </component>

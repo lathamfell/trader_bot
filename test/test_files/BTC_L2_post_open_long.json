@@ -1,6 +1,7 @@
 {
    "BTC_L2":{
       "config":{
+         "dca_prices": [],
          "description":"latham BTC_L2 <1m Split TP>",
          "leverage":[5],
          "reset_sl":[false],

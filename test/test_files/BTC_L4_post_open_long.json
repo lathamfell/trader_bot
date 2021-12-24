@@ -1,6 +1,7 @@
 {
 	"BTC_L4": {
 		"config": {
+			"dca_prices": [],
 			"leverage": [1],
 			"sl_pct": [10],
       		"sl_trail": [false],
