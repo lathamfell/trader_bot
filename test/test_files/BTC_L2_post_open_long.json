@@ -113,8 +113,7 @@
          ],
          "took_partial_profit":false,
          "trade_id":"6762491",
-         "entry_signal": "HTF",
-         "htf_shadow": "long"
+         "entry_signal": "HTF"
       }
    }
 }

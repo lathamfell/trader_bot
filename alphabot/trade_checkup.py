@@ -276,7 +276,7 @@ def check_tp_and_sl_reset_due_to_dca_hit(
         py3c, coll, logger
 ):
     if not h.is_trade_open(_trade_status=_trade_status):
-        print(f"{description} not in a trade, not checking TP resets")
+        print(f"{description} not in a trade, not checking for DCA")
         return
 
     current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]

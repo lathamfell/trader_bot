@@ -12,7 +12,7 @@ def main():
     api_key = USER_ATTR[USER]["c3_api_key"]
     secret = USER_ATTR[USER]["c3_secret"]
     py3c = Py3CW(key=api_key, secret=secret)
-    account_id = 30577995
+    account_id = "30823191"
     pair = "BTC_BTCUSD_PERP"
     leverage = 1
     _type = "buy"
@@ -21,12 +21,9 @@ def main():
     sl_pct = 10
 
 
-    error, data = py3c.request(entity="accounts", action="", action_id="29834950")
+    error, data = py3c.request(entity="accounts", action="account_table_data", action_id=account_id)
     print(error)
     print(data)
-    for account in data:
-        if account['id'] == 29834950:
-            print(account['btc_amount'])
 
 
 

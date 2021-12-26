@@ -173,8 +173,7 @@
       "took_partial_profit": false,
       "profit_logged": false,
       "trade_id": "7876280",
-      "mean_potential_profit": 0.3,
-      "htf_shadow": "short"
+      "mean_potential_profit": 0.3
     }
   }
 }

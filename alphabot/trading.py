@@ -66,7 +66,7 @@ def open_trade(
     pair,
     _type,
     leverage,
-    units,
+    unit_allocation_pct,
     tp_pct,
     sl_pct,
     sl_trail,
@@ -90,6 +90,8 @@ def open_trade(
     # )
     if not coll:
         h.get_mongo_coll()
+
+    units = get_units(py3c=py3c, unit_allocation_pct=unit_allocation_pct, account_id=account_id, leverage=leverage)
 
     if tp_pct_2 is not None and units < 2:
         print(f"Partial TP configured, but units are only 1. Rejecting trade")
@@ -279,6 +281,27 @@ def open_trade(
     )
 
     return trade_id
+
+
+def get_units(py3c, unit_allocation_pct, account_id, leverage):
+    if unit_allocation_pct < 0 or unit_allocation_pct > 100:
+        raise Exception(f"Invalid units config: {unit_allocation_pct}")
+    account_usd_value = get_account_usd_value(py3c=py3c, account_id=str(account_id))
+    print(f"account usd value is {account_usd_value}")
+    total_allocation = int(account_usd_value * unit_allocation_pct/100 * leverage)
+    print(f"total allocation is {total_allocation}")
+    return total_allocation
+
+
+def get_account_usd_value(py3c, account_id):
+    error, data = py3c.request(entity="accounts", action="account_table_data", action_id=account_id)
+    if error.get("error"):
+        raise Exception(f"Error getting account usd value for {account_id}: {error['msg']}")
+    print(f"account table data: {data}")
+    usd_value = 0
+    for position in data:
+        usd_value += position['usd_value']
+    return int(usd_value)
 
 
 def get_base_trade(account_id, pair, _type, leverage, alert_price, units, user, strat, entry_order_type, note, logger):

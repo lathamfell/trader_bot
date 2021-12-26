@@ -205,14 +205,14 @@ class AlertHandler:
 
         _type = entry_signal = None
 
-        # check for shadow update regardless of whether trades are opened/closed
-        if alert.get("open_short_htf"):
+        # check for shadow update
+        if alert.get("shadow_short_htf"):
             new_htf_shadow = htf_shadow = "short"
-        elif alert.get("open_long_htf"):
+        elif alert.get("shadow_long_htf"):
             new_htf_shadow = htf_shadow = "long"
-        elif alert.get("open_short_ltf"):
+        elif alert.get("shadow_short_ltf"):
             new_ltf_shadow = ltf_shadow = "short"
-        elif alert.get("open_long_ltf"):
+        elif alert.get("shadow_long_ltf"):
             new_ltf_shadow = ltf_shadow = "long"
 
         # update shadows in db if needed
@@ -290,7 +290,7 @@ class AlertHandler:
                 pair=self.pair,
                 _type=_type,
                 leverage=self.leverage[tf_idx],
-                units=self.units[tf_idx],
+                unit_allocation_pct=self.units[tf_idx],
                 tp_pct=self.tp_pct[tf_idx],
                 tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
                 sl_pct=self.sl_pct[tf_idx],

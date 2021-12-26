@@ -117,6 +117,7 @@ def config_update(request, logger):
     new_units = normalized(new_config.get("units"))
     old_units = current_config.get("units")
     if new_units != old_units:
+        screen_units(new_units)
         print(f"Changing units from {old_units} to {new_units}")
 
     new_description = new_config.get("description", "")
@@ -239,3 +240,9 @@ def screen_dca_weights(dca_weights, dca_pct):
         assert total_weight == 100, f"DCA weights {tf} do not add up to 100"
         # make sure there is more one weight than pct for each timeframe
         assert len(tf) == len(dca_pct[i]) + 1, f"DCA pct {dca_pct[i]} does not match DCA weight {tf}"
+
+
+def screen_units(units):
+    for tf_units_pct in units:
+        if tf_units_pct < 0 or tf_units_pct > 100:
+            raise Exception(f"Invalid units % setting: {tf_units_pct} in {units}")
