@@ -434,7 +434,7 @@ def log_profit_and_roe(
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
         if last_sl_set is not None:
-            sl_str = f" SL was set at {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
+            sl_str = f" SL {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
         else:
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
