@@ -1,6 +1,7 @@
 import json
 import yagmail
 import datetime as dt
+from dateutil import parser
 import os
 import pymongo
 
@@ -150,3 +151,13 @@ def get_tp_price_from_pct(tp_pct, entry, direction):
 def get_sl_or_dca_price_from_pct(sl_or_dca_pct, entry, direction):
     sign = -1 if direction == "long" else 1
     return entry * (1 + (sign * sl_or_dca_pct) / 100)
+
+
+def get_days_elapsed(start, end):
+    """Takes two time strings and returns the days in between them as a float.
+    Example of a time string:
+        12-26 08:24 UTC
+    """
+    start_dt = parser.parse(start)
+    end_dt = parser.parse(end)
+    return (end_dt - start_dt).total_seconds() / 86400
