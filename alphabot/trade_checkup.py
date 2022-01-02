@@ -358,6 +358,11 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
         # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
 
+    if dca_stage >= len(expected_cumulative_units):
+        # reached all dca stages
+        # nothing else to do
+        return None, None, None
+
     # we reached the next dca stage
     print(
         f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
