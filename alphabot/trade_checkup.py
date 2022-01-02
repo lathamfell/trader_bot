@@ -353,14 +353,15 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     dca_stage = state["status"]["dca_stage"]
-    if current_units == expected_cumulative_units[dca_stage]:
-        # nothing to do because next DCA stage hasn't been reached yet
-        # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
-        return None, None, None
 
     if dca_stage >= len(expected_cumulative_units):
         # reached all dca stages
         # nothing else to do
+        return None, None, None
+    
+    if current_units == expected_cumulative_units[dca_stage]:
+        # nothing to do because next DCA stage hasn't been reached yet
+        # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
 
     # we reached the next dca stage
