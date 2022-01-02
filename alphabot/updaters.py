@@ -44,32 +44,32 @@ def config_update(request, logger):
     new_tp_pct = normalized(new_config.get("tp_pct"))
     old_tp_pct = current_config.get("tp_pct")
     if new_tp_pct != old_tp_pct:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing tp_pct from {old_tp_pct} to {new_tp_pct}")
 
     new_tp_pct_after_dca = normalized(new_config.get("tp_pct_after_dca"))
     old_tp_pct_after_dca = current_config.get("tp_pct_after_dca")
     if new_tp_pct_after_dca != old_tp_pct_after_dca:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing tp_pct_after_dca from {old_tp_pct_after_dca} to {new_tp_pct_after_dca}")
 
     new_tp_pct_2 = normalized(new_config.get("tp_pct_2"))
     old_tp_pct_2 = current_config.get("tp_pct_2")
     if new_tp_pct_2 != old_tp_pct_2:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing tp_pct_2 from {old_tp_pct_2} to {new_tp_pct_2}")
 
     new_sl_pct = normalized(new_config.get("sl_pct"))
     old_sl_pct = current_config.get("sl_pct")
     if new_sl_pct != old_sl_pct:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing sl_pct from {old_sl_pct} to {new_sl_pct}")
 
     new_dca_pct = normalized(new_config.get("dca_pct"))
     old_dca_pct = current_config.get("dca_pct")
     if new_dca_pct != old_dca_pct:
         screen_dca_pct(new_dca_pct)
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing dca_pct from {old_dca_pct} to {new_dca_pct}")
 
     new_dca_weights = normalized(new_config.get("dca_weights"))
@@ -79,31 +79,31 @@ def config_update(request, logger):
             dca_weights=new_dca_weights,
             dca_pct=new_dca_pct if new_dca_pct else old_dca_pct
         )
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing dca_weights from {old_dca_weights} to {new_dca_weights}")
 
     new_sl_trail = normalized(new_config.get("sl_trail"))
     old_sl_trail = current_config.get("sl_trail")
     if new_sl_trail != old_sl_trail:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing sl_trail from {old_sl_trail} to {new_sl_trail}")
 
     new_trail_delay = normalized(new_config.get("trail_delay"))
     old_trail_delay = current_config.get("trail_delay")
     if new_trail_delay != old_trail_delay:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing trail_delay from {old_trail_delay} to {new_trail_delay}")
 
     new_reset_sl = normalized(new_config.get("reset_sl"))
     old_reset_sl = current_config.get("reset_sl")
     if new_reset_sl != old_reset_sl:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing reset_sl from {old_reset_sl} to {new_reset_sl}")
 
     new_sl_reset_points = normalized(new_config.get("sl_reset_points"))
     old_sl_reset_points = current_config.get("sl_reset_points")
     if new_sl_reset_points != old_sl_reset_points:
-        reset_profits = True
+        #reset_profits = True
         print(
             f"Changing sl_reset_points from {old_sl_reset_points} to {new_sl_reset_points}"
         )
@@ -111,7 +111,7 @@ def config_update(request, logger):
     new_leverage = normalized(new_config.get("leverage"))
     old_leverage = current_config.get("leverage")
     if new_leverage != old_leverage:
-        reset_profits = True
+        #reset_profits = True
         print(f"Changing leverage from {old_leverage} to {new_leverage}")
 
     new_units = normalized(new_config.get("units"))
@@ -139,9 +139,9 @@ def config_update(request, logger):
     else:
         set_command = {}
         reset_str = ""
-        print(
-            f"Not resetting paper assets because no config changes were made to TP, SL, DCA, or leverage."
-        )
+        #print(
+        #    f"Not resetting paper assets because no config changes were made to TP, SL, DCA, or leverage."
+        #)
 
     if new_tp_pct:
         set_command[f"{strat}.config.tp_pct"] = new_tp_pct

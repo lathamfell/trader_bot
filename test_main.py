@@ -1,7 +1,7 @@
 import pytest
 import os
 from unittest.mock import patch, call
-import json
+import json5
 from main import app
 from freezegun import freeze_time
 
@@ -123,7 +123,7 @@ def mock_py3c_request_side_effect_open_long(
         with open(
             "test/test_files/BTC_L4_open_long_base_trade_initial_response.json"
         ) as _f:
-            mock_base_trade_initial_response = json.load(_f)
+            mock_base_trade_initial_response = json5.load(_f)
         return {}, mock_base_trade_initial_response
     if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "7873502":
         if waiting_for_base_open_long_call_count == 0:
@@ -132,14 +132,14 @@ def mock_py3c_request_side_effect_open_long(
             with open(
                 "test/test_files/BTC_L4_open_long_first_base_waiting_response.json"
             ) as _f:
-                mock_first_base_waiting_response = json.load(_f)
+                mock_first_base_waiting_response = json5.load(_f)
             return {}, mock_first_base_waiting_response
         if waiting_for_base_open_long_call_count == 1:
             # second call, send status indicating base open is complete
             with open(
                 "test/test_files/BTC_L4_open_long_base_complete_response.json"
             ) as _f:
-                mock_base_complete_response = json.load(_f)
+                mock_base_complete_response = json5.load(_f)
             return {}, mock_base_complete_response
     if (
         entity == "smart_trades_v2"
@@ -148,7 +148,7 @@ def mock_py3c_request_side_effect_open_long(
         and payload == expected_update_payload
     ):
         with open("test/test_files/BTC_L4_open_long_update_trade_response.json") as _f:
-            mock_update_complete_response = json.load(_f)
+            mock_update_complete_response = json5.load(_f)
         return {}, mock_update_complete_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -203,7 +203,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
         with open(
             "test/test_files/BTC_L2_open_long_base_trade_initial_response.json"
         ) as _f:
-            mock_base_trade_initial_response = json.load(_f)
+            mock_base_trade_initial_response = json5.load(_f)
         return {}, mock_base_trade_initial_response
     if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "6762491":
         if waiting_for_base_open_long_call_count == 0:
@@ -212,14 +212,14 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
             with open(
                 "test/test_files/BTC_L2_open_long_first_base_waiting_response.json"
             ) as _f:
-                mock_first_base_waiting_response = json.load(_f)
+                mock_first_base_waiting_response = json5.load(_f)
             return {}, mock_first_base_waiting_response
         if waiting_for_base_open_long_call_count == 1:
             # second call, send status indicating base open is complete
             with open(
                 "test/test_files/BTC_L2_open_long_base_complete_response.json"
             ) as _f:
-                mock_base_complete_response = json.load(_f)
+                mock_base_complete_response = json5.load(_f)
             return {}, mock_base_complete_response
     if (
         entity == "smart_trades_v2"
@@ -228,7 +228,7 @@ def mock_py3c_request_side_effect_open_long_with_leverage(
         and payload == expected_update_payload
     ):
         with open("test/test_files/BTC_L2_open_long_update_trade_response.json") as _f:
-            mock_update_complete_response = json.load(_f)
+            mock_update_complete_response = json5.load(_f)
         return {}, mock_update_complete_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -278,7 +278,7 @@ def mock_py3c_request_side_effect_open_short(
         with open(
             "test/test_files/BTC_L4_open_short_base_trade_initial_response.json"
         ) as _f:
-            mock_base_trade_initial_response = json.load(_f)
+            mock_base_trade_initial_response = json5.load(_f)
         return {}, mock_base_trade_initial_response
     if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "7876280":
         if waiting_for_base_open_short_call_count == 0:
@@ -287,14 +287,14 @@ def mock_py3c_request_side_effect_open_short(
             with open(
                 "test/test_files/BTC_L4_open_short_first_base_waiting_response.json"
             ) as _f:
-                mock_first_base_waiting_response = json.load(_f)
+                mock_first_base_waiting_response = json5.load(_f)
             return {}, mock_first_base_waiting_response
         if waiting_for_base_open_short_call_count == 1:
             # second call, send status indicating base open is complete
             with open(
                 "test/test_files/BTC_L4_open_short_base_complete_response.json"
             ) as _f:
-                mock_base_complete_response = json.load(_f)
+                mock_base_complete_response = json5.load(_f)
             return {}, mock_base_complete_response
     if (
         entity == "smart_trades_v2"
@@ -303,7 +303,7 @@ def mock_py3c_request_side_effect_open_short(
         and payload == expected_update_payload
     ):
         with open("test/test_files/BTC_L4_open_short_update_trade_response.json") as _f:
-            mock_update_complete_response = json.load(_f)
+            mock_update_complete_response = json5.load(_f)
         return {}, mock_update_complete_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -314,17 +314,17 @@ def mock_py3c_request_side_effect_close_long(entity, action, action_id=None):
     if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "7886336":
         if waiting_for_close_long_call_count == 0:
             with open("test/test_files/BTC_L4_close_long_first_status.json") as _f:
-                mock_first_status_response = json.load(_f)
+                mock_first_status_response = json5.load(_f)
             waiting_for_close_long_call_count += 1
             return {}, mock_first_status_response
         if waiting_for_close_long_call_count == 1:
             with open("test/test_files/BTC_L4_close_long_waiting_response.json") as _f:
-                mock_waiting_response = json.load(_f)
+                mock_waiting_response = json5.load(_f)
             waiting_for_close_long_call_count += 1
             return {}, mock_waiting_response
         if waiting_for_close_long_call_count == 2:
             with open("test/test_files/BTC_L4_close_long_successful_close.json") as _f:
-                mock_successful_close_response = json.load(_f)
+                mock_successful_close_response = json5.load(_f)
             return {}, mock_successful_close_response
 
     if (
@@ -333,7 +333,7 @@ def mock_py3c_request_side_effect_close_long(entity, action, action_id=None):
         and action_id == "7886336"
     ):
         with open("test/test_files/BTC_L4_close_long_direct_response.json") as _f:
-            mock_direct_response = json.load(_f)
+            mock_direct_response = json5.load(_f)
         return {}, mock_direct_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -344,17 +344,17 @@ def mock_py3c_request_side_effect_close_short(entity, action, action_id=None):
     if entity == "smart_trades_v2" and action == "get_by_id" and action_id == "7886809":
         if waiting_for_close_short_call_count == 0:
             with open("test/test_files/BTC_L4_close_short_first_status.json") as _f:
-                mock_first_status_response = json.load(_f)
+                mock_first_status_response = json5.load(_f)
             waiting_for_close_short_call_count += 1
             return {}, mock_first_status_response
         if waiting_for_close_short_call_count == 1:
             with open("test/test_files/BTC_L4_close_short_waiting_response.json") as _f:
-                mock_waiting_response = json.load(_f)
+                mock_waiting_response = json5.load(_f)
             waiting_for_close_short_call_count += 1
             return {}, mock_waiting_response
         if waiting_for_close_short_call_count == 2:
             with open("test/test_files/BTC_L4_close_short_successful_close.json") as _f:
-                mock_successful_close_response = json.load(_f)
+                mock_successful_close_response = json5.load(_f)
             return {}, mock_successful_close_response
 
     if (
@@ -363,7 +363,7 @@ def mock_py3c_request_side_effect_close_short(entity, action, action_id=None):
         and action_id == "7886809"
     ):
         with open("test/test_files/BTC_L4_close_short_direct_response.json") as _f:
-            mock_direct_response = json.load(_f)
+            mock_direct_response = json5.load(_f)
         return {}, mock_direct_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -373,15 +373,15 @@ def mock_py3c_request_side_effect_trade_checkup(entity, action, action_id=None):
     if entity == "smart_trades_v2" and action == "get_by_id":
         if action_id == "7881028":
             with open("test/test_files/trade_checkup_status_028.json") as _f:
-                mock_028_response = json.load(_f)
+                mock_028_response = json5.load(_f)
             return {}, mock_028_response
         if action_id == "7881029":
             with open("test/test_files/trade_checkup_status_029.json") as _f:
-                mock_029_response = json.load(_f)
+                mock_029_response = json5.load(_f)
             return {}, mock_029_response
         if action_id == "7876616":
             with open("test/test_files/trade_checkup_status_616.json") as _f:
-                mock_616_response = json.load(_f)
+                mock_616_response = json5.load(_f)
             return {}, mock_616_response
 
     raise Exception("side effect called but no conditions were fulfilled")
@@ -463,19 +463,31 @@ def test_config_update_from_pre_tri_a_and_with_empty_sl_reset_points(client):
     # check that config was properly updated
     actual = coll.find_one({"_id": user})[strat]
     with open(
-        "test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json"
+            "test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json5"
     ) as _f:
-        expected = json.load(_f)[strat]
+        expected = json5.load(_f)[strat]
     assert actual == expected
 
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_description(client):
+def test_config_update_of_multiple_attributes(client):
     coll = th.reset_test_coll("baseline_test_coll_1.json")
 
     user = "latham"
     strat = "BTC_L4"
-    new_description = "20m Split TPs"  # was 15m Split TPs
+    new_description = "20m Split TPs"
+    new_tp_pct = [8, 4, 1]
+    new_tp_pct_after_dca = [8, None, 0.5]
+    new_tp_pct_2 = [10, "6", 2]
+    new_sl_pct = ["5", 2, 1]
+    new_sl_trail = [True]
+    new_trail_delay = [True]
+    new_reset_sl = [True]
+    new_sl_reset_points = [[["0.5", "0.0"], ["1", "-0.25"]]]
+    new_leverage = [10, 2, 1]
+    new_units = [19, 21, 23]
+    new_dca = [[2, 5], [1], [0.2, 0.5]]
+
     client.post(
         "/",
         json=dict(
@@ -484,32 +496,17 @@ def test_config_update_of_description(client):
             strat=strat,
             config={
                 "description": new_description,
-                "tp_pct": ["10"],
-                "sl_pct": ["10"],
-                "sl_trail": [False],
-                "leverage": ["1"],
-                "units": ["2"],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
+                "tp_pct": new_tp_pct,
+                "tp_pct_after_dca": new_tp_pct_after_dca,
+                "tp_pct_2": new_tp_pct_2,
+                "sl_pct": new_sl_pct,
+                "dca_pct": new_dca,
+                "sl_trail": new_sl_trail,
+                "trail_delay": new_trail_delay,
+                "leverage": new_leverage,
+                "units": new_units,
+                "reset_sl": new_reset_sl,
+                "sl_reset_points": new_sl_reset_points,
             },
         ),
     )
@@ -517,564 +514,11 @@ def test_config_update_of_description(client):
     # check that config was properly updated
     actual = coll.find_one({"_id": user})[strat]
     with open(
-        "test/test_files/expected_strat_config_after_description_update.json"
+            "test/test_files/expected_strat_config_after_multiple_attributes_update.json5"
     ) as _f:
-        expected = json.load(_f)[strat]
+        expected = json5.load(_f)[strat]
     assert actual == expected
 
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_tp_pct_and_tp_pct_after_dca(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_tp_pct = [8, 4, 1]  # was [10]
-    new_tp_pct_after_dca = [8, None, 0.5]
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": new_tp_pct,
-                "tp_pct_after_dca": new_tp_pct_after_dca,
-                "sl_pct": ["10"],
-                "sl_trail": [False],
-                "leverage": ["1"],
-                "units": ["2"],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_tp_pct_and_tp_pct_after_dca_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_tp_pct_2(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_tp_pct_2 = ["2"]  # was None
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "tp_pct_2": new_tp_pct_2,
-                "sl_pct": [10],
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_tp_pct_2_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_sl_pct(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_sl_pct = ["5"]  # was 10
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": new_sl_pct,
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_sl_pct_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_sl_trail(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_sl_trail = [True]  # was False
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "sl_trail": new_sl_trail,
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]]
-            }
-        )
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_sl_trail_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_trail_delay(client):
-    coll = th.reset_test_coll("baseline_test_coll_2.json")
-
-    user = "malcolm"
-    strat = "BTC_M1"
-    new_trail_delay = [True]  # was False
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "A2A 15m",
-                "tp_pct": [5],
-                "sl_pct": [.5],
-                "sl_trail": [True],
-                "trail_delay": new_trail_delay,
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    [
-                      0.8,
-                      0
-                    ],
-                    [
-                      1.2,
-                      -0.1
-                    ],
-                    [
-                      2,
-                      -1.1
-                    ]
-                ]],
-            }
-        )
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_trail_delay_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_reset_sl(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_reset_sl = [True]  # was False
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": new_reset_sl,
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open(
-        "test/test_files/expected_strat_config_after_reset_sl_update.json"
-    ) as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_sl_reset_points(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_sl_reset_points = [[["0.5", "0.0"], ["1", "-0.25"]]]
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": new_sl_reset_points,
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open(
-        "test/test_files/expected_strat_config_after_sl_reset_points_update.json"
-    ) as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_leverage(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_leverage = [10]
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "sl_trail": [False],
-                "leverage": new_leverage,
-                "units": [2],
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_leverage_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_units(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L4"
-    new_units = [19]
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m Split TPs",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": new_units,
-                "reset_sl": [False],
-                "sl_reset_points": [[
-                    ["0.15", "-0.1"],
-                    ["0.2", "-0.15"],
-                    ["0.3", "-0.19"],
-                    ["0.4", "-0.28"],
-                    ["0.5", "-0.37"],
-                    ["0.6", "-0.46"],
-                    ["0.7", "-0.55"],
-                    ["0.8", "-0.63"],
-                    ["0.9", "-0.72"],
-                    ["1", "-0.8"],
-                    ["2", "-1.7"],
-                    ["3", "-2.6"],
-                    ["4", "-3.5"],
-                    ["5", "-4.4"],
-                    ["6", "-5.3"],
-                    ["7", "-6.2"],
-                    ["8", "-7.1"],
-                    ["9", "-8"],
-                ]],
-            },
-        ),
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_after_units_update.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
-
-
-@patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
-def test_config_update_of_dca(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
-
-    user = "latham"
-    strat = "BTC_L6"
-    new_dca = [[2, 5], [1], [0.2, 0.5]]
-
-    client.post(
-        "/",
-        json=dict(
-            route="config_update",
-            user=user,
-            strat=strat,
-            config={
-                "description": "15m SL",
-                "tp_pct": [10],
-                "sl_pct": [10],
-                "dca_pct": new_dca,
-                "sl_trail": [False],
-                "leverage": [1],
-                "units": [1],
-                "reset_sl": [True],
-                "sl_reset_points": [[
-                    [
-                      0.25,
-                      -0.1
-                    ],
-                    [
-                      0.35,
-                      -0.19
-                    ],
-                    [
-                      0.45,
-                      -0.28
-                    ],
-                    [
-                      0.55,
-                      -0.37
-                    ],
-                    [
-                      0.65,
-                      -0.46
-                    ],
-                    [
-                      0.75,
-                      -0.55
-                    ],
-                    [
-                      0.85,
-                      -0.64
-                    ],
-                    [
-                      0.95,
-                      0.73
-                    ],
-                    [
-                      1,
-                      -0.75
-                    ],
-                    [
-                      2,
-                      -1.7
-                    ],
-                    [
-                      3,
-                      -2.6
-                    ],
-                    [
-                      4,
-                      -3.5
-                    ],
-                    [
-                      5,
-                      -4.4
-                    ],
-                    [
-                      6,
-                      -5.3
-                    ],
-                    [
-                      7,
-                      -6.2
-                    ],
-                    [
-                      8,
-                      -7.1
-                    ],
-                    [
-                      9,
-                      -8
-                    ]
-                  ]]
-            }
-        )
-    )
-
-    actual = coll.find_one({"_id": user})[strat]
-    with open("test/test_files/expected_strat_config_update_of_dca.json") as _f:
-        expected = json.load(_f)[strat]
-    assert actual == expected
 
 # the trade opening tests all require a new mock now, to fetch the unit allocation
 """
@@ -1192,8 +636,8 @@ def test_trade_checkup(client, mock_tc_py3c):
 
     # identify updates it ought to have made to the 3 open trades,
     #   update their expected json accordingly
-    with open("test/test_files/expected_post_trade_checkup.json") as _f:
-        expected_post_close_state = json.load(_f)
+    with open("test/test_files/expected_post_trade_checkup.json5") as _f:
+        expected_post_close_state = json5.load(_f)
         assert coll.find_one({"_id": "latham"}) == expected_post_close_state[0]
         assert coll.find_one({"_id": "malcolm"}) == expected_post_close_state[1]
 

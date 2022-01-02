@@ -6,6 +6,7 @@ from flask import Flask, request
 import datetime as dt
 from alphabot.py3cw.request import Py3CW
 import traceback
+import json5
 
 import alphabot.helpers as h
 from alphabot.trade_checkup import trade_checkup

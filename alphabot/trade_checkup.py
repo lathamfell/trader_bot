@@ -354,32 +354,32 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     dca_stage = state["status"]["dca_stage"]
     if current_units == expected_cumulative_units[dca_stage]:
-        # nothing to do
+        # nothing to do because next DCA stage hasn't been reached yet
         # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
-    else:
-        # we reached the next dca stage
-        print(
-            f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
-            f"stage {dca_stage}")
-        tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
-        new_dca_stage = dca_stage + 1
-        new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
-        sl_pct = state["config"]["sl_pct"][tf_idx]
-        new_entry = h.get_trade_entry(_trade_status=_trade_status)
-        new_tp_price = h.get_tp_price_from_pct(
-            tp_pct=new_tp_pct,
-            entry=new_entry,
-            direction=state["status"]["last_entry_direction"])
-        new_sl_price = h.get_sl_or_dca_price_from_pct(
-            sl_or_dca_pct=sl_pct,
-            entry=new_entry,
-            direction=state["status"]["last_entry_direction"]
-        )
-        print(
-            f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
-            f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
-        return new_dca_stage, new_tp_price, new_sl_price
+
+    # we reached the next dca stage
+    print(
+        f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
+        f"stage {dca_stage}")
+    tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
+    new_dca_stage = dca_stage + 1
+    new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
+    sl_pct = state["config"]["sl_pct"][tf_idx]
+    new_entry = h.get_trade_entry(_trade_status=_trade_status)
+    new_tp_price = h.get_tp_price_from_pct(
+        tp_pct=new_tp_pct,
+        entry=new_entry,
+        direction=state["status"]["last_entry_direction"])
+    new_sl_price = h.get_sl_or_dca_price_from_pct(
+        sl_or_dca_pct=sl_pct,
+        entry=new_entry,
+        direction=state["status"]["last_entry_direction"]
+    )
+    print(
+        f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
+        f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
+    return new_dca_stage, new_tp_price, new_sl_price
 
 
 def log_profit_and_roe(
@@ -434,13 +434,13 @@ def log_profit_and_roe(
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
         if last_sl_set is not None:
-            sl_str = f" SL was set at {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
+            sl_str = f" SL {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
         else:
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
         print(
-            f"{description} {entry_signal} {direction} {trade_id} current profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
-            f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), max drawdown: "
+            f"{description} {entry_signal} {direction} {trade_id} profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
+            f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
             f"Entry time: {entry_time}. Full trade status: {_trade_status}"
         )
@@ -463,10 +463,10 @@ def log_profit_and_roe(
         potential_paper_assets
         * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
     )
-    print(
-        f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
-        f"{potential_paper_assets}, now is {new_potential_paper_assets}"
-    )
+    #print(
+    #    f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
+    #    f"{potential_paper_assets}, now is {new_potential_paper_assets}"
+    #)
 
     # add to profits record and history
     potential_profits = strat_states[strat]["status"].get("potential_profits", [])
@@ -499,6 +499,13 @@ def log_profit_and_roe(
     full_profit_history[entry_time] = new_history_entry
     print(f"Added entry to full profit history: {new_history_entry}")
 
+    # update performance
+    asset_ratio_to_original = new_paper_assets / 10000
+    config_change_time = strat_states[strat]["status"]["config_change_time"]
+    days = h.get_days_elapsed(start=config_change_time, end=exit_time)
+    daily_profit_pct_avg = round((asset_ratio_to_original ** (1 / float(days)) - 1) * 100, 2)
+    apr = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
+    print(f"New daily profit pct avg is {daily_profit_pct_avg}%, which is an APR of {apr}%")
     coll.update_one(
         {"_id": user},
         {
@@ -515,14 +522,13 @@ def log_profit_and_roe(
                 f"{strat}.status.drawdown_std_dev": drawdown_std_dev,
                 f"{strat}.status.median_drawdown": median_drawdown,
                 f"{strat}.status.trade_id": None,
+                f"{strat}.status.daily_profit_pct_avg": daily_profit_pct_avg,
+                f"{strat}.status.apr": apr
             }
         },
         upsert=True,
     )
     print(
-        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE) out "
-        f"of "
-        f"a potential "
-        f"{max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), paper assets are now "
-        f"${new_paper_assets:,} out of a potential ${new_potential_paper_assets:,}"
+        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
+        f"paper assets are now ${new_paper_assets:,}"
     )
