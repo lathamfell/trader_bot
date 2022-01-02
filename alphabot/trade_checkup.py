@@ -354,32 +354,35 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     dca_stage = state["status"]["dca_stage"]
     if current_units == expected_cumulative_units[dca_stage]:
-        # nothing to do
+        # nothing to do because next DCA stage hasn't been reached yet
         # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
-    else:
-        # we reached the next dca stage
-        print(
-            f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
-            f"stage {dca_stage}")
-        tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
-        new_dca_stage = dca_stage + 1
-        new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
-        sl_pct = state["config"]["sl_pct"][tf_idx]
-        new_entry = h.get_trade_entry(_trade_status=_trade_status)
-        new_tp_price = h.get_tp_price_from_pct(
-            tp_pct=new_tp_pct,
-            entry=new_entry,
-            direction=state["status"]["last_entry_direction"])
-        new_sl_price = h.get_sl_or_dca_price_from_pct(
-            sl_or_dca_pct=sl_pct,
-            entry=new_entry,
-            direction=state["status"]["last_entry_direction"]
-        )
-        print(
-            f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
-            f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
-        return new_dca_stage, new_tp_price, new_sl_price
+    if dca_stage == len(expected_cumulative_units):
+        # we already went through all the DCA stages
+        return None, None, None
+
+    # we reached the next dca stage
+    print(
+        f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
+        f"stage {dca_stage}")
+    tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
+    new_dca_stage = dca_stage + 1
+    new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
+    sl_pct = state["config"]["sl_pct"][tf_idx]
+    new_entry = h.get_trade_entry(_trade_status=_trade_status)
+    new_tp_price = h.get_tp_price_from_pct(
+        tp_pct=new_tp_pct,
+        entry=new_entry,
+        direction=state["status"]["last_entry_direction"])
+    new_sl_price = h.get_sl_or_dca_price_from_pct(
+        sl_or_dca_pct=sl_pct,
+        entry=new_entry,
+        direction=state["status"]["last_entry_direction"]
+    )
+    print(
+        f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
+        f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
+    return new_dca_stage, new_tp_price, new_sl_price
 
 
 def log_profit_and_roe(

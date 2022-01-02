@@ -20,7 +20,7 @@ To monitor BetaBot:
 To stop BetaBot:
 `pgrep -lf python`
 `kill <pid>`
-BetBot is a collection of scripts executed as cronjobs.
+BetaBot is a collection of scripts executed as cronjobs.
 To update cron schedule:
 `crontab -e`
 

@@ -1,88 +1,17 @@
 {
   "BTC_L4": {
-    "config": {
-      "leverage": [1],
-      "sl_pct": [10.0],
-      "sl_trail": [false],
-      "tp_pct": [10.0],
-      "units": [2],
-      "reset_sl": [false],
-      "sl_reset_points": [[
-        [
-          0.15,
-          -0.1
-        ],
-        [
-          0.2,
-          -0.15
-        ],
-        [
-          0.3,
-          -0.19
-        ],
-        [
-          0.4,
-          -0.28
-        ],
-        [
-          0.5,
-          -0.37
-        ],
-        [
-          0.6,
-          -0.46
-        ],
-        [
-          0.7,
-          -0.55
-        ],
-        [
-          0.8,
-          -0.63
-        ],
-        [
-          0.9,
-          -0.72
-        ],
-        [
-          1.0,
-          -0.8
-        ],
-        [
-          2.0,
-          -1.7
-        ],
-        [
-          3.0,
-          -2.6
-        ],
-        [
-          4.0,
-          -3.5
-        ],
-        [
-          5.0,
-          -4.4
-        ],
-        [
-          6.0,
-          -5.3
-        ],
-        [
-          7.0,
-          -6.2
-        ],
-        [
-          8.0,
-          -7.1
-        ],
-        [
-          9.0,
-          -8.0
-        ]
-      ]],
-      "description": "latham BTC_L4 <20m Split TPs>"
-    },
+    "config": {'dca_pct': [[2.0, 5.0], [1.0], [0.2, 0.5]],
+            'description': 'latham BTC_L4 <20m Split TPs>',
+            'leverage': [10, 2, 1],
+            'reset_sl': [true],
+            'sl_pct': [5.0, 2, 1],
+            'sl_reset_points': [[[0.5, 0.0], [1.0, -0.25]]],
+            'sl_trail': [true],
+            'tp_pct': [8, 4, 1],
+            'tp_pct_2': [10, 6.0, 2],
+            'tp_pct_after_dca': [8, null, 0.5],
+            'trail_delay': [true],
+            'units': [19, 21, 23]},
     "status": {
       "config_change_time": "07-06 05:23 UTC",
       "drawdown_std_dev": 0.29,
