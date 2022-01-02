@@ -357,9 +357,9 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
         # nothing to do because next DCA stage hasn't been reached yet
         # print(f"current_units {current_units} matches expected {expected_cumulative_units[dca_stage]} for stage {dca_stage}")
         return None, None, None
-    if dca_stage == len(expected_cumulative_units):
+    #if dca_stage == len(expected_cumulative_units):
         # we already went through all the DCA stages
-        return None, None, None
+    #    return None, None, None
 
     # we reached the next dca stage
     print(
