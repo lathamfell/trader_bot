@@ -6,28 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/report.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_description_update.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_multiple_attributes_update.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_leverage_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_reset_sl_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_pct_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_reset_points_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_sl_trail_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_2_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_pct_and_tp_pct_after_dca_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_tp_trail_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_trail_delay_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_units_update.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_update_of_dca.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -759,7 +737,7 @@
       <workItem from="1639001779249" duration="4930000" />
       <workItem from="1639087950824" duration="59914000" />
       <workItem from="1639678042887" duration="40116000" />
-      <workItem from="1641080289700" duration="4763000" />
+      <workItem from="1641080289700" duration="6021000" />
     </task>
     <servers />
   </component>
