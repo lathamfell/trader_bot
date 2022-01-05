@@ -324,16 +324,7 @@ def check_tp_and_sl_reset_due_to_dca_hit(
     )
     if update_trade_error.get("error"):
         print(f"{description} error resetting TP/SL, {update_trade_error['msg']}")
-        print(f"{description} closing trade {trade_id} by market since we couldn't reset TP/SL")
-        sleep(1)
-        trading.close_trade(
-            py3c=py3c,
-            trade_id=trade_id,
-            user=user,
-            strat=strat,
-            description=description,
-            logger=logger
-        )
+        print(f"{description} ** WARNING ** could not reset TP/SL on trade {trade_id}")
         raise Exception
 
     # update trade status with new dca stage
