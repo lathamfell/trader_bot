@@ -61,7 +61,7 @@ def main():
         h.send_email(
             to="lathamfell@gmail.com", subject="AlphaBot Error", body=f"{request.data}"
         )
-        return "request not processed due to server error"
+        return "AB request not processed due to server error, or other Exception thrown"
 
 
 class AlertHandler:
