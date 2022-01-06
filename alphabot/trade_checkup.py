@@ -393,11 +393,8 @@ def log_profit_and_roe(
         return
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
-    potential_paper_assets = strat_states[strat]["status"].get(
-        "potential_paper_assets", STARTING_PAPER
-    )
     leverage = strat_states[strat]["config"].get("leverage", [1])[tf_idx]
-    profit, roe = h.get_profit_and_roe(_trade_status=_trade_status)
+    profit_pct, roe = h.get_profit_and_roe(_trade_status=_trade_status)
     if new_sl:
         last_sl_set = new_sl
     else:
@@ -410,19 +407,19 @@ def log_profit_and_roe(
 
     # check for new max profit
     cur_max_profit = strat_states[strat]["status"].get("max_profit_this_entry", -100000)
-    max_profit_this_entry = max(profit, cur_max_profit)
+    max_profit_this_entry = max(profit_pct, cur_max_profit)
     if max_profit_this_entry > cur_max_profit:
         set_command[f"{strat}.status.max_profit_this_entry"] = max_profit_this_entry
 
     # check for new max drawdown
     cur_max_drawdown = strat_states[strat]["status"].get("max_drawdown_this_entry", 0)
-    max_drawdown_this_entry = min(profit, cur_max_drawdown)
+    max_drawdown_this_entry = min(profit_pct, cur_max_drawdown)
     if max_drawdown_this_entry < cur_max_drawdown:
         set_command[f"{strat}.status.max_drawdown_this_entry"] = max_drawdown_this_entry
 
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # save listed profit for comparison to profit on close later
-        set_command[f"{strat}.status.most_recent_profit"] = profit
+        set_command[f"{strat}.status.most_recent_profit"] = profit_pct
         if set_command:
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
             # print(f"{description} set most recent profit to {profit}")
@@ -436,7 +433,7 @@ def log_profit_and_roe(
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
         print(
-            f"{description} {entry_signal} {direction} {trade_id} profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
+            f"{description} {entry_signal} {direction} {trade_id} profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE), "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
             f"Entry time: {entry_time}. Full trade status: {_trade_status}"
@@ -445,32 +442,24 @@ def log_profit_and_roe(
 
     # trade is closed!
     print(f"{description} Detected a closed trade, full status: {_trade_status}")
-    new_paper_assets = int(paper_assets * (1 + roe / 100))
+    # calculate profit on total assets, considering DCA
+
+    state = strat_states[strat]
+    current_units = float(_trade_status["position"]["units"]["value"])
+    expected_cumulative_units = state["config"]["expected_cumulative_units"]
+    share_of_assets_committed = current_units / expected_cumulative_units[-1]
+    profit_on_assets = roe * share_of_assets_committed
+    new_paper_assets = int(paper_assets * (1 + profit_on_assets / 100))
     print(
         f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}"
     )
-    # calculate potential profit for this trade. Take the max recorded profit, and subtract the observed close dump
     most_recent_profit = strat_states[strat]["status"].get("most_recent_profit", 0)
     print(
-        f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit}"
+        f"{description} got most recent profit {most_recent_profit} from strat status. Final trade profit was {profit_pct}"
     )
-    close_dump = profit - most_recent_profit
+    close_dump = profit_pct - most_recent_profit
     print(f"{description} close dump (slippage + fees) is {round(close_dump, 2)}%")
-    new_potential_paper_assets = int(
-        potential_paper_assets
-        * (1 + ((max_profit_this_entry + close_dump) * leverage) / 100)
-    )
-    #print(
-    #    f"{description} max profit this entry was {max_profit_this_entry}. Potential paper assets were "
-    #    f"{potential_paper_assets}, now is {new_potential_paper_assets}"
-    #)
-
     # add to profits record and history
-    potential_profits = strat_states[strat]["status"].get("potential_profits", [])
-    potential_profits.append(max_profit_this_entry)
-    median_potential_profit = round(median(potential_profits), 2)
-    mean_potential_profit = round(mean(potential_profits), 2)
-    profit_std_dev = round(std(potential_profits), 2)
 
     drawdowns = strat_states[strat]["status"].get("drawdowns", [])
     drawdowns.append(max_drawdown_this_entry)
@@ -482,12 +471,10 @@ def log_profit_and_roe(
     exit_time = h.get_readable_time(t=_trade_status["data"]["closed_at"])
     new_history_entry = {
         "direction": direction,
-        "profit": profit,
+        "profit": profit_pct,
         "roe": roe,
-        "potential_profit": max_profit_this_entry,
         "max_drawdown": max_drawdown_this_entry,
         "assets": new_paper_assets,
-        "potential_assets": new_potential_paper_assets,
         "exit_time": exit_time,
         "close_dump": close_dump,
         "trade_id": trade_id,
@@ -500,32 +487,24 @@ def log_profit_and_roe(
     asset_ratio_to_original = new_paper_assets / 10000
     config_change_time = strat_states[strat]["status"]["config_change_time"]
     days = h.get_days_elapsed(start=config_change_time, end=exit_time)
-    daily_profit_pct_avg = round((asset_ratio_to_original ** (1 / float(days)) - 1) * 100, 2)
-    apr = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
-    print(f"New daily profit pct avg is {daily_profit_pct_avg}%, which is an APR of {apr}%")
+    apr = h.get_apr(asset_ratio=asset_ratio_to_original, days=days)
     coll.update_one(
         {"_id": user},
         {
             "$set": {
                 f"{strat}.status.paper_assets": new_paper_assets,
-                f"{strat}.status.potential_paper_assets": new_potential_paper_assets,
                 f"{strat}.status.profit_logged": True,
                 f"{strat}.status.full_profit_history": full_profit_history,
-                f"{strat}.status.potential_profits": potential_profits,
                 f"{strat}.status.drawdowns": drawdowns,
-                f"{strat}.status.median_potential_profit": median_potential_profit,
-                f"{strat}.status.mean_potential_profit": mean_potential_profit,
-                f"{strat}.status.profit_std_dev": profit_std_dev,
                 f"{strat}.status.drawdown_std_dev": drawdown_std_dev,
                 f"{strat}.status.median_drawdown": median_drawdown,
                 f"{strat}.status.trade_id": None,
-                f"{strat}.status.daily_profit_pct_avg": daily_profit_pct_avg,
                 f"{strat}.status.apr": apr
             }
         },
         upsert=True,
     )
     print(
-        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit}% ({round(profit * leverage, 2)}% ROE), "
+        f"{description} {direction} {trade_id} **CLOSED**  Profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE), "
         f"paper assets are now ${new_paper_assets:,}"
     )

@@ -81,7 +81,7 @@
       "description": "latham BTC_L2 <1m Split TP>"
     },
     "status": {
-      "config_change_time": "07-06 05:23 UTC",
+      "config_change_time": "2021-07-06 05:23 UTC",
       "drawdown_std_dev": 0,
       "drawdowns": [],
       "full_profit_history": {},
@@ -91,7 +91,7 @@
       "potential_paper_assets": 10000,
       "potential_profits": [],
       "profit_std_dev": 0,
-      "entry_time": "07-06 05:19 UTC",
+      "entry_time": "2021-07-06 05:19 UTC",
       "entry_signal": "HTF",
       "last_entry_direction": "long",
       "last_sl_set": 10,

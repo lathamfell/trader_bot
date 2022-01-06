@@ -87,7 +87,7 @@
       "tp_pct_2": [null]
     },
     "status": {
-      "config_change_time": "07-08 19:43 UTC",
+      "config_change_time": "2021-07-08 19:43 UTC",
       "dca_stage": 0,
       "drawdown_std_dev": 0.04,
       "drawdowns": [
@@ -98,7 +98,7 @@
       ],
       "entry_price": 33006.8,
       "full_profit_history": {
-        "07-08 23:27 UTC": {
+        "2021-07-08 23:27 UTC": {
           "direction": "short",
           "profit": 0.04,
           "roe": 0.04,
@@ -106,7 +106,7 @@
           "max_drawdown": -0.15,
           "assets": 10004,
           "potential_assets": 10014,
-          "exit_time": "07-08 23:57 UTC",
+          "exit_time": "2021-07-08 23:57 UTC",
           "close_dump": -0.09,
           "trade_id": "7873502",
           "entry_signal": "HTF"
@@ -162,7 +162,7 @@
         0
       ],
       "profit_std_dev": 0.22,
-      "entry_time": "07-08 14:45 UTC",
+      "entry_time": "2021-07-08 14:45 UTC",
       "entry_signal": "HTF",
       "last_entry_direction": "short",
       "last_sl_set": 10,

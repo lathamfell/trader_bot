@@ -83,14 +83,14 @@
          "expected_cumulative_units": [2]
       },
       "status":{
-         "config_change_time":"07-06 05:23 UTC",
+         "config_change_time":"2021-07-06 05:23 UTC",
          "dca_stage": 0,
          "drawdown_std_dev":0,
          "drawdowns":[
 
          ],
          "entry_price": 32796.6,
-         "entry_time":"07-08 14:45 UTC",
+         "entry_time":"2021-07-08 14:45 UTC",
          "full_profit_history":{
 
          },

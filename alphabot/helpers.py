@@ -12,7 +12,7 @@ def get_readable_time(t=None):
     # always UTC in Google App Engine and from 3Commas
     if not t:
         t = dt.datetime.now().isoformat()
-    return t[5:16].replace("T", " ") + " UTC"
+    return t[:16].replace("T", " ") + " UTC"
 
 
 def get_current_trade_direction(_trade_status, user, strat, logger):
@@ -156,8 +156,16 @@ def get_sl_or_dca_price_from_pct(sl_or_dca_pct, entry, direction):
 def get_days_elapsed(start, end):
     """Takes two time strings and returns the days in between them as a float.
     Example of a time string:
-        12-26 08:24 UTC
+        2021-12-26 08:24 UTC
     """
+    #print(f"Calculating days elapsed from {start} to {end}")
     start_dt = parser.parse(start)
     end_dt = parser.parse(end)
     return (end_dt - start_dt).total_seconds() / 86400
+
+
+def get_apr(asset_ratio, days):
+    #print(f"Calculating APR from asset ratio {asset_ratio} for {days} days")
+    daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
+    apr = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
+    return apr
