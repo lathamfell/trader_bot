@@ -180,12 +180,8 @@ def get_reset_set_command(strat):
     now = h.get_readable_time()
     set_command = {
         f"{strat}.status.paper_assets": STARTING_PAPER,
-        f"{strat}.status.potential_paper_assets": STARTING_PAPER,
         f"{strat}.status.full_profit_history": {},
-        f"{strat}.status.potential_profits": [],
         f"{strat}.status.drawdowns": [],
-        f"{strat}.status.median_potential_profit": 0,
-        f"{strat}.status.mean_potential_profit": 0,
         f"{strat}.status.median_drawdown": 0,
         f"{strat}.status.config_change_time": now,
         f"{strat}.status.profit_std_dev": 0,

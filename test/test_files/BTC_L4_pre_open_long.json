@@ -36,10 +36,7 @@
 			"drawdowns": [],
 			"full_profit_history": {},
 			"median_drawdown": 0,
-			"median_potential_profit": 0,
 			"paper_assets": 10000,
-			"potential_paper_assets": 10000,
-			"potential_profits": [],
 			"profit_std_dev": 0,
 			"entry_time": "2021-07-08 16:00 UTC",
       		"entry_signal": "HTF",
@@ -52,7 +49,6 @@
 			"took_partial_profit": false,
 			"profit_logged": true,
 			"trade_id": null,
-			"mean_potential_profit": 0
 		}
 	}
 }

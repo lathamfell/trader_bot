@@ -94,10 +94,7 @@
 			"entry_price": 32796.6,
 			"full_profit_history": {},
 			"median_drawdown": 0,
-			"median_potential_profit": 0,
 			"paper_assets": 10000,
-			"potential_paper_assets": 10000,
-			"potential_profits": [],
 			"profit_std_dev": 0,
 			"entry_time": "2021-07-08 14:45 UTC",
 			"entry_signal": "HTF",
@@ -110,7 +107,6 @@
 			"took_partial_profit": false,
 			"profit_logged": false,
 			"trade_id": "7873502",
-			"mean_potential_profit": 0
 		}
 	}
 }

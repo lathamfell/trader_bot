@@ -425,7 +425,7 @@ def test_get(client, mock_print):
 
 @patch("alphabot.report.USER_ATTR", MOCK_USER_ATTR)
 def test_report(client, mock_print):
-    th.reset_test_coll("baseline_test_coll_1.json")
+    th.reset_test_coll("baseline_test_coll_1.json5")
 
     client.post("/", json=dict(route="report"))
     for _call in th.get_expected_calls(th.EXPECTED_REPORT_CALL_STRS):
@@ -434,7 +434,7 @@ def test_report(client, mock_print):
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_from_pre_tri_a_and_with_empty_sl_reset_points(client):
-    coll = th.reset_test_coll("baseline_test_coll_3.json")  # pre triA config
+    coll = th.reset_test_coll("baseline_test_coll_3.json5")  # pre triA config
 
     user = "latham"
     strat = "BTC_L1"
@@ -471,7 +471,7 @@ def test_config_update_from_pre_tri_a_and_with_empty_sl_reset_points(client):
 
 @patch("alphabot.updaters.USER_ATTR", MOCK_USER_ATTR)
 def test_config_update_of_multiple_attributes(client):
-    coll = th.reset_test_coll("baseline_test_coll_1.json")
+    coll = th.reset_test_coll("baseline_test_coll_1.json5")
 
     user = "latham"
     strat = "BTC_L4"
@@ -630,7 +630,7 @@ def test_close_short(client, mock_main_py3c_close_short):
 
 @patch("alphabot.trade_checkup.USER_ATTR", MOCK_USER_ATTR)
 def test_trade_checkup(client, mock_tc_py3c):
-    coll = th.reset_test_coll("baseline_test_coll_2.json")
+    coll = th.reset_test_coll("baseline_test_coll_2.json5")
 
     client.post("/", json=dict(route="trade_checkup"))
 
@@ -686,7 +686,7 @@ def test_close_long_while_another_worker_is_waiting_for_long_open(client):
 
 
 def test_partial_profit_signal_received(client, mock_main_py3c_partial_close_long):
-    coll = th.reset_test_coll("baseline_test_coll_2.json")
+    coll = th.reset_test_coll("baseline_test_coll_2.json5")
     user = "latham"
     strat = "BTC_M3"
     client.post(

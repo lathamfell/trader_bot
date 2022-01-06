@@ -158,14 +158,12 @@ def get_days_elapsed(start, end):
     Example of a time string:
         2021-12-26 08:24 UTC
     """
-    #print(f"Calculating days elapsed from {start} to {end}")
     start_dt = parser.parse(start)
     end_dt = parser.parse(end)
     return (end_dt - start_dt).total_seconds() / 86400
 
 
 def get_apr(asset_ratio, days):
-    #print(f"Calculating APR from asset ratio {asset_ratio} for {days} days")
-    daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
-    apr = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
+    weekly_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
+    apr = int((((1 + weekly_profit_pct_avg / 100) ** 365) - 1) * 100)
     return apr

@@ -42,7 +42,7 @@ def report(logger):
     sorted_entries = sorted(output, key=lambda k: k["assets"])
     for entry in sorted_entries:
         assets_no = entry["assets"]
-        assets_str = f"${assets_no:,} since {entry['config_change_time']}, {entry['apr']}% APR. "
+        assets_str = f"${assets_no:,} since {entry['config_change_time']}, {entry['apr']}% APR."
         print(f"Report: {assets_str} {entry['designation']}")
 
     print("** REPORT COMPLETE **")
