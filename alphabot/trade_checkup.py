@@ -433,7 +433,7 @@ def log_profit_and_roe(
         else:
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
-        units = int(_trade_status["position"]["units"]["value"])
+        units = int(float(_trade_status["position"]["units"]["value"]))
         print(
             f"{description} {entry_signal} {direction} {trade_id} profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE) on {units} units, "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), drawdown: "
