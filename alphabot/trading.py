@@ -91,7 +91,13 @@ def open_trade(
     if not coll:
         h.get_mongo_coll()
 
-    units = get_units(py3c=py3c, unit_allocation_pct=unit_allocation_pct, account_id=account_id, leverage=leverage)
+    units = get_units(
+        description=description,
+        py3c=py3c,
+        unit_allocation_pct=unit_allocation_pct,
+        account_id=account_id,
+        leverage=leverage
+    )
 
     if tp_pct_2 is not None and units < 2:
         print(f"Partial TP configured, but units are only 1. Rejecting trade")
@@ -105,7 +111,7 @@ def open_trade(
     dca_prices = []
     base_units = units
     expected_cumulative_units = [base_units]
-    print(f"dca_pct is {dca_pct}")
+    print(f"{description} dca_pct is {dca_pct}")
     if dca_pct and dca_pct[0] > 0:
         base_units = units * dca_weights[0] // 100
         expected_cumulative_units = [0] * len(dca_weights)
@@ -128,8 +134,8 @@ def open_trade(
     base_trade_error, base_trade_data = py3c.request(
         entity="smart_trades_v2", action="new", payload=base_trade
     )
-    print(f"base_trade_data: {base_trade_data}")
-    print(f"base_trade_error: {base_trade_error}")
+    print(f"{description} base_trade_data: {base_trade_data}")
+    print(f"{description} base_trade_error: {base_trade_error}")
 
     if base_trade_error.get("error"):
         error_msg = f"{description} error opening trade of type {_type} for account {account_id}, {base_trade_error['msg']}"
@@ -171,7 +177,7 @@ def open_trade(
     if dca_pct:
         for dca in dca_pct:
             dca_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=dca, entry=trade_entry, direction=direction)
-            print(f"Calculated DCA price of {round(dca_price, 1)} from DCA pct {dca} and entry {trade_entry}")
+            print(f"{description} calculated DCA price of {round(dca_price, 1)} from DCA pct {dca} and entry {trade_entry}")
             dca_prices.append(dca_price)
 
     update_trade_payload = get_update_trade_payload(
@@ -195,7 +201,7 @@ def open_trade(
 
     # separate API call to add TP and SL. This is because we needed the exact entry price from the base trade call in
     #   order to calculate them.
-    print(f"Updating trade {trade_id} with payload: {update_trade_payload}")
+    print(f"{description} updating trade {trade_id} with payload: {update_trade_payload}")
     update_trade_error, update_trade_data = py3c.request(
         entity="smart_trades_v2",
         action="update",
@@ -219,21 +225,21 @@ def open_trade(
             logger=logger,
         )
         raise Exception
-    print(f"Trade {trade_id} updated with TP {round(tp_price, 1)}, SL {round(sl_price, 1)}")
+    print(f"{description} trade {trade_id} updated with TP {round(tp_price, 1)}, SL {round(sl_price, 1)}")
 
     if dca_pct and dca_pct[0] > 0:
         for i, dca in enumerate(dca_pct):
             # per 3C API docs, separate API call required to add the DCA limit order
-            print(f"Units is {units}")
+            print(f"{description} units is {units}")
             dca_units = units * dca_weights[i + 1] // 100
             expected_cumulative_units[i + 1] = dca_units + expected_cumulative_units[i]
-            print(f"Calculated new units at {dca_units}, from dca weight of {dca_weights[i + 1]}")
+            print(f"{description} calculated new units at {dca_units}, from dca weight of {dca_weights[i + 1]}")
             add_funds_payload = get_add_funds_payload(
                 units=dca_units,
                 price=dca_prices[i],
                 trade_id=trade_id
             )
-            print(f"Adding funds to trade {trade_id} with payload {add_funds_payload}")
+            print(f"{description} adding funds to trade {trade_id} with payload {add_funds_payload}")
             add_funds_error, add_funds_data = py3c.request(
                 entity="smart_trades_v2",
                 action="add_funds",
@@ -245,7 +251,7 @@ def open_trade(
                     f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
                 )
                 print(
-                    f"full DCA (add_funds) config: {add_funds_payload}"
+                    f"{description} full DCA (add_funds) config: {add_funds_payload}"
                 )
                 print(f"{description} Closing trade {trade_id} by market since we couldn't apply DCA {dca}%")
                 close_trade(
@@ -283,13 +289,13 @@ def open_trade(
     return trade_id
 
 
-def get_units(py3c, unit_allocation_pct, account_id, leverage):
+def get_units(description, py3c, unit_allocation_pct, account_id, leverage):
     if unit_allocation_pct < 0 or unit_allocation_pct > 100:
         raise Exception(f"Invalid units config: {unit_allocation_pct}")
     account_usd_value = get_account_usd_value(py3c=py3c, account_id=str(account_id))
-    print(f"account usd value is {account_usd_value}")
+    print(f"{description} account usd value is {account_usd_value}")
     total_allocation = int(account_usd_value * unit_allocation_pct/100 * leverage)
-    print(f"total allocation is {total_allocation}")
+    print(f"{description} total allocation is {total_allocation}")
     return total_allocation
 
 
@@ -297,7 +303,6 @@ def get_account_usd_value(py3c, account_id):
     error, data = py3c.request(entity="accounts", action="account_table_data", action_id=account_id)
     if error.get("error"):
         raise Exception(f"Error getting account usd value for {account_id}: {error['msg']}")
-    print(f"account table data: {data}")
     usd_value = 0
     for position in data:
         usd_value += position['usd_value']

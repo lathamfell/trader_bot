@@ -48,20 +48,20 @@ def trade_checkup(logger):
             entry_order_type = USER_ATTR[user]["strats"][strat]["entry_order_type"]
             tp_order_type = USER_ATTR[user]["strats"][strat]["tp_order_type"]
             sl_order_type = USER_ATTR[user]["strats"][strat]["sl_order_type"]
-            new_sl = check_sl_reset_due_to_reset_trigger_hit(
-                _trade_status=_trade_status,
-                strat_states=strat_states,
-                strat=strat,
-                user=user,
-                entry_order_type=entry_order_type,
-                tp_order_type=tp_order_type,
-                sl_order_type=sl_order_type,
-                trade_id=trade_id,
-                py3c=py3c,
-                coll=coll,
-                description=description,
-                logger=logger,
-            )
+            #new_sl = check_sl_reset_due_to_reset_trigger_hit(
+            #    _trade_status=_trade_status,
+            #    strat_states=strat_states,
+            #    strat=strat,
+            #    user=user,
+            #    entry_order_type=entry_order_type,
+            #    tp_order_type=tp_order_type,
+            #    sl_order_type=sl_order_type,
+            #    trade_id=trade_id,
+            #    py3c=py3c,
+            #    coll=coll,
+            #    description=description,
+            #    logger=logger,
+            #)
             check_tp_and_sl_reset_due_to_dca_hit(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
@@ -84,13 +84,12 @@ def trade_checkup(logger):
                 strat=strat,
                 logger=logger,
                 coll=coll,
-                new_sl=new_sl,
+                new_sl=None
             )
 
     return "Trade checkup complete"
 
 
-"""
 def check_take_profits(
     _trade_status, strat_states, user, strat, trade_id, py3c, description, logger
 ):
@@ -124,9 +123,9 @@ def check_take_profits(
         return _trade_status
 
     return _trade_status
+
+
 """
-
-
 def check_sl_reset_due_to_reset_trigger_hit(
     _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id, py3c, coll, logger
 ):
@@ -220,6 +219,7 @@ def check_sl_reset_due_to_reset_trigger_hit(
         return new_sl
 
 
+
 def get_sl_reset(
     _trade_status, description, strat_states, strat, user, trade_id, logger
 ):
@@ -269,6 +269,7 @@ def get_sl_reset(
             return sl_price, sl_trigger, new_sl
 
     return None, None, None
+"""
 
 
 def check_tp_and_sl_reset_due_to_dca_hit(
@@ -432,8 +433,9 @@ def log_profit_and_roe(
         else:
             sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
+        units = _trade_status["position"]["units"]["value"]
         print(
-            f"{description} {entry_signal} {direction} {trade_id} profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE), "
+            f"{description} {entry_signal} {direction} {trade_id} profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE) on {units} units, "
             f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), drawdown: "
             f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
             f"Entry time: {entry_time}. Full trade status: {_trade_status}"
@@ -448,10 +450,12 @@ def log_profit_and_roe(
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     share_of_assets_committed = current_units / expected_cumulative_units[-1]
+    print(f"share of assets committed was {share_of_assets_committed}, calculated from current_units {current_units} and max units {expected_cumulative_units[-1]}")
     profit_on_assets = roe * share_of_assets_committed
+    print(f"adjusted profit on assets is {profit_on_assets}, calculated from roe {roe}")
     new_paper_assets = int(paper_assets * (1 + profit_on_assets / 100))
     print(
-        f"{description} roe was {roe}, old paper assets was {paper_assets} new paper assets are {new_paper_assets}"
+        f"{description} roe was {roe}, updating paper assets from {paper_assets} to {new_paper_assets}"
     )
     most_recent_profit = strat_states[strat]["status"].get("most_recent_profit", 0)
     print(
@@ -487,7 +491,7 @@ def log_profit_and_roe(
     asset_ratio_to_original = new_paper_assets / 10000
     config_change_time = strat_states[strat]["status"]["config_change_time"]
     days = h.get_days_elapsed(start=config_change_time, end=exit_time)
-    apr = h.get_apr(asset_ratio=asset_ratio_to_original, days=days)
+    apy = h.get_apy(asset_ratio=asset_ratio_to_original, days=days)
     coll.update_one(
         {"_id": user},
         {
@@ -499,7 +503,7 @@ def log_profit_and_roe(
                 f"{strat}.status.drawdown_std_dev": drawdown_std_dev,
                 f"{strat}.status.median_drawdown": median_drawdown,
                 f"{strat}.status.trade_id": None,
-                f"{strat}.status.apr": apr
+                f"{strat}.status.apy": apy
             }
         },
         upsert=True,

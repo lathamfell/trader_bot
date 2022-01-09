@@ -163,7 +163,7 @@ def get_days_elapsed(start, end):
     return (end_dt - start_dt).total_seconds() / 86400
 
 
-def get_apr(asset_ratio, days):
-    weekly_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
-    apr = int((((1 + weekly_profit_pct_avg / 100) ** 365) - 1) * 100)
-    return apr
+def get_apy(asset_ratio, days):
+    daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
+    apy = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
+    return apy

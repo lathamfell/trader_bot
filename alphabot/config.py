@@ -56,10 +56,10 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
-            "BTC_L2": {  # 4h laguerre
+            "BTC_L2": {  # test
                 "logic": "alpha",
                 "coin": "btc",
-                "account_id": 31212864,  # trendking2021@gmail.com - Brave
+                "account_id": 30823322,  # psychobot2021@gmail.com - Brave
                 "pair": "BTC_BTCUSD",
                 "entry_order_type": "market",
                 "tp_order_type": "limit",

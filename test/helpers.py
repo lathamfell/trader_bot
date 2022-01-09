@@ -134,18 +134,18 @@ MOCK_USER_ATTR = {
 }
 
 EXPECTED_REPORT_CALL_STRS = ['** REPORT **',
-                             'Report: $9,844 since 2021-07-06 05:23 UTC, -91% APR. latham BTC_L5 <15m TP and SL>. Leverage: [1]. Trades: 6',
-                             'Report: $9,856 since 2021-07-06 05:23 UTC, -88% APR. latham BTC_L3 <15m Tiny TP>. Leverage: [1]. Trades: 7',
-                             'Report: $9,911 since 2021-07-06 05:23 UTC, -74% APR. latham BTC_L4 <15m Split TPs>. Leverage: [1]. Trades: 7',
-                             'Report: $9,977 since 2021-07-08 03:51 UTC, -84% APR. malcolm BTC_M1 <A2A 15m>. Leverage: [1]. Trades: 1',
-                             'Report: $9,987 since 2021-07-06 05:23 UTC, -16% APR. latham BTC_L6 <15m SL>. Leverage: [1]. Trades: 5',
-                             'Report: $10,000 since 2021-07-08 18:23 UTC, 0% APR. malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>. Leverage: [1]. Trades: 0',
-                             'Report: $10,000 since 2021-07-08 17:09 UTC, 0% APR. malcolm BTC_M2 <30m A2A HSL>. Leverage: [1]. Trades: 0',
-                             'Report: $10,000 since 2021-07-06 05:23 UTC, 0% APR. latham BTC_L1 <1m Benchmark>. Leverage: [1]. Trades: 0',
-                             'Report: $10,000 since 2021-07-06 05:23 UTC, 0% APR. latham BTC_L2 <1m Split TP>. Leverage: [5]. Trades: 0',
-                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APR. latham BTC_M3 <1h SL/TP>. Leverage: [1]. Trades: 0',
-                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APR. latham BTC_M4 <5/15 A2A HSL>. Leverage: [1]. Trades: 0',
-                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APR. latham BTC_M5 <15m A2A HSL>. Leverage: [1]. Trades: 0',
+                             'Report: $9,844 since 2021-07-06 05:23 UTC, -91% APY. latham BTC_L5 <15m TP and SL>. Leverage: [1]. Trades: 6',
+                             'Report: $9,856 since 2021-07-06 05:23 UTC, -88% APY. latham BTC_L3 <15m Tiny TP>. Leverage: [1]. Trades: 7',
+                             'Report: $9,911 since 2021-07-06 05:23 UTC, -74% APY. latham BTC_L4 <15m Split TPs>. Leverage: [1]. Trades: 7',
+                             'Report: $9,977 since 2021-07-08 03:51 UTC, -84% APY. malcolm BTC_M1 <A2A 15m>. Leverage: [1]. Trades: 1',
+                             'Report: $9,987 since 2021-07-06 05:23 UTC, -16% APY. latham BTC_L6 <15m SL>. Leverage: [1]. Trades: 5',
+                             'Report: $10,000 since 2021-07-08 18:23 UTC, 0% APY. malcolm ETH_M1 <15m ETH Fo Shizzle on da A2A>. Leverage: [1]. Trades: 0',
+                             'Report: $10,000 since 2021-07-08 17:09 UTC, 0% APY. malcolm BTC_M2 <30m A2A HSL>. Leverage: [1]. Trades: 0',
+                             'Report: $10,000 since 2021-07-06 05:23 UTC, 0% APY. latham BTC_L1 <1m Benchmark>. Leverage: [1]. Trades: 0',
+                             'Report: $10,000 since 2021-07-06 05:23 UTC, 0% APY. latham BTC_L2 <1m Split TP>. Leverage: [5]. Trades: 0',
+                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APY. latham BTC_M3 <1h SL/TP>. Leverage: [1]. Trades: 0',
+                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APY. latham BTC_M4 <5/15 A2A HSL>. Leverage: [1]. Trades: 0',
+                             'Report: $10,000 since 2021-07-08 18:27 UTC, 0% APY. latham BTC_M5 <15m A2A HSL>. Leverage: [1]. Trades: 0',
                              '** REPORT COMPLETE **'
                              ]
 

@@ -6,27 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/helpers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trading.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/updaters.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/updaters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L2_post_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L2_pre_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L2_pre_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_close_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_post_open_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_close_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_long.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_long.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/BTC_L4_pre_open_short.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_1.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_2.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/baseline_test_coll_3.json" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/baseline_test_coll_3.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json5" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_post_trade_checkup.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_multiple_attributes_update.json5" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_multiple_attributes_update.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json5" beforeDir="false" afterPath="$PROJECT_DIR$/test/test_files/expected_strat_config_after_update_from_pre_tri_a_and_with_empty_sl_reset_points.json5" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +79,7 @@
       <recent name="C:\Users\Latham\Documents\PycharmProjects\trader_bot\old" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_main.test_config_update_of_multiple_attributes">
+  <component name="RunManager" selected="Python.account_printer">
     <configuration name="account_printer" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="trader_bot" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -101,13 +87,13 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\Users\Latham\AppData\Local\Programs\Python\Python39\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="C:\Users\Latham\Documents\PycharmProjects\trader_bot\utility_scripts\account_printer.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utility_scripts/account_printer.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -704,9 +690,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.account_printer" />
         <item itemvalue="Python.trade_tester" />
         <item itemvalue="Python.test_main" />
-        <item itemvalue="Python.account_printer" />
         <item itemvalue="Python.pair_printer" />
         <item itemvalue="Python.scratch_7" />
       </list>
@@ -759,6 +745,8 @@
       <workItem from="1639087950824" duration="59914000" />
       <workItem from="1639678042887" duration="40116000" />
       <workItem from="1641080289700" duration="9345000" />
+      <workItem from="1641569398308" duration="2004000" />
+      <workItem from="1641639997994" duration="7629000" />
     </task>
     <servers />
   </component>
@@ -807,12 +795,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trading.py</url>
-          <line>113</line>
+          <line>119</line>
           <option name="timeStamp" value="136" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trading.py</url>
-          <line>130</line>
+          <line>136</line>
           <option name="timeStamp" value="137" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -827,12 +815,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trading.py</url>
-          <line>144</line>
+          <line>150</line>
           <option name="timeStamp" value="140" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trading.py</url>
-          <line>157</line>
+          <line>163</line>
           <option name="timeStamp" value="141" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -877,7 +865,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>166</line>
+          <line>165</line>
           <option name="timeStamp" value="169" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -892,7 +880,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/updaters.py</url>
-          <line>179</line>
+          <line>181</line>
           <option name="timeStamp" value="185" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -952,12 +940,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/updaters.py</url>
-          <line>230</line>
+          <line>232</line>
           <option name="timeStamp" value="202" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/updaters.py</url>
-          <line>224</line>
+          <line>226</line>
           <option name="timeStamp" value="203" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -966,17 +954,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trading.py</url>
-          <line>111</line>
+          <line>117</line>
           <option name="timeStamp" value="205" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>318</line>
+          <line>319</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>469</line>
+          <line>473</line>
           <option name="timeStamp" value="210" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -986,22 +974,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>473</line>
+          <line>477</line>
           <option name="timeStamp" value="215" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>480</line>
+          <line>484</line>
           <option name="timeStamp" value="216" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/updaters.py</url>
-          <line>174</line>
+          <line>176</line>
           <option name="timeStamp" value="218" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/updaters.py</url>
-          <line>130</line>
+          <line>132</line>
           <option name="timeStamp" value="220" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1015,6 +1003,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long.coverage" NAME="pytest for test_main.test_open_long Coverage Results" MODIFIED="1640508897146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_tp_pct_and_tp_pct_after_dca.coverage" NAME="pytest for test_main.test_config_update_of_tp_pct_and_tp_pct_after_dca Coverage Results" MODIFIED="1641083648441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$account_printer.coverage" NAME="account_printer Coverage Results" MODIFIED="1641750464871" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_sl_reset_points.coverage" NAME="pytest for test_main.test_config_update_of_sl_reset_points Coverage Results" MODIFIED="1639446505692" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_description.coverage" NAME="pytest for test_main.test_config_update_of_description Coverage Results" MODIFIED="1639468982797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_trade_checkup.coverage" NAME="pytest for test_main.test_trade_checkup Coverage Results" MODIFIED="1640527137487" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

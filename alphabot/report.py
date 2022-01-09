@@ -25,24 +25,24 @@ def report(logger):
             leverage = config.get("leverage", 1)
             description = config.get("description")
 
-            # calculate APR
+            # calculate APY
             current_time = h.get_readable_time()
             asset_ratio_to_original = assets / STARTING_PAPER
             config_change_time = status.get("config_change_time")
             days = h.get_days_elapsed(start=config_change_time, end=current_time)
-            apr = h.get_apr(asset_ratio=asset_ratio_to_original, days=days)
+            apy = h.get_apy(asset_ratio=asset_ratio_to_original, days=days)
 
             entry = {
                 "assets": assets,
                 "designation": f"{description}. Leverage: {leverage}. Trades: {len(full_profit_history)}",
                 "config_change_time": str(config_change_time),
-                "apr": apr
+                "apy": apy
             }
             output.append(entry)
     sorted_entries = sorted(output, key=lambda k: k["assets"])
     for entry in sorted_entries:
         assets_no = entry["assets"]
-        assets_str = f"${assets_no:,} since {entry['config_change_time']}, {entry['apr']}% APR."
+        assets_str = f"${assets_no:,} since {entry['config_change_time']}, {entry['apy']}% APY."
         print(f"Report: {assets_str} {entry['designation']}")
 
     print("** REPORT COMPLETE **")

@@ -10,11 +10,13 @@ def config_update(request, logger):
 
     if _update.get("reset"):
         # this is just a reset update. Reset all paper profits and return
-        for strat in USER_ATTR[user]["strats"]:
-            if strat in _update.get("to_reset", []):
+        for strat in _update.get("to_reset", []):
+            if strat in USER_ATTR[user]["strats"]:
                 set_command, reset_str = get_reset_set_command(strat=strat)
                 coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
                 print(f"Reset paper assets for {strat}")
+            else:
+                print(f"Did not find strat {strat} for user {user}")
         return "strats reset"
 
     strat = _update["strat"]
