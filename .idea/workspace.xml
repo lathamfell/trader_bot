@@ -5,14 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/helpers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/report.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/trading.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trading.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/updaters.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/updaters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/helpers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -746,7 +739,7 @@
       <workItem from="1639678042887" duration="40116000" />
       <workItem from="1641080289700" duration="9345000" />
       <workItem from="1641569398308" duration="2004000" />
-      <workItem from="1641639997994" duration="7629000" />
+      <workItem from="1641639997994" duration="8029000" />
     </task>
     <servers />
   </component>
