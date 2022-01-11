@@ -50,7 +50,7 @@ USER_ATTR = {
             "BTC_L1": {  # test
                 "logic": "alpha",
                 "coin": "btc",
-                "account_id": 30823191,  # lathamfell@gmail.com - Chrome
+                "account_id": 30823191,  # lathamfell@gmail.com
                 "pair": "BTC_BTCUSD",
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
@@ -59,12 +59,21 @@ USER_ATTR = {
             "BTC_L2": {  # test
                 "logic": "alpha",
                 "coin": "btc",
-                "account_id": 30823322,  # psychobot2021@gmail.com - Brave
+                "account_id": 30823322,  # psychobot2021@gmail.com
                 "pair": "BTC_BTCUSD",
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
+            "ETH_L1": {  # for now the Eth bot uses the test account
+                "logic": "alpha",
+                "coin": "eth",
+                "account_id": 30823322,  # psychobot@gmail.com
+                "pair": "ETH_ETHUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            }
         },
     },
 }

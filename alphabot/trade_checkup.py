@@ -450,9 +450,9 @@ def log_profit_and_roe(
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
     share_of_assets_committed = current_units / expected_cumulative_units[-1]
-    print(f"share of assets committed was {share_of_assets_committed}, calculated from current_units {current_units} and max units {expected_cumulative_units[-1]}")
+    print(f"{description} share of assets committed was {share_of_assets_committed}, calculated from current_units {current_units} and max units {expected_cumulative_units[-1]}")
     profit_on_assets = roe * share_of_assets_committed
-    print(f"adjusted profit on assets is {profit_on_assets}, calculated from roe {roe}")
+    print(f"{description} adjusted profit on assets is {profit_on_assets}, calculated from roe {roe}")
     new_paper_assets = int(paper_assets * (1 + profit_on_assets / 100))
     print(
         f"{description} roe was {roe}, updating paper assets from {paper_assets} to {new_paper_assets}"
@@ -485,7 +485,7 @@ def log_profit_and_roe(
         "entry_signal": entry_signal
     }
     full_profit_history[entry_time] = new_history_entry
-    print(f"Added entry to full profit history: {new_history_entry}")
+    print(f"{description} added entry to full profit history: {new_history_entry}")
 
     # update performance
     asset_ratio_to_original = new_paper_assets / 10000
