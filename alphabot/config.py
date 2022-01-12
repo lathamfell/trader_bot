@@ -65,15 +65,6 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
-            "ETH_L1": {  # for now the Eth bot uses the test account
-                "logic": "alpha",
-                "coin": "eth",
-                "account_id": 30823322,  # psychobot@gmail.com
-                "pair": "ETH_ETHUSD",
-                "entry_order_type": "market",
-                "tp_order_type": "limit",
-                "sl_order_type": "market"
-            }
         },
     },
 }
