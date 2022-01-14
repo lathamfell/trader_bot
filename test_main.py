@@ -684,14 +684,3 @@ def test_close_long_while_another_worker_is_waiting_for_long_open(client):
     # so this test is essentially a dupe of test_close_long_but_no_trade_is_open
     pass
 
-
-def test_partial_profit_signal_received(client, mock_main_py3c_partial_close_long):
-    coll = th.reset_test_coll("baseline_test_coll_2.json5")
-    user = "latham"
-    strat = "BTC_M3"
-    client.post(
-        "/",
-        json=dict(user=user, strat=strat, close_long=True, partial=True, price=33333),
-    )
-
-    #assert False
