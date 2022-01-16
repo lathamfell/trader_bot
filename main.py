@@ -177,6 +177,9 @@ class AlertHandler:
         if self.logic == "alpha":
             self.run_logic_alpha(alert, logger)
             return
+        if self.logic == "beta":
+            self.run_logic_beta(alert, logger)
+            return
 
         elif self.logic == "":
             print(
@@ -189,7 +192,7 @@ class AlertHandler:
         raise Exception
 
     def run_logic_alpha(self, alert, logger):
-        # tri A / dub A with signal exit
+        # tri A with signal exit
         direction = h.get_current_trade_direction(
             _trade_status=self.trade_status,
             user=self.user,
@@ -309,6 +312,103 @@ class AlertHandler:
                 coll=self.coll,
                 entry_signal=entry_signal
             )
+
+
+def run_logic_beta(self, alert, logger):
+    # dub A with signal exit
+    direction = h.get_current_trade_direction(
+        _trade_status=self.trade_status,
+        user=self.user,
+        strat=self.strat,
+        logger=logger
+    )
+    htf_shadow = self.state["status"].get("htf_shadow")
+    print(f"{self.strat} current HTF shadow: {htf_shadow}")
+    new_htf_shadow = None
+
+    _type = entry_signal = None
+
+    # check for shadow update
+    if alert.get("shadow_short_htf"):
+        new_htf_shadow = htf_shadow = "short"
+    elif alert.get("shadow_long_htf"):
+        new_htf_shadow = htf_shadow = "long"
+
+    # update shadows in db if needed
+    if new_htf_shadow:
+        self.coll.update_one(
+            {"_id": self.user},
+            {"$set": {
+                f"{self.strat}.status.htf_shadow": new_htf_shadow
+            }}
+        )
+        print(f"{self.strat} HTF shadow updated to {new_htf_shadow}")
+
+    # does current trade need to be closed.  If so, close by market because this is signal close
+    if (alert.get("open_short_htf") and direction == "long") or \
+            (alert.get("open_long_htf") and direction == "short"):
+        trade_id = self.state["status"]["trade_id"]
+        trading.close_trade(
+            py3c=self.py3c,
+            trade_id=trade_id,
+            user=self.user,
+            strat=self.strat,
+            description=self.description,
+            logger=logger,
+        )
+        direction = None
+        print(f"{self.strat} HTF signal against current trade: closing")
+
+    if direction:
+        # if we are still in a trade there is no need to enter another
+        return
+
+    # check for HTF entry criteria
+    if alert.get("open_short_htf"):
+        print(f"{self.strat} HTF signal: opening short")
+        entry_signal = "HTF"
+        _type = "sell"
+    elif alert.get("open_long_htf"):
+        print(f"{self.strat} HTF signal: opening long")
+        entry_signal = "HTF"
+        _type = "buy"
+
+    # check for LTF entry criteria
+    if alert.get("open_short_ltf") and htf_shadow == "short":
+        print(f"{self.strat} LTF in shadow, opening short")
+        entry_signal = "LTF"
+        _type = "sell"
+    elif alert.get("open_long_ltf") and htf_shadow == "long":
+        print(f"{self.strat} LTF in shadow, opening long")
+        entry_signal = "LTF"
+        _type = "buy"
+
+    if _type:
+        tf_idx = h.get_tf_idx(tf=entry_signal)
+        trading.open_trade(
+            py3c=self.py3c,
+            account_id=self.account_id,
+            pair=self.pair,
+            _type=_type,
+            leverage=self.leverage[tf_idx],
+            unit_allocation_pct=self.units[tf_idx],
+            tp_pct=self.tp_pct[tf_idx],
+            tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
+            sl_pct=self.sl_pct[tf_idx],
+            dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
+            dca_weights=self.dca_weights[tf_idx] if self.dca_weights else None,
+            sl_trail=self.sl_trail[tf_idx],
+            entry_order_type=self.entry_order_type,
+            tp_order_type=self.tp_order_type,
+            sl_order_type=self.sl_order_type,
+            user=self.user,
+            strat=self.strat,
+            description=self.description,
+            logger=logger,
+            alert_price=self.alert_price,
+            coll=self.coll,
+            entry_signal=entry_signal
+        )
 
 
 if __name__ == "__main__":

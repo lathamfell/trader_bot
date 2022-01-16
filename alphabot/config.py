@@ -48,7 +48,7 @@ USER_ATTR = {
         "email_enabled": False,
         "strats": {
             "BTC_L1": {
-                "logic": "alpha",
+                "logic": "beta",
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com
                 "pair": "BTC_BTCUSD",
