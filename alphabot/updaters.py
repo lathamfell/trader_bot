@@ -123,7 +123,7 @@ def config_update(request, logger):
         print(f"Changing units from {old_units} to {new_units}")
 
     new_description = new_config.get("description", "")
-    full_new_description = f"{user} {strat} <{new_description}>"
+    full_new_description = f"{user} {strat} {new_description}"
     if full_new_description != current_description:
         print(f"Changing description from {current_description} to {new_description}")
 
