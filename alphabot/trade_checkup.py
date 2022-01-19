@@ -429,18 +429,8 @@ def log_profit_and_roe(
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
-        if last_sl_set is not None:
-            sl_str = f" SL {1 * last_sl_set}% ({round(1 * last_sl_set * leverage, 2)}% ROE)."
-        else:
-            sl_str = ""
         entry_time = strat_states[strat]["status"].get("entry_time")
         units = int(float(_trade_status["position"]["units"]["value"]))
-        #print(
-        #    f"{description} {entry_signal} {direction} {trade_id} profit: {profit_pct}% ({round(profit_pct * leverage, 2)}% ROE) on {units} units, "
-        #    f"max profit: {max_profit_this_entry}% ({round(max_profit_this_entry * leverage, 2)}% ROE), drawdown: "
-        #    f"{max_drawdown_this_entry}% ({round(max_drawdown_this_entry * leverage, 2)}% ROE).{sl_str} "
-        #    f"Entry time: {entry_time}. Full trade status: {_trade_status}"
-        #)
         print(
             f"{description} {entry_signal} {direction} profit: {profit_pct}/{tp}% (ROE {round(profit_pct*leverage, 2)}/{round(tp*leverage, 2)}%) on {units} units, "
             f"max {max_profit_this_entry}% (ROE {round(max_profit_this_entry*leverage, 2)}%), dd "
