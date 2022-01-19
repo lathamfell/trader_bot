@@ -485,10 +485,10 @@ def log_profit_and_roe(
     print(f"{description} added entry to full profit history: {new_history_entry}")
 
     # update performance
-    assets_earned = new_paper_assets - 10000
+    asset_ratio_to_original = new_paper_assets / 10000
     config_change_time = strat_states[strat]["status"]["config_change_time"]
     days = h.get_days_elapsed(start=config_change_time, end=exit_time)
-    apy = h.get_apy(assets_earned=assets_earned, days=days)
+    apy = h.get_apy(asset_ratio=asset_ratio_to_original, days=days)
     coll.update_one(
         {"_id": user},
         {
