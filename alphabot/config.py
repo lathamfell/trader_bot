@@ -47,8 +47,8 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "BTC_L1": {
-                "logic": "beta",
+            "BTC_L1": {  # guided scalper 1m
+                "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com
                 "pair": "BTC_BTCUSD",
@@ -65,6 +65,42 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
+            "BTC_L3": {  # Nerd Lama: BT approved Lama strat
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31212864,  # trendking2021@gmail.com
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            },
+            "BTC_L4": {  # guided scalper 5m/1
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31462134,  # slackerbot2021@gmail.com
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            },
+            "BTC_L5": {  # Nerd Lama with 1m LLTF
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31466503,  # swethbot@gmail.com
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            },
+            "BTC_L6": {  # Non-cyborg Malcolm clone
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31467510,  # shorterbot2021@hotmail.com
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            }
         },
     },
 }
