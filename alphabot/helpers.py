@@ -5,7 +5,7 @@ from dateutil import parser
 import os
 import pymongo
 
-from alphabot.config import TRADE_TYPES, DEFAULT_STRAT_CONFIG
+from alphabot.config import TRADE_TYPES, DEFAULT_STRAT_CONFIG, STARTING_PAPER
 
 
 def get_readable_time(t=None):
@@ -163,7 +163,7 @@ def get_days_elapsed(start, end):
     return (end_dt - start_dt).total_seconds() / 86400
 
 
-def get_apy(asset_ratio, days):
-    daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
-    apy = int((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
+def get_apy(assets_earned, days):
+    projected_final_assets = assets_earned * 365 / days + STARTING_PAPER
+    apy = round((projected_final_assets / STARTING_PAPER - 1) * 100)
     return apy

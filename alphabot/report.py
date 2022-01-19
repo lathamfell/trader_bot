@@ -27,10 +27,10 @@ def report(logger):
 
             # calculate APY
             current_time = h.get_readable_time()
-            asset_ratio_to_original = assets / STARTING_PAPER
+            assets_earned = assets - STARTING_PAPER
             config_change_time = status.get("config_change_time")
             days = h.get_days_elapsed(start=config_change_time, end=current_time)
-            apy = h.get_apy(asset_ratio=asset_ratio_to_original, days=days)
+            apy = h.get_apy(assets_earned=assets_earned, days=days)
 
             entry = {
                 "assets": assets,
