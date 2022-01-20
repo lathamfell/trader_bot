@@ -28,21 +28,22 @@ def report(logger):
             # calculate APY
             current_time = h.get_readable_time()
             asset_ratio_to_original = assets / STARTING_PAPER
+            pct_return = round((asset_ratio_to_original - 1) * 100, 1)
             config_change_time = status.get("config_change_time")
             days = h.get_days_elapsed(start=config_change_time, end=current_time)
             apy = h.get_apy(asset_ratio=asset_ratio_to_original, days=days)
 
             entry = {
-                "assets": assets,
+                "pct_return": pct_return,
                 "designation": f"{description}. Leverage: {leverage}. Trades: {len(full_profit_history)}",
                 "config_change_time": str(config_change_time),
                 "apy": apy
             }
             output.append(entry)
-    sorted_entries = sorted(output, key=lambda k: k["assets"])
+    sorted_entries = sorted(output, key=lambda k: k["pct_return"])
     for entry in sorted_entries:
-        assets_no = entry["assets"]
-        assets_str = f"${assets_no:,} since {entry['config_change_time']}, {entry['apy']}% APY."
+        pct_return = entry["pct_return"]
+        assets_str = f"{pct_return}% since {entry['config_change_time']}, {entry['apy']}% APY."
         print(f"Report: {assets_str} {entry['designation']}")
 
     print("** REPORT COMPLETE **")
