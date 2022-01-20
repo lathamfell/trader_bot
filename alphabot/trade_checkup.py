@@ -395,7 +395,9 @@ def log_profit_and_roe(
 
     paper_assets = strat_states[strat]["status"].get("paper_assets", STARTING_PAPER)
     leverage = strat_states[strat]["config"].get("leverage", [1])[tf_idx]
-    tp = strat_states[strat]["config"]["tp_pct"][tf_idx]
+    #tp = strat_states[strat]["config"]["tp_pct"][tf_idx]
+    tp = h.get_current_tp_from_trade_status(ts=_trade_status)
+
     profit_pct, roe = h.get_profit_and_roe(_trade_status=_trade_status)
     if new_sl:
         last_sl_set = new_sl

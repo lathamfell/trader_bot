@@ -167,3 +167,9 @@ def get_apy(asset_ratio, days):
     daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
     apy = round((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
     return apy
+
+
+def get_current_tp_from_trade_status(ts):
+    entry_price = float(ts['position']['price']['value_without_commission'])
+    tp_price = float(ts['take_profit']['steps'][0]['price']['value'])
+    return abs(round((tp_price - entry_price) / entry_price * 100, 2))
