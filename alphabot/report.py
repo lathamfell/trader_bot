@@ -40,7 +40,7 @@ def report(logger):
                 "apy": apy
             }
             output.append(entry)
-    sorted_entries = sorted(output, key=lambda k: k["pct_return"])
+    sorted_entries = sorted(output, key=lambda k: k["apy"])
     for entry in sorted_entries:
         pct_return = entry["pct_return"]
         assets_str = f"{pct_return}% since {entry['config_change_time']}, {entry['apy']}% APY."

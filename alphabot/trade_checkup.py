@@ -448,8 +448,11 @@ def log_profit_and_roe(
     state = strat_states[strat]
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
-    share_of_assets_committed = current_units / expected_cumulative_units[-1]
-    print(f"{description} share of assets committed was {share_of_assets_committed}, calculated from current_units {current_units} and max units {expected_cumulative_units[-1]}")
+    asset_allocation = state["config"]["units"][tf_idx] / 100
+    share_of_assets_committed = current_units / expected_cumulative_units[-1] * asset_allocation
+    print(
+        f"{description} share of assets committed was {share_of_assets_committed}, calculated from current_units "
+        f"{current_units}, max units {expected_cumulative_units[-1]} and asset allocation {asset_allocation}")
     profit_on_assets = roe * share_of_assets_committed
     print(f"{description} adjusted profit on assets is {profit_on_assets}, calculated from roe {roe}")
     new_paper_assets = int(paper_assets * (1 + profit_on_assets / 100))
