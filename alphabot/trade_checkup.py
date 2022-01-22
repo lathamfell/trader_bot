@@ -280,8 +280,13 @@ def check_tp_and_sl_reset_due_to_dca_hit(
         print(f"{description} not in a trade, not checking for DCA")
         return
 
-    current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
-    current_sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
+    try:
+        current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
+        current_sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
+    except KeyError:
+        # most likely the trade is in the process of being closed
+        print(f"{description} checkup: did not find TP price or SL price in trade status; skipping TP/SL DCA check")
+        return
     new_dca_stage, new_tp_price, new_sl_price = get_tp_sl_reset_due_to_dca(
         _trade_status=_trade_status, strat_states=strat_states, strat=strat, description=description
     )
