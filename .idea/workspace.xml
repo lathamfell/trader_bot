@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f5a01f26-1da3-4831-8acd-5ce4d0ab4f43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alphabot/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alphabot/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/alphabot/trade_checkup.py" beforeDir="false" afterPath="$PROJECT_DIR$/alphabot/trade_checkup.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -744,7 +744,7 @@
       <workItem from="1641639997994" duration="16991000" />
       <workItem from="1641956222138" duration="12092000" />
       <workItem from="1642550795095" duration="13663000" />
-      <workItem from="1642650194269" duration="7134000" />
+      <workItem from="1642650194269" duration="12170000" />
     </task>
     <servers />
   </component>
@@ -962,7 +962,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>475</line>
+          <line>478</line>
           <option name="timeStamp" value="210" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -972,12 +972,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>479</line>
+          <line>482</line>
           <option name="timeStamp" value="215" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/alphabot/trade_checkup.py</url>
-          <line>486</line>
+          <line>489</line>
           <option name="timeStamp" value="216" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1001,7 +1001,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_open_long.coverage" NAME="pytest for test_main.test_open_long Coverage Results" MODIFIED="1640508897146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_tp_pct_and_tp_pct_after_dca.coverage" NAME="pytest for test_main.test_config_update_of_tp_pct_and_tp_pct_after_dca Coverage Results" MODIFIED="1641083648441" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/trader_bot$account_printer.coverage" NAME="account_printer Coverage Results" MODIFIED="1642548300837" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/trader_bot$account_printer.coverage" NAME="account_printer Coverage Results" MODIFIED="1642773158307" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_sl_reset_points.coverage" NAME="pytest for test_main.test_config_update_of_sl_reset_points Coverage Results" MODIFIED="1639446505692" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_config_update_of_description.coverage" NAME="pytest for test_main.test_config_update_of_description Coverage Results" MODIFIED="1639468982797" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/trader_bot$pytest_for_test_main_test_trade_checkup.coverage" NAME="pytest for test_main.test_trade_checkup Coverage Results" MODIFIED="1640527137487" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

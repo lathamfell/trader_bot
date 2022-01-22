@@ -74,7 +74,7 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market"
             },
-            "BTC_L4": {  # guided scalper 5m/1
+            "BTC_L4": {  # guided scalper 10/1
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 31462134,  # slackerbot2021@gmail.com

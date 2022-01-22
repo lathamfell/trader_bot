@@ -283,7 +283,7 @@ def check_tp_and_sl_reset_due_to_dca_hit(
     current_tp_price = _trade_status["take_profit"]["steps"][0]["price"]["value"]
     current_sl_price = _trade_status["stop_loss"]["conditional"]["price"]["value"]
     new_dca_stage, new_tp_price, new_sl_price = get_tp_sl_reset_due_to_dca(
-        _trade_status=_trade_status, strat_states=strat_states, strat=strat
+        _trade_status=_trade_status, strat_states=strat_states, strat=strat, description=description
     )
 
     if not new_dca_stage:
@@ -340,7 +340,7 @@ def check_tp_and_sl_reset_due_to_dca_hit(
     print(f"{description} updated trade status DCA stage to {new_dca_stage}")
 
 
-def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
+def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat, description):
     state = strat_states[strat]
     current_units = float(_trade_status["position"]["units"]["value"])
     expected_cumulative_units = state["config"]["expected_cumulative_units"]
@@ -358,7 +358,7 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
 
     # we reached the next dca stage
     print(
-        f"current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
+        f"{description} current_units {current_units} does not match expected {expected_cumulative_units[dca_stage]} for "
         f"stage {dca_stage}")
     tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
     new_dca_stage = dca_stage + 1
@@ -375,7 +375,7 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat):
         direction=state["status"]["last_entry_direction"]
     )
     print(
-        f"New TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
+        f"{description} new TP pct is {new_tp_pct}, SL pct is still {sl_pct}. Starting from new average entry of {new_entry}, "
         f"new TP price is {new_tp_price} and new SL price is {new_sl_price}")
     return new_dca_stage, new_tp_price, new_sl_price
 
@@ -428,6 +428,9 @@ def log_profit_and_roe(
             coll.update_one({"_id": user}, {"$set": set_command}, upsert=True)
             # print(f"{description} set most recent profit to {profit}")
 
+    dca_pct = strat_states[strat]["config"].get("dca_pct")[tf_idx]
+    dca_str = "/".join(([str(pct) for pct in dca_pct]))
+
     if not h.is_trade_closed(_trade_status=_trade_status, logger=logger):
         # logger.debug(f"{description} detected that trade {trade_id} is not closed, doing profit update and returning")
         # update the user
@@ -436,7 +439,7 @@ def log_profit_and_roe(
         print(
             f"{description} {entry_signal} {direction} profit: {profit_pct}/{tp}% (ROE {round(profit_pct*leverage, 2)}/{round(tp*leverage, 2)}%) on {units} units, "
             f"max {max_profit_this_entry}% (ROE {round(max_profit_this_entry*leverage, 2)}%), dd "
-            f"{max_drawdown_this_entry}/{last_sl_set}% (ROE {round(max_drawdown_this_entry * leverage, 2)}/{round(last_sl_set*leverage)}%). "
+            f"{max_drawdown_this_entry}/{dca_str}/{last_sl_set}% (ROE {round(max_drawdown_this_entry * leverage, 2)}/{round(last_sl_set*leverage, 2)}%). "
             f"Entry {entry_time}. Full trade status: {_trade_status}"
         )
         return
