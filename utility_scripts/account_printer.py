@@ -6,7 +6,7 @@ from alphabot.py3cw.request import Py3CW
 
 def main():
     # change this to whatever you need
-    user = "latham"
+    user = "malcolm"
 
     api_key = USER_ATTR[user]["c3_api_key"]
     secret = USER_ATTR[user]["c3_secret"]
