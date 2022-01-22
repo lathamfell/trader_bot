@@ -164,9 +164,13 @@ def get_days_elapsed(start, end):
 
 
 def get_apy(asset_ratio, days):
-    daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
+    try:
+        daily_profit_pct_avg = round((asset_ratio ** (1 / float(days)) - 1) * 100, 2)
+    except ZeroDivisionError:
+        # not enough time has passed to calculate apy
+        return 0
     apy = round((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
-    return apy
+    return min(apy, 1000000)  # prevents the very large APYs resulting from short time periods
 
 
 def get_current_tp_from_trade_status(ts):

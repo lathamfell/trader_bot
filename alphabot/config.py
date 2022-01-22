@@ -56,7 +56,7 @@ USER_ATTR = {
         "email": "lathamfell@gmail.com",
         "email_enabled": False,
         "strats": {
-            "BTC_L1": {  # guided scalper 1m
+            "BTC_L1": {  # DubA Scalper 1D1m
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 30823191,  # lathamfell@gmail.com
@@ -74,7 +74,7 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market",
             },
-            "BTC_L3": {  # Nerd Lama: BT approved Lama strat
+            "BTC_L3": {  # Nerd Lama 1D45m5m
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 31212864,  # trendking2021@gmail.com
@@ -83,7 +83,7 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market"
             },
-            "BTC_L4": {  # guided scalper 10/1
+            "BTC_L4": {  # Scared Lama 1D45m1m
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 31462134,  # slackerbot2021@gmail.com
@@ -92,7 +92,7 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market"
             },
-            "BTC_L5": {  # Nerd Lama with 1m LLTF
+            "BTC_L5": {  # Nerd Lama 1D45m1m
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 31466503,  # swethbot@gmail.com
@@ -101,7 +101,7 @@ USER_ATTR = {
                 "tp_order_type": "limit",
                 "sl_order_type": "market"
             },
-            "BTC_L6": {  # Non-cyborg Malcolm clone
+            "BTC_L6": {  # Scared Lama 1D45m5m
                 "logic": "alpha",
                 "coin": "btc",
                 "account_id": 31467510,  # shorterbot2021@hotmail.com
