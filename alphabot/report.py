@@ -37,13 +37,14 @@ def report(logger):
                 "pct_return": pct_return,
                 "designation": f"{description}. Leverage: {leverage}. Trades: {len(full_profit_history)}",
                 "config_change_time": str(config_change_time),
-                "apy": apy
+                "apy": apy,
+                "apy_str": "{:,}".format(apy)
             }
             output.append(entry)
     sorted_entries = sorted(output, key=lambda k: k["apy"])
     for entry in sorted_entries:
         pct_return = entry["pct_return"]
-        assets_str = f"{pct_return}% since {entry['config_change_time']}, {entry['apy']}% APY."
+        assets_str = f"{pct_return}% since {entry['config_change_time']}, {entry['apy_str']}% APY."
         print(f"Report: {assets_str} {entry['designation']}")
 
     print("** REPORT COMPLETE **")

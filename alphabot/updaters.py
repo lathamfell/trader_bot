@@ -76,6 +76,13 @@ def config_update(request, logger):
         )
         print(f"Changing dca_weights from {old_dca_weights} to {new_dca_weights}")
 
+    new_signal_dca = new_config.get("signal_dca")
+    old_signal_dca = current_config.get("signal_dca")
+    if not isinstance(new_signal_dca, bool):
+        raise Exception(f"Signal dca config {new_signal_dca} is not a boolean. Must be true or false.")
+    if new_signal_dca != old_signal_dca:
+        print(f"Changing signal_dca from {old_signal_dca} to {new_signal_dca}")
+
     new_sl_trail = normalized(new_config.get("sl_trail"))
     old_sl_trail = current_config.get("sl_trail")
     if new_sl_trail != old_sl_trail:
@@ -115,13 +122,13 @@ def config_update(request, logger):
         print(f"Changing description from {current_description} to {new_description}")
 
     # check to make sure tp_pct_2 and units are aligned
-    if new_tp_pct_2:
-        for i in range(len(new_tp_pct_2)):
-            if new_tp_pct_2[i] is not None and new_units[i] < 2:
-                print(
-                    f"Config update failed, need more than one unit in trade if using multiple TP points"
-                )
-                raise Exception
+    #if new_tp_pct_2:
+    #    for i in range(len(new_tp_pct_2)):
+    #        if new_tp_pct_2[i] is not None and new_units[i] < 2:
+    #            print(
+    #                f"Config update failed, need more than one unit in trade if using multiple TP points"
+    #            )
+    #            raise Exception
 
     set_command = {}
 
@@ -129,14 +136,16 @@ def config_update(request, logger):
         set_command[f"{strat}.config.tp_pct"] = new_tp_pct
     if new_tp_pct_after_dca:
         set_command[f"{strat}.config.tp_pct_after_dca"] = new_tp_pct_after_dca
-    if new_tp_pct_2:
-        set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
+    #if new_tp_pct_2:
+    #    set_command[f"{strat}.config.tp_pct_2"] = new_tp_pct_2
     if new_sl_pct:
         set_command[f"{strat}.config.sl_pct"] = new_sl_pct
     if new_dca_pct:
         set_command[f"{strat}.config.dca_pct"] = new_dca_pct
     if new_dca_weights:
         set_command[f"{strat}.config.dca_weights"] = new_dca_weights
+    if new_signal_dca is not None:
+        set_command[f"{strat}.config.signal_dca"] = new_signal_dca
     if new_sl_trail:
         set_command[f"{strat}.config.sl_trail"] = new_sl_trail
     if new_trail_delay:

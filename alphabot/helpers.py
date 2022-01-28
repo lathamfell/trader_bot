@@ -34,21 +34,25 @@ def get_trade_entry(_trade_status):
     return float(_trade_status["position"]["price"]["value_without_commission"])
 
 
-def is_trade_open(_trade_status):
-    return _trade_status["status"]["type"] in TRADE_TYPES["open"]
-
-
 def is_trade_opening(_trade_status):
     return _trade_status["status"]["type"] in TRADE_TYPES["opening"]
 
 
-def is_trade_closed(_trade_status, logger):
+def is_trade_open(_trade_status):
+    return _trade_status["status"]["type"] in TRADE_TYPES["open"]
+
+
+def is_trade_closing(_trade_status):
+    return _trade_status["status"]["type"] in TRADE_TYPES["closing"]
+
+
+def is_trade_closed(_trade_status, logger=None):
     try:
         _trade_status["data"]["closed_at"]
     except KeyError:
-        # logger.debug(f"Determined that trade {_trade_status['id']} is not closed. Full status: {_trade_status}")
+        print(f"Determined that trade {_trade_status['id']} is not closed. Full status: {_trade_status}")
         return False
-    # logger.debug(f"Determined that trade {_trade_status['id']} is closed. Full status: {_trade_status}")
+    print(f"Determined that trade {_trade_status['id']} is closed. Full status: {_trade_status}")
     return True
 
 
@@ -81,7 +85,8 @@ def send_email(to, subject, body=None):
 
 
 def get_default_open_trade_mongo_set_command(
-        strat, trade_id, direction, sl, entry_signal, entry_price, expected_cumulative_units, dca_prices
+        strat, trade_id, direction, sl, entry_signal, entry_price, dca_stages
+        #expected_cumulative_units, dca_prices
 ):
     entry_time = get_readable_time()
     return {
@@ -93,14 +98,15 @@ def get_default_open_trade_mongo_set_command(
         f"{strat}.status.max_drawdown_this_entry": 0,
         f"{strat}.status.last_sl_set": sl,
         f"{strat}.status.dca_stage": 0,
+        f"{strat}.status.dca_stages": dca_stages,
         f"{strat}.status.entry_time": entry_time,
         f"{strat}.status.entry_price": entry_price,
         f"{strat}.status.most_recent_profit": 0,
         f"{strat}.status.took_partial_profit": False,
         f"{strat}.status.entry_signal": entry_signal,
         # these are config items calculated during each trade open; they only change when config does
-        f"{strat}.config.expected_cumulative_units": expected_cumulative_units,
-        f"{strat}.config.dca_prices": dca_prices
+        #f"{strat}.config.expected_cumulative_units": expected_cumulative_units,
+        #f"{strat}.config.dca_prices": dca_prices
     }
 
 
@@ -170,7 +176,7 @@ def get_apy(asset_ratio, days):
         # not enough time has passed to calculate apy
         return 0
     apy = round((((1 + daily_profit_pct_avg / 100) ** 365) - 1) * 100)
-    return min(apy, 1000000)  # prevents the very large APYs resulting from short time periods
+    return min(apy, 2**32 - 1)  # Mongo DB can only store up to 8 byte ints
 
 
 def get_current_tp_from_trade_status(ts):

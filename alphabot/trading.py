@@ -78,9 +78,10 @@ def open_trade(
     sl_order_type,
     dca_pct=None,
     dca_weights=None,
+    signal_dca=False,
     user=None,
     strat=None,
-    tp_pct_2=None,
+    #tp_pct_2=None,
     coll=None,
     entry_signal=None
 ):
@@ -91,6 +92,8 @@ def open_trade(
     if not coll:
         h.get_mongo_coll()
 
+    dca_stages = []
+
     units = get_units(
         description=description,
         py3c=py3c,
@@ -98,24 +101,36 @@ def open_trade(
         account_id=account_id,
         leverage=leverage
     )
+    print(f"{description} unit allocation calculated as {units}")
 
-    if tp_pct_2 is not None and units < 2:
-        print(f"Partial TP configured, but units are only 1. Rejecting trade")
-        raise Exception
+    #if tp_pct_2 is not None and units < 2:
+    #    print(f"Partial TP configured, but units are only 1. Rejecting trade")
+    #    raise Exception
 
     if _type == "buy":
         direction = "long"
     else:
         direction = "short"
 
-    dca_prices = []
+    #dca_prices = []
     base_units = units
     expected_cumulative_units = [base_units]
     print(f"{description} dca_pct is {dca_pct}")
     if dca_pct and dca_pct[0] > 0:
+        print(f"{description} setting units for dca stage 0 (i.e. entry units)")
         base_units = units * dca_weights[0] // 100
-        expected_cumulative_units = [0] * len(dca_weights)
-        expected_cumulative_units[0] = base_units
+        print(f"{description} base (entry) units is {base_units}")
+        #expected_cumulative_units = [0] * len(dca_weights)
+        #expected_cumulative_units[0] = base_units
+        dca_stages.append({
+            "stage": 0,
+            "units": base_units,
+            "cumulative_units": base_units,
+            "pct": 0,
+            "weight": dca_weights[0],
+            "price": None,  # set after base trade price is set
+        })
+    print(f"{description} ended up with base units {base_units} and initial dca stages list of {dca_stages}")
 
     base_trade = get_base_trade(
         account_id=account_id,
@@ -130,7 +145,7 @@ def open_trade(
         note=f"{description} {entry_signal} {direction}",
         logger=logger,
     )
-    # logger.debug(f"{user} {strat} Sending base trade: {base_trade}")
+    print(f"{description} Sending base trade: {base_trade}")
     base_trade_error, base_trade_data = py3c.request(
         entity="smart_trades_v2", action="new", payload=base_trade
     )
@@ -162,30 +177,40 @@ def open_trade(
     )
 
     trade_entry = h.get_trade_entry(_trade_status=_trade_status)
+    dca_stages[0]["price"] = trade_entry
 
     if alert_price:
         print(
             f"{description} {entry_signal} entered base trade {trade_id} {_type} at {trade_entry}"
         )
 
-    tp_price_2 = None
+    #tp_price_2 = None
     direction = "long" if _type == "buy" else "short"
     tp_price = h.get_tp_price_from_pct(tp_pct=tp_pct, entry=trade_entry, direction=direction)
-    if tp_pct_2 is not None:
-        tp_price_2 = h.get_tp_price_from_pct(tp_pct=tp_pct_2, entry=trade_entry, direction=direction)
+    #if tp_pct_2 is not None:
+    #    tp_price_2 = h.get_tp_price_from_pct(tp_pct=tp_pct_2, entry=trade_entry, direction=direction)
     sl_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=sl_pct, entry=trade_entry, direction=direction)
-    if dca_pct:
-        for dca in dca_pct:
+    if dca_pct and dca_pct[0] > 0:
+        for i, dca in enumerate(dca_pct):
             dca_price = h.get_sl_or_dca_price_from_pct(sl_or_dca_pct=dca, entry=trade_entry, direction=direction)
             print(f"{description} calculated DCA price of {round(dca_price, 1)} from DCA pct {dca} and entry {trade_entry}")
-            dca_prices.append(dca_price)
+            dca_stages.append({
+                "stage": i + 1,
+                "pct": dca,
+                "price": dca_price,
+                "units": units * dca_weights[i + 1] // 100,
+                "cumulative_units": dca_stages[i]["cumulative_units"] + units * dca_weights[i + 1] // 100,
+                "weight": dca_weights[i + 1]
+            })
+
+            print(f"DCA stages is now: {dca_stages}")
 
     update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
         _type=_type,
         units=units,
         tp_price_1=tp_price,
-        tp_price_2=tp_price_2,
+        #tp_price_2=tp_price_2,
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
@@ -228,42 +253,12 @@ def open_trade(
     print(f"{description} trade {trade_id} updated with TP {round(tp_price, 1)}, SL {round(sl_price, 1)}")
 
     if dca_pct and dca_pct[0] > 0:
-        for i, dca in enumerate(dca_pct):
-            # per 3C API docs, separate API call required to add the DCA limit order
-            print(f"{description} units is {units}")
-            dca_units = units * dca_weights[i + 1] // 100
-            expected_cumulative_units[i + 1] = dca_units + expected_cumulative_units[i]
-            print(f"{description} calculated new units at {dca_units}, from dca weight of {dca_weights[i + 1]}")
-            add_funds_payload = get_add_funds_payload(
-                units=dca_units,
-                price=dca_prices[i],
-                trade_id=trade_id
-            )
-            print(f"{description} adding funds to trade {trade_id} with payload {add_funds_payload}")
-            add_funds_error, add_funds_data = py3c.request(
-                entity="smart_trades_v2",
-                action="add_funds",
-                action_id=trade_id,
-                payload=add_funds_payload
-            )
-            if add_funds_error.get("error"):
-                print(
-                    f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
-                )
-                print(
-                    f"{description} full DCA (add_funds) config: {add_funds_payload}"
-                )
-                print(f"{description} Closing trade {trade_id} by market since we couldn't apply DCA {dca}%")
-                close_trade(
-                    py3c=py3c,
-                    trade_id=trade_id,
-                    user=user,
-                    strat=strat,
-                    description=description,
-                    logger=logger,
-                )
-                raise Exception
-            print(f"{description} trade {trade_id} updated with DCA order for {dca_units} units at -{dca}%")
+        if not signal_dca:
+            for dca_stage in dca_stages:
+                if dca_stage['stage'] == 0:
+                    continue
+                add_funds(description=description, py3c=py3c, user=user, strat=strat, logger=logger,
+                          dca_stage=dca_stage, trade_id=trade_id, order_type='limit')
 
     coll.update_one(
         {"_id": user},
@@ -273,20 +268,58 @@ def open_trade(
                 trade_id=trade_id,
                 direction=direction,
                 sl=sl_pct,
-                expected_cumulative_units=expected_cumulative_units,
+                #expected_cumulative_units=expected_cumulative_units,
                 entry_signal=entry_signal,
                 entry_price=trade_entry,
-                dca_prices=dca_prices
+                dca_stages=dca_stages
+                #dca_prices=dca_prices
             )
         },
         upsert=True,
     )
-
-    print(
-        f"{description} {entry_signal} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
-    )
+    trade_summary = f"{description} {entry_signal} {direction} {trade_id} **OPENED**  Full trade status: {update_trade_data}"
+    print(trade_summary)
+    if user == "latham":
+        h.send_email(
+            to="lathamfell@gmail.com", subject="AlphaBot Trade Opened", body=trade_summary
+        )
 
     return trade_id
+
+
+def add_funds(description, py3c, user, strat, logger, dca_stage, trade_id, order_type):
+    add_funds_payload = get_add_funds_payload(
+        order_type=order_type,
+        units=dca_stage['units'],
+        price=dca_stage['price'],
+        trade_id=trade_id)
+
+    print(f"{description} adding funds to trade {trade_id} with payload {add_funds_payload}")
+    add_funds_error, add_funds_data = py3c.request(
+        entity="smart_trades_v2",
+        action="add_funds",
+        action_id=trade_id,
+        payload=add_funds_payload
+    )
+    if add_funds_error.get("error"):
+        print(
+            f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
+        )
+        print(
+            f"{description} full DCA (add_funds) config: {add_funds_payload}"
+        )
+        print(
+            f"{description} Closing trade {trade_id} by market since we couldn't add funds for DCA stage {dca_stage['stage']}")
+        close_trade(
+            py3c=py3c,
+            trade_id=trade_id,
+            user=user,
+            strat=strat,
+            description=description,
+            logger=logger,
+        )
+        raise Exception
+    print(f"{description} trade {trade_id} added funds for DCA stage {dca_stage['stage']}")
 
 
 def get_units(description, py3c, unit_allocation_pct, account_id, leverage):
@@ -294,7 +327,7 @@ def get_units(description, py3c, unit_allocation_pct, account_id, leverage):
         raise Exception(f"Invalid units config: {unit_allocation_pct}")
     account_usd_value = get_account_usd_value(py3c=py3c, account_id=str(account_id))
     print(f"{description} account usd value is {account_usd_value}")
-    total_allocation = int(account_usd_value * unit_allocation_pct/100 * leverage)
+    total_allocation = int(account_usd_value * unit_allocation_pct / 100 * leverage)
     print(f"{description} total allocation is {total_allocation}")
     return total_allocation
 
@@ -345,7 +378,7 @@ def get_update_trade_payload(
     sl_order_type,
     description,
     logger,
-    tp_price_2=None
+    #tp_price_2=None
 ):
     # logger.debug(
     #    f"{user} {strat} get_update_trade called with trade_id {trade_id}, units {units}, tp_price {tp_price}, "
@@ -374,26 +407,26 @@ def get_update_trade_payload(
         },
     }
 
-    if tp_price_2 is not None:
-        update_trade_payload["take_profit"]["steps"] = [
-            {
-                "order_type": tp_order_type,
-                "price": {"value": tp_price_1, "type": "last"},
-                "volume": 50,
-            },
-            {
-                "order_type": tp_order_type,
-                "price": {"value": tp_price_2, "type": "last"},
-                "volume": 50,
-            },
-        ]
+    #if tp_price_2 is not None:
+    #    update_trade_payload["take_profit"]["steps"] = [
+    #        {
+    #            "order_type": tp_order_type,
+    #            "price": {"value": tp_price_1, "type": "last"},
+    #            "volume": 50,
+    #        },
+    #        {
+    #            "order_type": tp_order_type,
+    #            "price": {"value": tp_price_2, "type": "last"},
+    #            "volume": 50,
+    #        },
+    #    ]
 
     return update_trade_payload
 
 
-def get_add_funds_payload(units, price, trade_id):
+def get_add_funds_payload(order_type, units, price, trade_id):
     add_funds_payload = {
-        "order_type": "limit",
+        "order_type": order_type,
         "units": {
             "value": units
         },

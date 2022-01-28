@@ -127,26 +127,33 @@ class AlertHandler:
         self.sl_pct = config["sl_pct"]
         self.dca_pct = config.get("dca_pct")
         self.dca_weights = config.get("dca_weights")
+        self.signal_dca = config.get("signal_dca")
+        self.dca_prices = config.get("dca_prices")
+        self.dca_stage = self.state['status'].get('dca_stage')
+        self.dca_stages = self.state['status'].get("dca_stages")
         self.sl_trail = config["sl_trail"]
         self.leverage = config["leverage"]
-        self.units = config["units"]
+        self.unit_allocation_pct = config["units"]
         self.description = config.get("description")
+        self._type = None
 
         # check status of previous trade, if there is one (whether open or closed)
         try:
-            trade_id = self.state["status"].get("trade_id")
+            self.trade_id = self.state["status"].get("trade_id")
         except KeyError:
             print(f"{self.user} {self.strat} no status in db yet")
             self.state["status"] = {}
-            trade_id = None
-        if trade_id:
+            self.trade_id = None
+        if self.trade_id:
             self.trade_status = trading.trade_status(
-                self.py3c, trade_id, self.description, logger
+                self.py3c, self.trade_id, self.description, logger
             )
             print(f"{self.description} trade status: {self.trade_status}")
         else:
             self.trade_status = None
 
+
+        """
         if self.condition:
             # we need to update state before running
             result = self.coll.update_one(
@@ -171,15 +178,19 @@ class AlertHandler:
                     f"{self.user} {self.strat} {self.condition} value {self.value} same as existing, nothing to update"
                 )
                 return
+        """
         self.run_logic(self.alert, logger)
+
+
+
 
     def run_logic(self, alert, logger):
         if self.logic == "alpha":
             self.run_logic_alpha(alert, logger)
             return
-        if self.logic == "beta":
-            self.run_logic_beta(alert, logger)
-            return
+        #if self.logic == "beta":
+        #    self.run_logic_beta(alert, logger)
+        #    return
 
         elif self.logic == "":
             print(
@@ -207,7 +218,7 @@ class AlertHandler:
         print(f"{self.strat} current LTF shadow: {ltf_shadow}")
         new_ltf_shadow = None
 
-        _type = entry_signal = None
+        entry_signal = None
 
         # check for shadow update
         if alert.get("shadow_short_htf"):
@@ -240,10 +251,9 @@ class AlertHandler:
         # does current trade need to be closed.  If so, close by market because this is signal close
         if (alert.get("open_short_htf") and direction == "long") or \
                 (alert.get("open_long_htf") and direction == "short"):
-            trade_id = self.state["status"]["trade_id"]
             trading.close_trade(
                 py3c=self.py3c,
-                trade_id=trade_id,
+                trade_id=self.trade_id,
                 user=self.user,
                 strat=self.strat,
                 description=self.description,
@@ -253,6 +263,53 @@ class AlertHandler:
             print(f"{self.strat} HTF signal against current trade: closing")
 
         if direction:
+            if self.signal_dca:
+                # check if we got a DCA signal
+                if alert.get("dca_short_signal") and direction == "short":
+                    print(f"{self.description} got dca short signal and current trade is short")
+                    # check price against dca prices
+                    cur_price = float(self.trade_status['data']['current_price']['last'])
+                    print(f"{self.description} current BTC price is {cur_price}")
+                    for dca_stage in self.dca_stages:
+                        if dca_stage['stage'] <= self.dca_stage:
+                            print(f"{self.description} already executed DCA stage {dca_stage['stage']}, skipping")
+                            continue
+                        if cur_price >= dca_stage['price']:
+                            print(
+                                f"{self.description} for DCA stage {dca_stage['stage']}, current price is >= "
+                                f"DCA price of {dca_stage['price']}. Performing DCA.")
+                            # perform DCA
+                            trading.add_funds(
+                                description=self.description, py3c=self.py3c, user=self.user, strat=self.strat,
+                                logger=logger, dca_stage=dca_stage, trade_id=self.trade_id, order_type='market')
+                        else:
+                            print(
+                                f"{self.description} for DCA stage {dca_stage['stage']}, current price is not >= "
+                                f"DCA price of {dca_stage['price']}. Not performing DCA."
+                            )
+                if alert.get("dca_long_signal") and direction == "long":
+                    print(f"{self.description} got dca long signal and current trade is long")
+                    # check price against dca prices
+                    cur_price = float(self.trade_status['data']['current_price']['last'])
+                    print(f"{self.description} current BTC price is {cur_price}")
+                    for dca_stage in self.dca_stages:
+                        if dca_stage['stage'] <= self.dca_stage:
+                            print(f"{self.description} already executed DCA stage {dca_stage['stage']}, skipping")
+                            continue
+                        if cur_price <= dca_stage['price']:
+                            print(
+                                f"{self.description} for DCA stage {dca_stage['stage']}, current price is <= "
+                                f"DCA price of {dca_stage['price']}. Performing DCA.")
+                            # perform DCA
+                            trading.add_funds(
+                                description=self.description, py3c=self.py3c, user=self.user, strat=self.strat,
+                                logger=logger, dca_stage=dca_stage, trade_id=self.trade_id, order_type='market')
+                        else:
+                            print(
+                                f"{self.description} for DCA stage {dca_stage['stage']}, current price is not <= "
+                                f"DCA price of {dca_stage['price']}. Not performing DCA."
+                            )
+
             # if we are still in a trade there is no need to enter another
             return
 
@@ -260,47 +317,48 @@ class AlertHandler:
         if alert.get("open_short_htf"):
             print(f"{self.strat} HTF signal: opening short")
             entry_signal = "HTF"
-            _type = "sell"
+            self._type = "sell"
         elif alert.get("open_long_htf"):
             print(f"{self.strat} HTF signal: opening long")
             entry_signal = "HTF"
-            _type = "buy"
+            self._type = "buy"
 
         # check for LTF entry criteria
         if alert.get("open_short_ltf") and htf_shadow == "short":
             print(f"{self.strat} LTF in shadow, opening short")
             entry_signal = "LTF"
-            _type = "sell"
+            self._type = "sell"
         elif alert.get("open_long_ltf") and htf_shadow == "long":
             print(f"{self.strat} LTF in shadow, opening long")
             entry_signal = "LTF"
-            _type = "buy"
+            self._type = "buy"
 
         # check for LLTF entry criteria
         if alert.get("open_short_lltf") and htf_shadow == "short" and ltf_shadow == "short":
             print(f"{self.strat} LLTF in double shadow, opening short")
             entry_signal = "LLTF"
-            _type = "sell"
+            self._type = "sell"
         elif alert.get("open_long_lltf") and htf_shadow == "long" and ltf_shadow == "long":
             print(f"{self.strat} LLTF in double shadow, opening long")
             entry_signal = "LLTF"
-            _type = "buy"
+            self._type = "buy"
 
-        if _type:
-            tf_idx = h.get_tf_idx(tf=entry_signal)
+        if self._type:
+            self.tf_idx = h.get_tf_idx(tf=entry_signal)
             trading.open_trade(
                 py3c=self.py3c,
                 account_id=self.account_id,
                 pair=self.pair,
-                _type=_type,
-                leverage=self.leverage[tf_idx],
-                unit_allocation_pct=self.units[tf_idx],
-                tp_pct=self.tp_pct[tf_idx],
-                tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
-                sl_pct=self.sl_pct[tf_idx],
-                dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
-                dca_weights=self.dca_weights[tf_idx] if self.dca_weights else None,
-                sl_trail=self.sl_trail[tf_idx],
+                _type=self._type,
+                leverage=self.leverage[self.tf_idx],
+                unit_allocation_pct=self.unit_allocation_pct[self.tf_idx],
+                tp_pct=self.tp_pct[self.tf_idx],
+                #tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
+                sl_pct=self.sl_pct[self.tf_idx],
+                dca_pct=self.dca_pct[self.tf_idx] if self.dca_pct else None,
+                dca_weights=self.dca_weights[self.tf_idx] if self.dca_weights else None,
+                signal_dca=self.signal_dca,
+                sl_trail=self.sl_trail[self.tf_idx],
                 entry_order_type=self.entry_order_type,
                 tp_order_type=self.tp_order_type,
                 sl_order_type=self.sl_order_type,
@@ -312,7 +370,7 @@ class AlertHandler:
                 coll=self.coll,
                 entry_signal=entry_signal
             )
-
+    """
     def run_logic_beta(self, alert, logger):
         # dub A with signal exit
         direction = h.get_current_trade_direction(
@@ -392,10 +450,11 @@ class AlertHandler:
                 leverage=self.leverage[tf_idx],
                 unit_allocation_pct=self.units[tf_idx],
                 tp_pct=self.tp_pct[tf_idx],
-                tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
+                #tp_pct_2=self.tp_pct_2[tf_idx] if self.tp_pct_2 else None,
                 sl_pct=self.sl_pct[tf_idx],
                 dca_pct=self.dca_pct[tf_idx] if self.dca_pct else None,
                 dca_weights=self.dca_weights[tf_idx] if self.dca_weights else None,
+                signal_dca=self.signal_dca,
                 sl_trail=self.sl_trail[tf_idx],
                 entry_order_type=self.entry_order_type,
                 tp_order_type=self.tp_order_type,
@@ -408,6 +467,11 @@ class AlertHandler:
                 coll=self.coll,
                 entry_signal=entry_signal
             )
+    """
+
+
+
+
 
 
 if __name__ == "__main__":
