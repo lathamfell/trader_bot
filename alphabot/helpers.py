@@ -156,7 +156,7 @@ def get_tp_price_from_pct(tp_pct, entry, direction):
 
 def get_sl_or_dca_price_from_pct(sl_or_dca_pct, entry, direction):
     sign = -1 if direction == "long" else 1
-    return entry * (1 + (sign * sl_or_dca_pct) / 100)
+    return round(entry * (1 + (sign * sl_or_dca_pct) / 100))
 
 
 def get_days_elapsed(start, end):

@@ -203,7 +203,7 @@ def open_trade(
                 "weight": dca_weights[i + 1]
             })
 
-            print(f"DCA stages is now: {dca_stages}")
+            print(f"{description} DCA stages is now: {dca_stages}")
 
     update_trade_payload = get_update_trade_payload(
         trade_id=trade_id,
@@ -303,22 +303,22 @@ def add_funds(description, py3c, user, strat, logger, dca_stage, trade_id, order
     )
     if add_funds_error.get("error"):
         print(
-            f"{description} Error adding DCA limit order while opening, {add_funds_error['msg']}"
+            f"{description} Error adding DCA funds while opening, {add_funds_error['msg']}"
         )
         print(
             f"{description} full DCA (add_funds) config: {add_funds_payload}"
         )
         print(
-            f"{description} Closing trade {trade_id} by market since we couldn't add funds for DCA stage {dca_stage['stage']}")
-        close_trade(
-            py3c=py3c,
-            trade_id=trade_id,
-            user=user,
-            strat=strat,
-            description=description,
-            logger=logger,
-        )
-        raise Exception
+            f"{description} Not closing trade {trade_id} by market even though we couldn't add funds for DCA stage {dca_stage['stage']}")
+        #close_trade(
+        #    py3c=py3c,
+        #    trade_id=trade_id,
+        #    user=user,
+        #    strat=strat,
+        #    description=description,
+        #    logger=logger,
+        #)
+        raise Exception(f"{description} error adding DCA for trade {trade_id} with payload {add_funds_payload}")
     print(f"{description} trade {trade_id} added funds for DCA stage {dca_stage['stage']}")
 
 

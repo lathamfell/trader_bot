@@ -447,7 +447,7 @@ def log_profit_and_roe(
         tp = h.get_current_tp_from_trade_status(ts=_trade_status)
         print(
             f"{description} {entry_signal} {direction}: {profit_pct}/{tp}% (ROE {round(profit_pct*leverage, 2)}/{round(tp*leverage, 2)}%), "
-            f"{units} units, DCA stage {dca_stage}, "
+            f"{units} units, DCA stage {dca_stage}/{dca_stages[-1]['stage']}, "
             f"max {max_profit_this_entry}% (ROE {round(max_profit_this_entry*leverage, 2)}%), dd "
             f"{max_drawdown_this_entry}/{last_sl_set}% (ROE {round(max_drawdown_this_entry * leverage, 2)}/{round(last_sl_set*leverage, 2)}%). "
             f"Entry {entry_time}. Full trade status: {_trade_status}"
