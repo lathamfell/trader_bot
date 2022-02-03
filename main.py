@@ -267,12 +267,16 @@ class AlertHandler:
                 # check if we got a DCA signal
                 if alert.get("dca_short_signal") and direction == "short":
                     print(f"{self.description} got dca short signal and current trade is short")
-                    # check price against dca prices
+                    # check DCA criteria
                     cur_price = float(self.trade_status['data']['current_price']['last'])
+                    min_stage = alert.get("min_stage")
                     print(f"{self.description} current BTC price is {cur_price}")
                     for dca_stage in self.dca_stages:
                         if dca_stage['stage'] <= self.dca_stage:
                             print(f"{self.description} already executed DCA stage {dca_stage['stage']}, skipping")
+                            continue
+                        if min_stage and dca_stage["stage"] < min_stage:
+                            print(f"{self.description} skipping DCA because alert min stage {min_stage} not reached yet")
                             continue
                         if cur_price >= dca_stage['price']:
                             print(
@@ -291,10 +295,14 @@ class AlertHandler:
                     print(f"{self.description} got dca long signal and current trade is long")
                     # check price against dca prices
                     cur_price = float(self.trade_status['data']['current_price']['last'])
+                    min_stage = alert.get("min_stage")
                     print(f"{self.description} current BTC price is {cur_price}")
                     for dca_stage in self.dca_stages:
                         if dca_stage['stage'] <= self.dca_stage:
                             print(f"{self.description} already executed DCA stage {dca_stage['stage']}, skipping")
+                            continue
+                        if min_stage and dca_stage["stage"] < min_stage:
+                            print(f"{self.description} skipping DCA because alert min stage {min_stage} not reached yet")
                             continue
                         if cur_price <= dca_stage['price']:
                             print(
