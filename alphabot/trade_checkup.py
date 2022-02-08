@@ -353,10 +353,11 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat, description):
     dca_stage = state["status"]["dca_stage"]
     dca_stages = state["status"]["dca_stages"]
 
-    #if dca_stage == dca_stages[-1]["stage"]:
+    if dca_stage == dca_stages[-1]["stage"]:
+        #print(f"{description} reached max DCA stage, no need to reset TP/SL")
         # reached all dca stages
         # nothing else to do
-    #    return None, None, None
+        return None, None, None
 
     if current_units == dca_stages[dca_stage]['cumulative_units']:
         # nothing to do because next DCA stage hasn't been reached yet
@@ -371,6 +372,7 @@ def get_tp_sl_reset_due_to_dca(_trade_status, strat_states, strat, description):
         f"{description} current_units {current_units} does not match expected "
         f"{dca_stages[dca_stage]['cumulative_units']} for stage {dca_stage}")
     tf_idx = h.get_tf_idx(state["status"]["entry_signal"])
+
     new_dca_stage = dca_stage + 1
     new_tp_pct = state["config"]["tp_pct_after_dca"][tf_idx]
     sl_pct = state["config"]["sl_pct"][tf_idx]

@@ -319,7 +319,7 @@ def add_funds(description, py3c, user, strat, logger, dca_stage, trade_id, order
         #    logger=logger,
         #)
         raise Exception(f"{description} error adding DCA for trade {trade_id} with payload {add_funds_payload}")
-    print(f"{description} trade {trade_id} added funds for DCA stage {dca_stage['stage']}")
+    print(f"{description} trade {trade_id} added funds for DCA stage {dca_stage['stage']}. Full response: {add_funds_data}")
 
 
 def get_units(description, py3c, unit_allocation_pct, account_id, leverage):
