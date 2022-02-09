@@ -269,7 +269,7 @@ class AlertHandler:
                     print(f"{self.description} got dca short signal and current trade is short")
                     # check DCA criteria
                     cur_price = float(self.trade_status['data']['current_price']['last'])
-                    min_stage = alert.get("min_stage")
+                    min_stage = int(alert.get("min_stage", 0))
                     print(f"{self.description} current BTC price is {cur_price}")
                     for dca_stage in self.dca_stages:
                         if dca_stage['stage'] <= self.dca_stage:
@@ -295,7 +295,7 @@ class AlertHandler:
                     print(f"{self.description} got dca long signal and current trade is long")
                     # check price against dca prices
                     cur_price = float(self.trade_status['data']['current_price']['last'])
-                    min_stage = alert.get("min_stage")
+                    min_stage = int(alert.get("min_stage", 0))
                     print(f"{self.description} current BTC price is {cur_price}")
                     for dca_stage in self.dca_stages:
                         if dca_stage['stage'] <= self.dca_stage:
