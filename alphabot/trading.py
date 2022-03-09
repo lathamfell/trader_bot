@@ -160,6 +160,7 @@ def open_trade(
     trade_id = str(base_trade_data["id"])
 
     while True:
+        sleep(2)
         _trade_status = trade_status(
             py3c=py3c, trade_id=trade_id, description=description, logger=logger
         )
@@ -169,7 +170,6 @@ def open_trade(
             f"{description} {entry_signal} trade {trade_id} waiting for base open. Status: {_trade_status['status']['type']}. "
             f"Full status: {_trade_status}"
         )
-        sleep(1)
 
     print(
         f"{description} {entry_signal} {direction} {trade_id} base order in, status: {_trade_status['status']['type']}. "

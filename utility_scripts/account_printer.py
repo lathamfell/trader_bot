@@ -15,8 +15,8 @@ def main():
     error, data = py3c.request(entity="accounts", action="")
     print(json.dumps(data, indent=4, sort_keys=True))
     for acct in data:
-        if "COIN-M" in acct['name'] or "Bybit" in acct['name']:
-            print(f"Account {acct['name']}: {acct['id']}")
+        #if "COIN-M" in acct['name'] or "Bybit" in acct['name']:
+        print(f"Account {acct['name']}: {acct['id']}")
 
 
 if __name__ == "__main__":

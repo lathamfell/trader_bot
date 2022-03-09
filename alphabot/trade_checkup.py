@@ -48,20 +48,20 @@ def trade_checkup(logger):
             entry_order_type = USER_ATTR[user]["strats"][strat]["entry_order_type"]
             tp_order_type = USER_ATTR[user]["strats"][strat]["tp_order_type"]
             sl_order_type = USER_ATTR[user]["strats"][strat]["sl_order_type"]
-            #new_sl = check_sl_reset_due_to_reset_trigger_hit(
-            #    _trade_status=_trade_status,
-            #    strat_states=strat_states,
-            #    strat=strat,
-            #    user=user,
-            #    entry_order_type=entry_order_type,
-            #    tp_order_type=tp_order_type,
-            #    sl_order_type=sl_order_type,
-            #    trade_id=trade_id,
-            #    py3c=py3c,
-            #    coll=coll,
-            #    description=description,
-            #    logger=logger,
-            #)
+            new_sl = check_sl_reset_due_to_reset_trigger_hit(
+                _trade_status=_trade_status,
+                strat_states=strat_states,
+                strat=strat,
+                user=user,
+                entry_order_type=entry_order_type,
+                tp_order_type=tp_order_type,
+                sl_order_type=sl_order_type,
+                trade_id=trade_id,
+                py3c=py3c,
+                coll=coll,
+                description=description,
+                logger=logger,
+            )
             check_tp_and_sl_reset_due_to_dca_hit(
                 _trade_status=_trade_status,
                 strat_states=strat_states,
@@ -88,6 +88,7 @@ def trade_checkup(logger):
             )
 
     return "Trade checkup complete"
+
 
 """
 def check_take_profits(
@@ -125,7 +126,7 @@ def check_take_profits(
     return _trade_status
 """
 
-"""
+
 def check_sl_reset_due_to_reset_trigger_hit(
     _trade_status, description, strat_states, strat, user, entry_order_type, tp_order_type, sl_order_type, trade_id, py3c, coll, logger
 ):
@@ -153,12 +154,6 @@ def check_sl_reset_due_to_reset_trigger_hit(
     _type = _trade_status["position"]["type"]
     units = _trade_status["position"]["units"]["value"]
     tp_price_1 = _trade_status["take_profit"]["steps"][0]["price"]["value"]
-    tp_price_2 = None
-    try:
-        tp_price_2 = _trade_status["take_profit"]["steps"][1]["price"]["value"]
-    except IndexError:
-        # only one TP
-        pass
     sl_pct = strat_states[strat]["config"]["sl_pct"]
     sl_trail = strat_states[strat]["config"]["sl_trail"]
     description = strat_states[strat]["config"].get("description")
@@ -168,7 +163,6 @@ def check_sl_reset_due_to_reset_trigger_hit(
         _type=_type,
         units=units,
         tp_price_1=tp_price_1,
-        tp_price_2=tp_price_2,
         sl_price=sl_price,
         sl_pct=sl_pct,
         sl_trail=sl_trail,
@@ -217,7 +211,6 @@ def check_sl_reset_due_to_reset_trigger_hit(
 
     if new_sl:
         return new_sl
-
 
 
 def get_sl_reset(
@@ -269,7 +262,6 @@ def get_sl_reset(
             return sl_price, sl_trigger, new_sl
 
     return None, None, None
-"""
 
 
 def check_tp_and_sl_reset_due_to_dca_hit(

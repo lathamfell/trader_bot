@@ -58,3 +58,4 @@ Config update:
 Tests:
 In PyCharm Windows terminal, execute the command inside test.sh. 
 To run test suite with breakpoints: use a Pytest debug configuration
+

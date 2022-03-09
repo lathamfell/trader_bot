@@ -47,6 +47,24 @@ USER_ATTR = {
                 "entry_order_type": "market",
                 "tp_order_type": "limit",
                 "sl_order_type": "market"
+            },
+            "BTC_M3": {
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31538061,
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
+            },
+            "BTC_M4": {
+                "logic": "alpha",
+                "coin": "btc",
+                "account_id": 31538077,
+                "pair": "BTC_BTCUSD",
+                "entry_order_type": "market",
+                "tp_order_type": "limit",
+                "sl_order_type": "market"
             }
         },
     },
