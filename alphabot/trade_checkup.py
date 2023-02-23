@@ -191,7 +191,7 @@ def check_sl_reset_due_to_reset_trigger_hit(
             description=description,
             logger=logger,
         )
-        raise Exception
+        raise Exception("Trade closed after error trying to reset SL")
     # update strat status so we don't do these triggers again
     set_command = {}
     direction = strat_states[strat]["status"].get("last_entry_direction")
@@ -220,6 +220,7 @@ def get_sl_reset(
     try:
         reset_sl = strat_states[strat]["config"]["reset_sl"][tf_idx]
         sl_reset_points = strat_states[strat]["config"]["sl_reset_points"]
+        print(f"{description} configured sl_reset_points are {sl_reset_points}")
         if not reset_sl or sl_reset_points == [[[]]]:
             # logger.debug(f"{user} {strat} has SL reset disabled or has no reset points, skipping")
             return None, None, None
@@ -232,12 +233,15 @@ def get_sl_reset(
 
     # get the reset points for this TF
     sl_reset_points = sl_reset_points[tf_idx]
+    print(f"{description} TF reset points are {sl_reset_points}")
 
     profit, roe = h.get_profit_and_roe(_trade_status)
     direction = strat_states[strat]["status"].get("last_entry_direction")
     sl_reset_points_hit = strat_states[strat]["status"]["sl_reset_points_hit"]
     for sl_reset_point in sl_reset_points:
+        print(f"{description} sl_reset_point is {sl_reset_point}")
         sl_trigger = sl_reset_point[0]
+        print(f"{description} sl_trigger is {sl_trigger}")
         new_sl = sl_reset_point[1]
         if sl_trigger not in sl_reset_points_hit:
             if profit < sl_trigger:
@@ -291,7 +295,10 @@ def check_tp_and_sl_reset_due_to_dca_hit(
     # most things are the same
     _type = _trade_status["position"]["type"]
     #units = _trade_status["position"]["units"]["value"]
-    units = strat_states[strat]["status"]["dca_stages"][-1]["cumulative_units"]  # all units
+    try:
+        units = strat_states[strat]["status"]["dca_stages"][-1]["cumulative_units"]  # all units
+    except IndexError:
+        units = _trade_status["position"]["units"]["value"]
     sl_pct = _trade_status["stop_loss"]["conditional"]["trailing"]["percent"]
     sl_trail = _trade_status["stop_loss"]["conditional"]["trailing"]["enabled"]
     description = strat_states[strat]["config"].get("description")
@@ -455,7 +462,10 @@ def log_profit_and_roe(
         state = strat_states[strat]
         current_units = float(_trade_status["position"]["units"]["value"])
         #expected_cumulative_units = state["config"]["expected_cumulative_units"]
-        max_units = dca_stages[-1]["cumulative_units"]
+        try:
+            max_units = dca_stages[-1]["cumulative_units"]
+        except IndexError:
+            max_units = current_units
         #asset_allocation = state["config"]["units"][tf_idx] / 100
         asset_allocation = 1  # assume 1 so that % tracking remains accurate even when user does not commit all account assets
         share_of_assets_committed = current_units / max_units * asset_allocation

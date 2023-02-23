@@ -177,7 +177,8 @@ def open_trade(
     )
 
     trade_entry = h.get_trade_entry(_trade_status=_trade_status)
-    dca_stages[0]["price"] = trade_entry
+    if dca_pct and dca_pct[0] > 0:
+        dca_stages[0]["price"] = trade_entry
 
     if alert_price:
         print(
@@ -402,7 +403,7 @@ def get_update_trade_payload(
             "order_type": sl_order_type,
             "conditional": {
                 "price": {"value": sl_price, "type": "last"},
-                "trailing": {"enabled": sl_trail, "percent": sl_pct},
+                "trailing": {"enabled": False, "percent": 0},
             },
         },
     }
